@@ -571,6 +571,8 @@ void render_hud(void) {
             render_hud_cannon_reticle();
         }
 
+        render_hud_coins();
+
 #ifdef ENABLE_LIVES
         if (hudDisplayFlags & HUD_DISPLAY_FLAG_LIVES) {
             render_hud_mario_lives();

@@ -1,11 +1,29 @@
-// geo
-extern const GeoLayout castle_courtyard_geo_000200[];
-extern const GeoLayout castle_courtyard_geo_000218[];
-
-// leveldata
-extern const Gfx castle_courtyard_seg7_dl_070048B8[];
-extern const Gfx castle_courtyard_seg7_dl_07005078[];
-extern const Gfx castle_courtyard_seg7_dl_07005698[];
-extern const Gfx castle_courtyard_seg7_dl_07005938[];
-extern const Collision castle_courtyard_seg7_collision[];
-extern const MacroObject castle_courtyard_seg7_macro_objs[];
+extern const GeoLayout castle_courtyard_area_1_geo[];
+extern const GeoLayout castle_courtyard_area_1[];
+extern const Collision castle_courtyard_area_1_collision[];
+extern const MacroObject castle_courtyard_area_1_macro_objs[];
+extern u8 castle_courtyard_dl___ci4[];
+extern u8 castle_courtyard_dl___pal_rgba16[];
+extern u8 castle_courtyard_dl__2_ci4[];
+extern u8 castle_courtyard_dl__2_pal_rgba16[];
+extern u8 castle_courtyard_dl__6_ci4[];
+extern u8 castle_courtyard_dl__6_pal_rgba16[];
+extern u8 castle_courtyard_dl__5_ci4[];
+extern u8 castle_courtyard_dl__5_pal_rgba16[];
+extern u8 castle_courtyard_dl__3_ci4[];
+extern u8 castle_courtyard_dl__3_pal_rgba16[];
+extern u8 castle_courtyard_dl__4_ci4[];
+extern u8 castle_courtyard_dl__4_pal_rgba16[];
+extern u8 castle_courtyard_dl__1_ci4[];
+extern u8 castle_courtyard_dl__1_pal_rgba16[];
+extern Vtx castle_courtyard_dl_td_mesh_layer_1_vtx_cull[8];
+extern Vtx castle_courtyard_dl_td_mesh_layer_1_vtx_0[35];
+extern Vtx castle_courtyard_dl_td_mesh_layer_1_vtx_1[140];
+extern Vtx castle_courtyard_dl_td_mesh_layer_1_vtx_2[46];
+extern Vtx castle_courtyard_dl_td_mesh_layer_1_vtx_3[29];
+extern Vtx castle_courtyard_dl_td_mesh_layer_1_vtx_4[103];
+extern Vtx castle_courtyard_dl_td_mesh_layer_1_vtx_5[56];
+extern Vtx castle_courtyard_dl_td_001_mesh_layer_5_vtx_cull[8];
+extern Vtx castle_courtyard_dl_td_001_mesh_layer_5_vtx_0[18];
+extern Gfx castle_courtyard_dl_td_mesh_layer_1[];
+extern Gfx castle_courtyard_dl_td_001_mesh_layer_5[];

@@ -75,6 +75,7 @@ void bhv_bowser_tail_anchor_loop(void) {
 
 // Bowser's Flame
 
+extern const s16 dBowserFlamesOrientationValues[];
 /**
  * Bowser's Flame spawn main loop
  */

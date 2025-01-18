@@ -6,12 +6,4 @@
 #include "types.h"
 #include "make_const_nonconst.h"
 
-#include "bully/model.inc.c"
-#include "bully/anims/data.inc.c"
-#include "bully/anims/table.inc.c"
-UNUSED static const u64 binid_0 = 0;
-
-#include "blargg/model.inc.c"
-#include "blargg/anims/data.inc.c"
-#include "blargg/anims/table.inc.c"
-UNUSED static const u64 binid_1 = 1;
+int _group2_unused2 = 0;

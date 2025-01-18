@@ -316,12 +316,9 @@
 #define MODEL_BULLET_BILL                 0x54        // bullet_bill_geo
 #define MODEL_YELLOW_SPHERE               0x55        // yellow_sphere_geo
 #define MODEL_HOOT                        0x56        // hoot_geo
-#define MODEL_YOSHI_EGG                   0x57        // yoshi_egg_geo
 #define MODEL_THWOMP                      0x58        // thwomp_geo
-#define MODEL_HEAVE_HO                    0x59        // heave_ho_geo
 
 // group 2
-#define MODEL_BLARGG                      0x54        // blargg_geo
 #define MODEL_BULLY                       0x56        // bully_geo
 #define MODEL_BULLY_BOSS                  0x57        // bully_boss_geo
 
@@ -331,7 +328,6 @@
 #define MODEL_KING_BOBOMB                 0x56        // king_bobomb_geo
 
 // group 4
-#define MODEL_MANTA_RAY                   0x54        // manta_seg5_geo_05008D14
 #define MODEL_UNAGI                       0x55        // unagi_geo
 #define MODEL_SUSHI                       0x56        // sushi_geo
 #define MODEL_DL_WHIRLPOOL                0x57        // whirlpool_seg5_dl_05013CB8
@@ -346,16 +342,10 @@
 #define MODEL_EYEROK_RIGHT_HAND           0x59        // eyerok_right_hand_geo
 
 // group 6
-#define MODEL_DL_MONTY_MOLE_HOLE          0x54        // monty_mole_hole_seg5_dl_05000840
-#define MODEL_MONTY_MOLE                  0x55        // monty_mole_geo
-#define MODEL_UKIKI                       0x56        // ukiki_geo
-#define MODEL_FWOOSH                      0x57        // fwoosh_geo
 
 // group 7
 #define MODEL_SPINDRIFT                   0x54        // spindrift_geo
 #define MODEL_MR_BLIZZARD_HIDDEN          0x55        // mr_blizzard_hidden_geo
-#define MODEL_MR_BLIZZARD                 0x56        // mr_blizzard_geo
-#define MODEL_PENGUIN                     0x57        // penguin_geo
 
 // group 8
 #define MODEL_CAP_SWITCH_EXCLAMATION      0x54        // cap_switch_exclamation_seg5_dl_05002E00
@@ -363,7 +353,6 @@
 #define MODEL_CAP_SWITCH_BASE             0x56        // cap_switch_base_seg5_dl_05003120
 
 // group 9
-#define MODEL_BOO                         0x54        // boo_geo
 #define MODEL_BETA_BOO_KEY                0x55        // small_key_geo
 #define MODEL_HAUNTED_CHAIR               0x56        // haunted_chair_geo
 #define MODEL_MAD_PIANO                   0x57        // mad_piano_geo
@@ -373,10 +362,8 @@
 
 // group 10
 #define MODEL_BIRDS                       0x54        // birds_geo
-#define MODEL_YOSHI                       0x55        // yoshi_geo
 
 // group 11
-#define MODEL_ENEMY_LAKITU                0x54        // enemy_lakitu_geo
 #define MODEL_SPINY_BALL                  0x55        // spiny_ball_geo
 #define MODEL_SPINY                       0x56        // spiny_geo
 #define MODEL_WIGGLER_HEAD                0x57        // wiggler_head_geo
@@ -389,7 +376,6 @@
 
 // second set of actor bins, (0x64-0x73)
 // group 12
-#define MODEL_BOWSER                      0x64        // bowser_geo
 #define MODEL_BOWSER_BOMB_CHILD_OBJ       0x65        // bowser_bomb_geo - Spawns as a chill object in bowser's behavior command, causing an explosion if it touches a bomb
 #define MODEL_BOWSER_SMOKE                0x66        // bowser_impact_smoke_geo
 #define MODEL_BOWSER_FLAMES               0x67        // bowser_flames_geo
@@ -416,7 +402,6 @@
 // group 15
 #define MODEL_MIPS                        0x64        // mips_geo
 #define MODEL_BOO_CASTLE                  0x65        // boo_castle_geo
-#define MODEL_LAKITU                      0x66        // lakitu_geo
 
 // group 16
 #define MODEL_CHILL_BULLY                 0x64        // chilly_chief_geo
@@ -426,9 +411,6 @@
 // group 17
 #define MODEL_SWOOP                       0x64        // swoop_geo
 #define MODEL_SCUTTLEBUG                  0x65        // scuttlebug_geo
-#define MODEL_MR_I_IRIS                   0x66        // mr_i_iris_geo
-#define MODEL_MR_I_BODY                   0x67        // mr_i_geo
-#define MODEL_MR_I MODEL_MR_I_BODY // backwards compatibility
 #define MODEL_DORRIE                      0x68        // dorrie_geo
 
 // other models
@@ -571,5 +553,26 @@
 #define MODEL_THI_WARP_PIPE                       MODEL_LEVEL_GEOMETRY_16   // warp_pipe_geo
 #define MODEL_VCUTM_WARP_PIPE                     MODEL_LEVEL_GEOMETRY_16   // warp_pipe_geo
 #define MODEL_CASTLE_GROUNDS_WARP_PIPE            MODEL_LEVEL_GEOMETRY_16   // warp_pipe_geo
+
+#define MODEL_YOSHI_EGG 0xff
+
+#define MODEL_TD_SHADOW MODEL_LEVEL_GEOMETRY_03
+#define MODEL_MR_BLIZZARD MODEL_LEVEL_GEOMETRY_04
+#define MODEL_MONTY_MOLE MODEL_LEVEL_GEOMETRY_05
+#define MODEL_BOWSER MODEL_LEVEL_GEOMETRY_06
+#define MODEL_BOO MODEL_LEVEL_GEOMETRY_07
+#define MODEL_BLARGG MODEL_LEVEL_GEOMETRY_08
+#define MODEL_LAKITU MODEL_LEVEL_GEOMETRY_09
+#define MODEL_PENGUIN MODEL_LEVEL_GEOMETRY_0A
+#define MODEL_MANTA_RAY MODEL_LEVEL_GEOMETRY_0B
+#define MODEL_YOSHI MODEL_LEVEL_GEOMETRY_0C
+#define MODEL_UKIKI MODEL_LEVEL_GEOMETRY_0D
+#define MODEL_MR_I_IRIS MODEL_LEVEL_GEOMETRY_0E
+#define MODEL_MR_I_BODY MODEL_LEVEL_GEOMETRY_0F
+#define MODEL_MR_I MODEL_MR_I_BODY // backwards compatibility
+#define MODEL_HEAVE_HO MODEL_LEVEL_GEOMETRY_10
+#define MODEL_DL_MONTY_MOLE_HOLE MODEL_LEVEL_GEOMETRY_11
+#define MODEL_FWOOSH MODEL_LEVEL_GEOMETRY_12
+#define MODEL_ENEMY_LAKITU MODEL_LEVEL_GEOMETRY_13
 
 #endif // MODEL_IDS_H

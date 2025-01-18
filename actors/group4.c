@@ -12,9 +12,6 @@
 #include "clam_shell/anims/table.inc.c"
 UNUSED static const u64 binid_0 = 0;
 
-#include "manta/model.inc.c"
-#include "manta/anims/data.inc.c"
-#include "manta/anims/table.inc.c"
 UNUSED static const u64 binid_1 = 1;
 
 #include "sushi/model.inc.c"

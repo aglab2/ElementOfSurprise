@@ -541,5 +541,18 @@ extern const BehaviorScript bhvEndBirds2[];
 extern const BehaviorScript bhvIntroScene[];
 extern const BehaviorScript bhvUnusedFakeStar[];
 extern const BehaviorScript bhvMovie[];
+extern const BehaviorScript bhvTD[];
+
+extern const BehaviorScript bhvFireTower[];
+extern const BehaviorScript bhvWaterTower[];
+extern const BehaviorScript bhvCrystalTower[];
+extern const BehaviorScript bhvAirTower[];
+
+extern const BehaviorScript bhvSteamTower[];
+extern const BehaviorScript bhvSpireTower[];
+extern const BehaviorScript bhvInfernoTower[];
+extern const BehaviorScript bhvShardTower[];
+extern const BehaviorScript bhvHurricaneTower[];
+extern const BehaviorScript bhvPrismTower[];
 
 #endif // BEHAVIOR_DATA_H

@@ -7,6 +7,4 @@
 #include "common1.h"
 #include "group6.h"
 
-#include "monty_mole/geo.inc.c"
-#include "ukiki/geo.inc.c"
-#include "fwoosh/geo.inc.c"
+int _group6_unused_geo = 0;

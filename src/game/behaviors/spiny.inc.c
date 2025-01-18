@@ -5,6 +5,8 @@
  * Lakitu comes before it spawned spinies in processing order.
  */
 
+#include "actors/group0.h"
+
 /**
  * Hitbox for spiny both while thrown and walking. The interaction type is
  * changed to INTERACT_SPINY_WALKING while walking.

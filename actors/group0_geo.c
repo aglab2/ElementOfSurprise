@@ -16,3 +16,46 @@
 #include "water_splash/geo.inc.c"
 #include "sparkle_animation/geo.inc.c"
 #include "mario/geo.inc.c"
+
+#include "spindrift/geo.inc.c"
+#include "penguin/geo.inc.c"
+#include "snowman/geo.inc.c"
+
+#include "mr_i_eyeball/geo.inc.c"
+#include "mr_i_iris/geo.inc.c"
+#include "swoop/geo.inc.c"
+#include "snufit/geo.inc.c"
+#include "scuttlebug/geo.inc.c"
+
+#include "monty_mole/geo.inc.c"
+#include "ukiki/geo.inc.c"
+#include "fwoosh/geo.inc.c"
+
+#include "monty_mole_hole/model.inc.c"
+
+#include "monty_mole/model.inc.c"
+#include "monty_mole/anims/data.inc.c"
+#include "monty_mole/anims/table.inc.c"
+
+#include "smoke/model.inc.c"
+
+#include "ukiki/model.inc.c"
+#include "ukiki/anims/data.inc.c"
+#include "ukiki/anims/table.inc.c"
+
+#include "fwoosh/model.inc.c"
+
+#include "bowser/geo.inc.c"
+
+#include "bully/geo.inc.c"
+#include "blargg/geo.inc.c"
+
+#include "lakitu_enemy/geo.inc.c"
+#include "spiny_egg/geo.inc.c"
+#include "spiny/geo.inc.c"
+
+#include "manta/geo.inc.c"
+
+#include "yoshi/geo.inc.c"
+
+#include "heave_ho/geo.inc.c"
