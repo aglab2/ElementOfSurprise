@@ -555,4 +555,7 @@ extern const BehaviorScript bhvShardTower[];
 extern const BehaviorScript bhvHurricaneTower[];
 extern const BehaviorScript bhvPrismTower[];
 
+extern const BehaviorScript bhvTdEnemy[];
+extern const BehaviorScript bhvTdBullet[];
+
 #endif // BEHAVIOR_DATA_H

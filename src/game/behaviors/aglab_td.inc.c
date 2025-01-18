@@ -18,7 +18,8 @@ enum TowerTypes
 enum TDStates
 {
     TD_INIT,
-    TD_WAVE,
+    TD_WAVE_SPAWNING,
+    TD_WAVE_WAITING,
 };
 
 struct TowerBeh
@@ -75,6 +76,10 @@ static const struct Color kTowerColors[] = {
     [ TOWER_AIR ]     = { 0x58, 0x2f, 0xe , 255 }, 
 };
 
+#define TOWER_DEFAULT_RANGE 600.f
+#define TOWER_DEFAULT_DAMAGE 10
+#define TOWER_DEFAULT_BULLET_SPEED 50.f
+
 union TowerTypePacked
 {
     struct
@@ -94,6 +99,22 @@ enum EnemyTypes
     ENEMY_BOBOMB,
     ENEMY_BULLY,
     ENEMY_BOWSER,
+};
+
+static const f32 kSpeeds[] = { 
+    [ ENEMY_GOOMBA ] = 20.f,
+    [ ENEMY_KOOPA ]  = 40.f,
+    [ ENEMY_BOBOMB ] = 25.f,
+    [ ENEMY_BULLY ]  = 10.f,
+    [ ENEMY_BOWSER ] = 5.f,
+};
+
+static const u8 kHealths[] = {
+    [ ENEMY_GOOMBA ] = 30,
+    [ ENEMY_KOOPA ]  = 10,
+    [ ENEMY_BOBOMB ] = 30,
+    [ ENEMY_BULLY ]  = 80,
+    [ ENEMY_BOWSER ] = 200,
 };
 
 #define TD_BUSY ((void*) 1)
@@ -222,7 +243,7 @@ static void handle_tower_spawning()
 
     
         print_small_text_buffered(160, 205, line, PRINT_TEXT_ALIGN_CENTRE, PRINT_ALL, FONT_OUTLINE);
-        print_set_envcolour(color.r, color.g, color.b, color.a);
+        print_set_envcolour(color.r, color.g, color.b, 255);
         print_small_text_buffered(160, 215, kBasicTowerBehs[o->oTDSelectedTower].desc, PRINT_TEXT_ALIGN_CENTRE, PRINT_ALL, FONT_OUTLINE);
         print_set_envcolour(255, 255, 255, 255);
 
@@ -237,8 +258,8 @@ static void handle_tower_spawning()
                 packed->type0 = o->oTDSelectedTower;
                 packed->type1 = 0;
                 packed->_pad = 0;
-
-                slot->oBehParams2ndByte = o->oTDSelectedTower;
+                // needed to be set to NULL for handling bullets spawning, probably should be reworked
+                slot->parentObj = NULL;
             }
         }
     }
@@ -281,20 +302,131 @@ void bhv_td_loop()
     switch (o->oAction)
     {
         case TD_INIT:
-            if (-1 == o->oTDSelectedTower && gPlayer1Controller->buttonPressed & L_TRIG)
-                o->oAction = TD_WAVE;
+            if (-1 != o->oTDSelectedTower && gPlayer1Controller->buttonPressed & L_TRIG)
+                o->oAction = TD_WAVE_SPAWNING;
 
             break;
-        case TD_WAVE:
+        case TD_WAVE_SPAWNING:
+            if (0 == (o->oTimer % 10))
+            {
+                struct Object* enemy = spawn_object(o, MODEL_GOOMBA, bhvTdEnemy);
+                enemy->oBehParams2ndByte = ENEMY_GOOMBA;
+                enemy->oForwardVel = kSpeeds[enemy->oBehParams2ndByte];
+                enemy->oHealth = kHealths[enemy->oBehParams2ndByte];
+                enemy->oPosX = -1143;
+                enemy->oPosY = -200;
+                enemy->oPosZ = -1600;
+            }
+
+            if (200 == o->oTimer)
+            {
+                o->oAction = TD_WAVE_WAITING;
+            }
+
+            break;
+
+        case TD_WAVE_WAITING:
+    }
+}
+
+struct TdTrajPoint
+{
+    s16 x, z;
+};
+
+struct TdTrajPointF
+{
+    f32 x, z;
+};
+
+static const struct TdTrajPoint kTdEnemyPath[] =
+{
+    { -1143, -1600 },
+    { -1143, 127 },
+    { -381, 127 },
+    { -381, -381 },
+    { 381, -381 },
+    { 381, 635 },
+    { -1143, 635 },
+    { -1143, 1143 },
+    { 1143, 1143 },
+    { 1143, -889 },
+    { -381, -889 },
+    { -381, -1800 },
+};
+
+#define oTdEnemyProgress oF4
+#define oTdEnemySpeedDebuff oF8
+
+static void td_enemy_advance()
+{
+    if (o->oPosZ < -1610.f)
+    {
+        o->activeFlags = 0;
+        return;
+    }
+
+    const struct TdTrajPoint* curPoint   = &kTdEnemyPath[o->oTdEnemyProgress];
+    const struct TdTrajPoint* nextPoint  = &kTdEnemyPath[o->oTdEnemyProgress + 1];
+    const struct TdTrajPoint* nextPoint2 = &kTdEnemyPath[o->oTdEnemyProgress + 2];
+    f32* posToChange = NULL;
+    f32* nextPosToChange = NULL;
+    const s16* pointToCompare = NULL;
+    s16 nextDirectionPositive = 0;
+    f32 vel;
+    if (curPoint->x == nextPoint->x)
+    {
+        posToChange = &o->oPosZ;
+        nextPosToChange = &o->oPosX;
+        pointToCompare = &nextPoint->z;
+        nextDirectionPositive = nextPoint->x > nextPoint2->x;
+        vel = o->oForwardVel - o->oTdEnemySpeedDebuff;
+        if (curPoint->z > nextPoint->z)
+            vel = -vel;
+    }
+    else
+    {
+        posToChange = &o->oPosX;
+        nextPosToChange = &o->oPosZ;
+        pointToCompare = &nextPoint->x;
+        nextDirectionPositive = nextPoint->z > nextPoint2->z;
+        vel = o->oForwardVel - o->oTdEnemySpeedDebuff;
+        if (curPoint->x > nextPoint->x)
+            vel = -vel;
+    }
+
+    *posToChange += vel;
+    if (vel > 0)
+    {
+        if (*posToChange > *pointToCompare)
+        {
+            o->oTdEnemyProgress++;
+            f32 left = *posToChange - *pointToCompare;
+            *nextPosToChange += left * (nextDirectionPositive ? 1 : -1);
+        }
+    }
+    else
+    {
+        if (*posToChange < *pointToCompare)
+        {
+            o->oTdEnemyProgress++;
+            f32 left = *pointToCompare - *posToChange;
+            *nextPosToChange += left * (nextDirectionPositive ? 1 : -1);
+        }
     }
 }
 
 void bhv_td_enemy_loop()
 {
+    if (o->oTdEnemySpeedDebuff)
+        o->oTdEnemySpeedDebuff--;
+
+    td_enemy_advance();
     enum EnemyTypes enemyType = (enum EnemyTypes) o->oBehParams2ndByte;
     switch (enemyType)
     {
         case ENEMY_GOOMBA:
+            o->oAnimations = goomba_seg8_anims_0801DA4C;            
             cur_obj_init_animation_with_accel_and_sound(GOOMBA_ANIM_DEFAULT, 1.f);
             break;
         case ENEMY_KOOPA:
@@ -308,6 +440,79 @@ void bhv_td_enemy_loop()
     }
 }
 
+#define oTdBulletTarget oObjF4
+#define oTdBulletSpeedDebuff oF8
+
+static struct Object* shoot_closest_enemy(int model, int dmg, f32 range, f32 bulletVel)
+{
+    if (o->parentObj)
+        return NULL;
+
+    f32 dist;
+    struct Object* enemy = cur_obj_find_nearest_object_with_behavior(bhvTdEnemy, &dist);
+    if (!enemy)
+        return NULL;
+
+    s32 angleTowards = obj_angle_to_object(o, enemy);
+    cur_obj_rotate_yaw_toward(angleTowards, 0x800);
+
+    if (dist > range)
+        return NULL;
+
+    o->oFaceAngleYaw = angleTowards;
+
+    struct Object* bullet = spawn_object(o, model, bhvTdBullet);
+    bullet->oBehParams2ndByte = dmg;
+    bullet->oForwardVel = bulletVel;
+    bullet->oTdBulletTarget = enemy;
+    obj_scale(bullet, 3.f);
+    o->parentObj = bullet;
+
+    return bullet;
+}
+
+void bhv_td_bullet_loop()
+{
+    o->oAnimState++;
+    if (o->oTdBulletTarget->activeFlags == 0)
+    {
+        o->activeFlags = 0;
+        o->parentObj->parentObj = NULL;
+        return;
+    }
+
+    Vec3f d;
+    vec3_diff(d, &o->oPosVec, &o->oTdBulletTarget->oPosVec);
+    f32 dmag = vec3_mag(d);
+    if (dmag < o->oForwardVel)
+    {
+        o->oTdBulletTarget->oHealth -= o->oBehParams2ndByte;
+        if (o->oTdBulletTarget->oHealth <= 0)
+        {
+            o->oTdBulletTarget->activeFlags = 0;
+        }
+        else
+        {
+            if (o->oTdBulletSpeedDebuff)
+            {
+                o->oTdBulletTarget->oTdEnemySpeedDebuff = o->oTdBulletTarget->oForwardVel * o->oTdBulletSpeedDebuff / 50;
+            }
+        }
+
+        o->activeFlags = 0;
+        o->parentObj->parentObj = NULL;
+    }
+    else
+    {
+        d[0] /= dmag;
+        d[1] /= dmag;
+        d[2] /= dmag;
+        o->oPosX -= d[0] * o->oForwardVel;
+        o->oPosY -= d[1] * o->oForwardVel;
+        o->oPosZ -= d[2] * o->oForwardVel;
+    }
+}
+
 void bhv_fire_tower_loop()
 {
     union TowerTypePacked* packed = (union TowerTypePacked*) &o->oBehParams2ndByte;
@@ -318,6 +523,7 @@ void bhv_fire_tower_loop()
         s32 animIndex = FLY_GUY_ANIM_FLYING;
         struct Animation **animations = o->oAnimations;
         geo_obj_init_animation(&o->header.gfx, &animations[animIndex]);
+        shoot_closest_enemy(MODEL_RED_FLAME, TOWER_DEFAULT_DAMAGE, TOWER_DEFAULT_RANGE, TOWER_DEFAULT_BULLET_SPEED);
     }
     else
     {
@@ -337,6 +543,7 @@ void bhv_water_tower_loop()
         s32 animIndex = MR_BLIZZARD_ANIM_SPAWN_SNOWBALL;
         struct Animation **animations = o->oAnimations;
         geo_obj_init_animation(&o->header.gfx, &animations[animIndex]);
+        shoot_closest_enemy(MODEL_WHITE_PARTICLE, TOWER_DEFAULT_DAMAGE, TOWER_DEFAULT_RANGE, TOWER_DEFAULT_BULLET_SPEED);
     }
     else
     {
@@ -362,6 +569,7 @@ void bhv_crystal_tower_loop()
         obj_scale(o, 2.f + sins(o->oTimer * 0x456) / 10.f);
         o->oSnufitRecoil = 0;
         o->oSnufitBodyScale = 1000;
+        shoot_closest_enemy(MODEL_BOWLING_BALL, TOWER_DEFAULT_DAMAGE, TOWER_DEFAULT_RANGE * 2.5f, TOWER_DEFAULT_BULLET_SPEED);
     }
     else
     {
@@ -382,6 +590,7 @@ void bhv_air_tower_loop()
         s32 animIndex = MONTY_MOLE_ANIM_BEGIN_JUMP_INTO_HOLE;
         struct Animation **animations = o->oAnimations;
         geo_obj_init_animation(&o->header.gfx, &animations[animIndex]);
+        shoot_closest_enemy(MODEL_DIRT_ANIMATION, TOWER_DEFAULT_DAMAGE / 3, TOWER_DEFAULT_RANGE, TOWER_DEFAULT_BULLET_SPEED * 2.f);
     }
     else
     {

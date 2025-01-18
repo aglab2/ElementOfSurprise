@@ -688,7 +688,6 @@ extern void load_decompress(const u8* srcStart, const u8* srcEnd, u8* dst);
 extern s32 gTatums;
 void bhv_movie_loop()
 {
-    print_text_fmt_int(20, 40, "%x", (int) &(o->oTimer));
     if (0 == o->oAction)
     {
         if (o->oDistanceToMario < 100.f)
