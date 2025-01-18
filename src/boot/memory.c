@@ -189,7 +189,7 @@ void main_pool_init() {
 
 #if MEMORY_FRAGMENTATION_NO_FRAGMENTATION == MEMORY_FRAGMENTATION_LEVEL
     // One giant region encompassing all of the ram
-    SET_REGION(0, _framebuffer2SegmentBssEnd, _goddardSegmentStart);
+    SET_REGION(0, _poolStart, 0x80500000);
 #endif
 
 #if MEMORY_FRAGMENTATION_ZBUFFER_AND_FRAMEBUFFERS == MEMORY_FRAGMENTATION_LEVEL
@@ -539,7 +539,7 @@ void *load_to_fixed_pool_addr(u8 *destAddr, u8 *srcStart, u8 *srcEnd) {
 void load_decompress(const u8* srcStart, const u8* srcEnd, u8* dst)
 {
     u32 compSize = ALIGN16(srcEnd - srcStart);
-    u8 *compressed = 0x80700000; // main_pool_alloc_aligned_freeable(compSize, 0);
+    u8 *compressed = 0x80400000; // main_pool_alloc_aligned_freeable(compSize, 0);
     u32 *size = (u32 *) (compressed + 4);
     dma_read(compressed, srcStart, srcStart + DMA_ASYNC_HEADER_SIZE);
     struct DMAAsyncCtx asyncCtx;
@@ -561,7 +561,7 @@ void *load_segment_decompress(s32 segment, u8 *srcStart, u8 *srcEnd) {
 #else
     u32 compSize = ALIGN16(srcEnd - srcStart);
 #endif
-    u8 *compressed = main_pool_alloc_aligned_freeable(compSize, 0);
+    u8 *compressed = 0x80730000; // main_pool_alloc_aligned_freeable(compSize, 0);
 #ifdef GZIP
     // Decompressed size from end of gzip
     u32 *size = (u32 *) (compressed + compSize);

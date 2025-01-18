@@ -40,6 +40,7 @@ const LevelScript level_castle_courtyard_entry[] = {
 	AREA(1, castle_courtyard_area_1),
 		WARP_NODE(0x0A, LEVEL_ENDING, 0x01, 0x0A, WARP_NO_CHECKPOINT),
 		OBJECT(MODEL_TD_SHADOW, 4, 0, 15, 0, 0, 0, 0x00000000, bhvTD),
+		OBJECT(MODEL_NONE, 4, 0, 15, 0, 0, 0, 0x000A0000, bhvInstantActiveWarp),
 		OBJECT(MODEL_NONE, 6, 0, 24, 0, 0, 0, 0x00000000, bhvSpinAirborneWarp),
 		TERRAIN(castle_courtyard_area_1_collision),
 		MACRO_OBJECTS(castle_courtyard_area_1_macro_objs),

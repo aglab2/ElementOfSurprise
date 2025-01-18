@@ -730,9 +730,10 @@ void bhv_movie_loop()
     }
     else
     {
-        if (o->oTimer == 19)
+        if (o->oTimer == 15)
         {
             sMovieTexture = 0;
+            gMarioStates->action = ACT_JUMP;
         }
     }
 }

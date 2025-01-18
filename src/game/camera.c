@@ -10368,6 +10368,9 @@ static void cutscene_td(struct Camera *c)
     c->pos[0] = 0;
     c->pos[1] = 3500.f;
     c->pos[2] = 1400.f;
+
+    c->yaw = 0;
+    c->nextYaw = 0;
 }
 
 struct Cutscene sCutsceneTD[] = {
