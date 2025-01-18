@@ -6193,3 +6193,12 @@ extern const BehaviorScript bhvPrismTower[] = {
         CALL_NATIVE(bhv_prism_tower_loop),
     END_LOOP(),
 };
+
+extern void bhv_td_enemy_loop();
+extern const BehaviorScript bhvTdEnemy[] = {
+    BEGIN(OBJ_LIST_LEVEL),
+    OR_INT(oFlags, OBJ_FLAG_COMPUTE_DIST_TO_MARIO | OBJ_FLAG_UPDATE_GFX_POS_AND_ANGLE),
+    BEGIN_LOOP(),
+        CALL_NATIVE(bhv_td_enemy_loop),
+    END_LOOP(),
+};

@@ -31,19 +31,11 @@
 #include "ukiki/geo.inc.c"
 #include "fwoosh/geo.inc.c"
 
-#include "monty_mole_hole/model.inc.c"
-
-#include "monty_mole/model.inc.c"
 #include "monty_mole/anims/data.inc.c"
 #include "monty_mole/anims/table.inc.c"
 
-#include "smoke/model.inc.c"
-
-#include "ukiki/model.inc.c"
 #include "ukiki/anims/data.inc.c"
 #include "ukiki/anims/table.inc.c"
-
-#include "fwoosh/model.inc.c"
 
 #include "bowser/geo.inc.c"
 

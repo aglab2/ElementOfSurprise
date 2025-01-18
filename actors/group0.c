@@ -89,6 +89,14 @@
 #include "heave_ho/anims/data.inc.c"
 #include "heave_ho/anims/table.inc.c"
 
+#include "monty_mole_hole/model.inc.c"
+#include "monty_mole/model.inc.c"
+
+#include "smoke/model.inc.c"
+#include "ukiki/model.inc.c"
+
+#include "fwoosh/model.inc.c"
+
 #ifdef S2DEX_TEXT_ENGINE
 #include "src/s2d_engine/s2d_config.h"
 #include FONT_C_FILE
