@@ -6122,10 +6122,12 @@ extern const BehaviorScript bhvWaterTower[] = {
     END_LOOP(),
 };
 
+extern void bhv_crystal_tower_init();
 extern void bhv_crystal_tower_loop();
 extern const BehaviorScript bhvCrystalTower[] = {
     BEGIN(OBJ_LIST_SURFACE),
     OR_INT(oFlags, OBJ_FLAG_COMPUTE_DIST_TO_MARIO | OBJ_FLAG_UPDATE_GFX_POS_AND_ANGLE),
+    CALL_NATIVE(bhv_crystal_tower_init),
     BEGIN_LOOP(),
         CALL_NATIVE(bhv_crystal_tower_loop),
     END_LOOP(),

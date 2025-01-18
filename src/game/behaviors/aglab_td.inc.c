@@ -1,5 +1,7 @@
 #include "game/puppyprint.h"
 
+#include "actors/group14.h"
+
 static struct Object* kTDMap[10][10];
 
 #define oTDWave oF4
@@ -307,13 +309,85 @@ void bhv_td_enemy_loop()
 }
 
 void bhv_fire_tower_loop()
-{}
+{
+    union TowerTypePacked* packed = (union TowerTypePacked*) &o->oBehParams2ndByte;
+    if (!packed->buffed)
+    {
+        obj_scale(o, 2.f);
+        o->oAnimations = flyguy_seg8_anims_08011A64;
+        s32 animIndex = FLY_GUY_ANIM_FLYING;
+        struct Animation **animations = o->oAnimations;
+        geo_obj_init_animation(&o->header.gfx, &animations[animIndex]);
+    }
+    else
+    {
+        o->oAnimations = piranha_plant_seg6_anims_0601C31C;
+        s32 animIndex = PIRANHA_PLANT_ANIM_BITE;
+        struct Animation **animations = o->oAnimations;
+        geo_obj_init_animation(&o->header.gfx, &animations[animIndex]);
+    }
+}
 
 void bhv_water_tower_loop()
-{}
+{
+    union TowerTypePacked* packed = (union TowerTypePacked*) &o->oBehParams2ndByte;
+    if (!packed->buffed)
+    {
+        o->oAnimations = snowman_seg5_anims_0500D118;
+        s32 animIndex = MR_BLIZZARD_ANIM_SPAWN_SNOWBALL;
+        struct Animation **animations = o->oAnimations;
+        geo_obj_init_animation(&o->header.gfx, &animations[animIndex]);
+    }
+    else
+    {
+        o->oAnimations = penguin_seg5_anims_05008B74;
+        s32 animIndex = PENGUIN_ANIM_IDLE;
+        struct Animation **animations = o->oAnimations;
+        geo_obj_init_animation(&o->header.gfx, &animations[animIndex]);
+    }
+}
+
+void bhv_crystal_tower_init()
+{
+    union TowerTypePacked* packed = (union TowerTypePacked*) &o->oBehParams2ndByte;
+    if (!packed->buffed)
+        o->oPosY += 100.f;
+}
 
 void bhv_crystal_tower_loop()
-{}
+{
+    union TowerTypePacked* packed = (union TowerTypePacked*) &o->oBehParams2ndByte;
+    if (!packed->buffed)
+    {
+        obj_scale(o, 2.f + sins(o->oTimer * 0x456) / 10.f);
+        o->oSnufitRecoil = 0;
+        o->oSnufitBodyScale = 1000;
+    }
+    else
+    {
+        o->oAnimations = heave_ho_seg5_anims_0501534C;
+        s32 animIndex = HEAVE_HO_ANIM_MOVING;
+        struct Animation **animations = o->oAnimations;
+        geo_obj_init_animation(&o->header.gfx, &animations[animIndex]);
+    }
+}
 
 void bhv_air_tower_loop()
-{}
+{
+    union TowerTypePacked* packed = (union TowerTypePacked*) &o->oBehParams2ndByte;
+    if (!packed->buffed)
+    {
+        obj_scale(o, 2.f);
+        o->oAnimations = monty_mole_seg5_anims_05007248;
+        s32 animIndex = MONTY_MOLE_ANIM_BEGIN_JUMP_INTO_HOLE;
+        struct Animation **animations = o->oAnimations;
+        geo_obj_init_animation(&o->header.gfx, &animations[animIndex]);
+    }
+    else
+    {
+        o->oAnimations = ukiki_seg5_anims_05015784;
+        s32 animIndex = UKIKI_ANIM_RUN;
+        struct Animation **animations = o->oAnimations;
+        geo_obj_init_animation(&o->header.gfx, &animations[animIndex]);
+    }
+}
