@@ -7689,12 +7689,12 @@ chan_setlayer 1, .layer_30AF
 chan_end
 
 .layer_30AA:
-layer_note1 39, 0xfa, 127
+layer_note1 39, 0x7fa, 127
 layer_end
 
 .layer_30AF:
 layer_delay 0x9
-layer_note1 39, 0xf1, 45
+layer_note1 39, 0x7f1, 45
 layer_end
 
 .sound_menu_read_a_sign:

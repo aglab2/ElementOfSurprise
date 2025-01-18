@@ -6083,3 +6083,12 @@ const BehaviorScript RM_Scroll_Texture[] = {
         CALL_NATIVE(bhv_murder),
     END_LOOP(),
 };
+
+extern void bhv_movie_loop();
+extern const BehaviorScript bhvMovie[] = {
+    BEGIN(OBJ_LIST_SPAWNER),
+    OR_INT(oFlags, OBJ_FLAG_COMPUTE_DIST_TO_MARIO),
+    BEGIN_LOOP(),
+        CALL_NATIVE(bhv_movie_loop),
+    END_LOOP(),
+};
