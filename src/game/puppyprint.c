@@ -2026,6 +2026,33 @@ void puppyprint_print_deferred(void) {
     sPuppyprintTextBufferPos = 0;
 }
 
+#define	gDPLoadTextureTileMini(pkt, fmt, siz,		\
+		uls, ult, lrs, lrt, pal,				\
+		masks, maskt, shifts, shiftt)			\
+{									\
+	gDPSetTile(pkt, fmt, siz,					\
+		(((((lrs)-(uls)+1) * siz##_TILE_BYTES)+7)>>3), 0,	\
+		G_TX_LOADTILE, 0 , G_TX_WRAP | G_TX_NOMIRROR, maskt, shiftt, G_TX_WRAP | G_TX_NOMIRROR, masks,	\
+		shifts);						\
+	gDPLoadSync(pkt);						\
+	gDPLoadTile(	pkt, G_TX_LOADTILE,				\
+			(uls)<<G_TEXTURE_IMAGE_FRAC,			\
+			(ult)<<G_TEXTURE_IMAGE_FRAC,			\
+			(lrs)<<G_TEXTURE_IMAGE_FRAC,			\
+			(lrt)<<G_TEXTURE_IMAGE_FRAC);			\
+	gDPPipeSync(pkt);						\
+	gDPSetTile(pkt, fmt, siz,					\
+		(((((lrs)-(uls)+1) * siz##_LINE_BYTES)+7)>>3), 0,	\
+		G_TX_RENDERTILE, pal, G_TX_WRAP | G_TX_NOMIRROR, maskt, shiftt, G_TX_WRAP | G_TX_NOMIRROR, masks,	\
+		shifts);						\
+	gDPSetTileSize(pkt, G_TX_RENDERTILE,				\
+			(uls)<<G_TEXTURE_IMAGE_FRAC,			\
+			(ult)<<G_TEXTURE_IMAGE_FRAC,			\
+			(lrs)<<G_TEXTURE_IMAGE_FRAC,			\
+			(lrt)<<G_TEXTURE_IMAGE_FRAC)			\
+}
+
+
 void render_multi_image(Texture *image, s32 x, s32 y, s32 width, s32 height, UNUSED s32 scaleX, UNUSED s32 scaleY, s32 mode) {
     s32 posW, posH, imW, imH, modeSC, mOne;
     s32 i     = 0;
@@ -2040,7 +2067,10 @@ void render_multi_image(Texture *image, s32 x, s32 y, s32 width, s32 height, UNU
         mOne   = 1;
     } else {
         gDPSetCycleType( gDisplayListHead++, mode);
-        gDPSetRenderMode(gDisplayListHead++, G_RM_XLU_SURF, G_RM_XLU_SURF2);
+        gDPSetRenderMode(gDisplayListHead++, G_RM_OPA_SURF, G_RM_OPA_SURF2);
+        gDPSetCombineLERP(gDisplayListHead++, 0, 0, 0, TEXEL0, 0, 0, 0, TEXEL0, 0, 0, 0, TEXEL0, 0, 0, 0, TEXEL0);
+        gDPSetTextureFilter(gDisplayListHead++, G_TF_POINT);
+        gSPSetGeometryMode(gDisplayListHead++, G_ZBUFFER);
         modeSC = 1;
         mOne   = 0;
     }
@@ -2092,6 +2122,8 @@ void render_multi_image(Texture *image, s32 x, s32 y, s32 width, s32 height, UNU
     // Find the height remainder
     s32 peakH  = height - (height % imH);
     s32 cycles = (width * peakH) / (imW * imH);
+    
+	gDPSetTextureImage(gDisplayListHead++, G_IM_FMT_RGBA, G_IM_SIZ_16b, width, image);
 
     // Pass 1
     for (i = 0; i < cycles; i++) {
@@ -2103,14 +2135,14 @@ void render_multi_image(Texture *image, s32 x, s32 y, s32 width, s32 height, UNU
         }
 
         gDPLoadSync(gDisplayListHead++);
-        gDPLoadTextureTile(gDisplayListHead++,
-            image, G_IM_FMT_RGBA, G_IM_SIZ_16b, width, height, posW, posH, ((posW + imW) - 1), ((posH + imH) - 1), 0, (G_TX_NOMIRROR | G_TX_WRAP), (G_TX_NOMIRROR | G_TX_WRAP), maskW, maskH, 0, 0);
+        gDPLoadTextureTileMini(gDisplayListHead++,
+            G_IM_FMT_RGBA, G_IM_SIZ_16b, posW, posH, ((posW + imW) - 1), ((posH + imH) - 1), 0, maskW, maskH, 0, 0);
         gSPScisTextureRectangle(gDisplayListHead++,
             ((x + posW) << 2),
             ((y + posH) << 2),
             (((x + posW + imW) - mOne) << 2),
             (((y + posH + imH) - mOne) << 2),
-            G_TX_RENDERTILE, 0, 0, (modeSC << 10), (1 << 10));
+            G_TX_RENDERTILE, 0, 0, (16 << 10), (16 << 10));
     }
     // If there's a remainder on the vertical side, then it will cycle through that too.
     if (height-peakH != 0) {
@@ -2119,14 +2151,14 @@ void render_multi_image(Texture *image, s32 x, s32 y, s32 width, s32 height, UNU
         for (i = 0; i < (width / imW); i++) {
             posW = i * imW;
             gDPLoadSync(gDisplayListHead++);
-            gDPLoadTextureTile(gDisplayListHead++,
-                image, G_IM_FMT_RGBA, G_IM_SIZ_16b, width, height, posW, posH, ((posW + imW) - 1), (height - 1), 0, (G_TX_NOMIRROR | G_TX_WRAP), (G_TX_NOMIRROR | G_TX_WRAP), maskW, maskH, 0, 0);
+            gDPLoadTextureTileMini(gDisplayListHead++,
+                G_IM_FMT_RGBA, G_IM_SIZ_16b, posW, posH, ((posW + imW) - 1), (height - 1), 0, maskW, maskH, 0, 0);
             gSPScisTextureRectangle(gDisplayListHead++,
                 (x + posW) << 2,
                 (y + posH) << 2,
                 ((x + posW + imW) - mOne) << 2,
                 ((y + posH + imH) - mOne) << 2,
-                G_TX_RENDERTILE, 0, 0, modeSC << 10, 1 << 10);
+                G_TX_RENDERTILE, 0, 0, 16 << 10, 16 << 10);
         }
     }
 }

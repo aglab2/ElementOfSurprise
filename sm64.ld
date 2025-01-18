@@ -201,7 +201,7 @@ SECTIONS
       BUILD_DIR/lib/libpl*.o(.text*);
 #endif
       *ULTRALIB.a:*.o(.text*);
-      */libnustd.a:*.o(.text*);
+      *libnustd.a:*.o(.text*);
       *libgcc.a:*.o(.text*);
       */libz.a:*.o(.text*);
       */libhvqm2.a:*.o(.text*);

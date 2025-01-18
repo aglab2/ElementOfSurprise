@@ -330,7 +330,13 @@ extern const Gfx breakable_box_seg8_dl_cork_box_end[];
  * would make the ZEX 0-4 render on top of Rej's 5-7.
  */
 
+extern u8* sMovieTexture;
 void geo_process_master_list_sub(struct GraphNodeMasterList *node) {
+    if (sMovieTexture)
+    {
+        return;
+    }
+
     struct RenderPhase *renderPhase;
     struct DisplayListNode *currList;
     s32 currLayer     = LAYER_FIRST;

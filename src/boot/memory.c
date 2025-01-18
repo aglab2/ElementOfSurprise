@@ -536,6 +536,18 @@ void *load_to_fixed_pool_addr(u8 *destAddr, u8 *srcStart, u8 *srcEnd) {
 #define DMA_ASYNC_HEADER_SIZE 0
 #endif
 
+void load_decompress(const u8* srcStart, const u8* srcEnd, u8* dst)
+{
+    u32 compSize = ALIGN16(srcEnd - srcStart);
+    u8 *compressed = 0x80700000; // main_pool_alloc_aligned_freeable(compSize, 0);
+    u32 *size = (u32 *) (compressed + 4);
+    dma_read(compressed, srcStart, srcStart + DMA_ASYNC_HEADER_SIZE);
+    struct DMAAsyncCtx asyncCtx;
+    dma_async_ctx_init(&asyncCtx, compressed + DMA_ASYNC_HEADER_SIZE, srcStart + DMA_ASYNC_HEADER_SIZE, srcEnd);
+    lz4t_unpack(compressed, dst, &asyncCtx);
+    main_pool_free(compressed);
+}
+
 /**
  * Decompress the block of ROM data from srcStart to srcEnd and return a
  * pointer to an allocated buffer holding the decompressed data. Set the
