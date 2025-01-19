@@ -1210,6 +1210,15 @@ void bhv_hurricane_tower_loop()
             o->parentObj->oForwardVel = 60.f;
         }
     }
+    else
+    {
+        if (0 == o->activeFlags)
+        {
+            // Handle the case where the tower is destroyed cleanly
+            o->parentObj->activeFlags = 0;
+            o->parentObj = NULL;
+        }
+    }
 }
 
 void bhv_td_spiny_loop()
