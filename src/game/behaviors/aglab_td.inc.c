@@ -1100,9 +1100,31 @@ void bhv_spire_tower_loop()
         bullet->oBehParams = BULLET_INSTA_KILL;
 }
 
+#define oTdBulletEnemy oObjF4
+
+void bhv_td_flame_loop()
+{
+    deal_damage_around(300.f, 6);
+}
+
+void bhv_inferno_tower_init()
+{
+    obj_scale(o, 1.2f);
+    o->oAnimations = (void*) blargg_seg5_anims_0500616C;
+    struct Animation **animations = o->oAnimations;
+    s32 animIndex = 0;
+    geo_obj_init_animation(&o->header.gfx, &animations[animIndex]);
+
+    o->parentObj = spawn_object(o, MODEL_RED_FLAME, bhvTdFlame);
+    obj_scale(o->parentObj, 5.f);
+    obj_scale(o, 0.5f);
+}
+
 void bhv_inferno_tower_loop()
 {
-
+    o->parentObj->oPosX = o->oPosX + sins(o->oTimer * 0x756) * 250.f;
+    o->parentObj->oPosY = o->oPosY;
+    o->parentObj->oPosZ = o->oPosZ + coss(o->oTimer * 0x756) * 250.f;
 }
 
 void bhv_shard_tower_loop()

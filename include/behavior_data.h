@@ -558,6 +558,7 @@ extern const BehaviorScript bhvPrismTower[];
 extern const BehaviorScript bhvTdEnemy[];
 extern const BehaviorScript bhvTdBullet[];
 extern const BehaviorScript bhvTdFlameLinger[];
+extern const BehaviorScript bhvTdFlame[];
 extern const BehaviorScript bhvTdHealthBar[];
 
 #endif // BEHAVIOR_DATA_H
