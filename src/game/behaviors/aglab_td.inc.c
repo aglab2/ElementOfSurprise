@@ -598,7 +598,7 @@ void bhv_air_tower_loop()
         s32 animIndex = MONTY_MOLE_ANIM_BEGIN_JUMP_INTO_HOLE;
         struct Animation **animations = o->oAnimations;
         geo_obj_init_animation(&o->header.gfx, &animations[animIndex]);
-        shoot_closest_enemy(MODEL_DIRT_ANIMATION, 1.f, TOWER_DEFAULT_DAMAGE / 3, TOWER_DEFAULT_RANGE, TOWER_DEFAULT_BULLET_SPEED * 2.f, TOWER_DEFAULT_ATTACK_CD / 2);
+        shoot_closest_enemy(MODEL_DIRT, 1.f, TOWER_DEFAULT_DAMAGE / 3, TOWER_DEFAULT_RANGE, TOWER_DEFAULT_BULLET_SPEED * 2.f, TOWER_DEFAULT_ATTACK_CD / 2);
     }
     else
     {

@@ -73,6 +73,7 @@ extern const Gfx coin_seg3_dl_red_tilt_left[];
 
 // dirt
 extern const GeoLayout dirt_animation_geo[];
+extern const GeoLayout dirt_geo[];
 extern const GeoLayout cartoon_star_geo[];
 extern const Gfx dirt_seg3_sub_dl_dirt_particle[];
 extern const Gfx dirt_seg3_dl_dirt_particle[];

@@ -15,6 +15,15 @@ const GeoLayout dirt_animation_geo[] = {
    GEO_END(),
 };
 
+extern const Gfx dirt_seg3_dl_dirt_particle_dl[];
+const GeoLayout dirt_geo[] = {
+   GEO_NODE_START(),
+   GEO_OPEN_NODE(),
+      GEO_DISPLAY_LIST(LAYER_DIRT, dirt_seg3_dl_dirt_particle_dl),
+   GEO_CLOSE_NODE(),
+   GEO_END(),
+};
+
 // This is probably wrongly named according to the Bin IDs...
 // 0x16000F24
 const GeoLayout cartoon_star_geo[] = {
