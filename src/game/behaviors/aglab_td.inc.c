@@ -1072,7 +1072,7 @@ void bhv_steam_tower_init()
 void bhv_steam_tower_loop()
 {
     obj_scale(o, 1.1f + sins(o->oTimer * 0x456) / 10.f);
-    deal_damage_around(400.f, 1);
+    deal_damage_around(400.f, 3);
 }
 
 void bhv_spire_tower_loop()
@@ -1199,4 +1199,61 @@ void bhv_td_healthbar_loop()
     o->oHealth = o->parentObj->oHealth;
 
     vec3_copy(&o->oPosVec, &o->parentObj->oPosVec);
+}
+
+void td_patch_unallocs()
+{
+    // do not reference enemies from hp bars
+    {
+        uintptr_t *behaviorAddr = segmented_to_virtual(bhvTdHealthBar);
+        struct ObjectNode *listHead = &gObjectLists[get_object_list_from_behavior(behaviorAddr)];
+        struct Object *obj = (struct Object *) listHead->next;
+
+        while (obj != (struct Object *) listHead) {
+            if (obj->behavior == behaviorAddr && obj->activeFlags != ACTIVE_FLAG_DEACTIVATED) {
+                if (obj->parentObj->activeFlags == 0)
+                {
+                    obj->activeFlags = 0;
+                }
+            }
+
+            obj = (struct Object *) obj->header.next;
+        }
+    }
+
+    // delete bullets referenncing dead enemies
+    {
+        uintptr_t *behaviorAddr = segmented_to_virtual(bhvTdBullet);
+        struct ObjectNode *listHead = &gObjectLists[get_object_list_from_behavior(behaviorAddr)];
+        struct Object *obj = (struct Object *) listHead->next;
+
+        while (obj != (struct Object *) listHead) {
+            if (obj->behavior == behaviorAddr && obj->activeFlags != ACTIVE_FLAG_DEACTIVATED) {
+                if (!obj->oTdBulletEnemy || obj->oTdBulletEnemy->activeFlags == 0)
+                {
+                    obj->activeFlags = 0;
+                }
+            }
+
+            obj = (struct Object *) obj->header.next;
+        }
+    }
+
+    // clear lingers for flames
+    {
+        uintptr_t *behaviorAddr = segmented_to_virtual(bhvTdBullet);
+        struct ObjectNode *listHead = &gObjectLists[get_object_list_from_behavior(behaviorAddr)];
+        struct Object *obj = (struct Object *) listHead->next;
+
+        while (obj != (struct Object *) listHead) {
+            if (obj->behavior == behaviorAddr && obj->activeFlags != ACTIVE_FLAG_DEACTIVATED) {
+                if (obj->oTdBulletEnemy && obj->oTdBulletEnemy->activeFlags == 0)
+                {
+                    obj->oTdBulletEnemy = NULL;
+                }
+            }
+
+            obj = (struct Object *) obj->header.next;
+        }
+    }
 }

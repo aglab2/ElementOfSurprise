@@ -648,6 +648,9 @@ void update_objects(UNUSED s32 unused) {
     // Take a snapshot of the current collision processing time.
     UNUSED u32 firstPoint = profiler_get_delta(PROFILER_DELTA_COLLISION); 
 
+    // For td perform hack that checks that bullets/objects are not referencing dead objects
+    td_patch_unallocs();
+
     // Unload any objects that have been deactivated
     unload_deactivated_objects();
 
