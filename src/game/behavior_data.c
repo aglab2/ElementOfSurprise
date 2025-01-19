@@ -757,15 +757,6 @@ const BehaviorScript bhvRotatingPlatform[] = {
     END_LOOP(),
 };
 
-const BehaviorScript bhvTower[] = {
-    BEGIN(OBJ_LIST_SURFACE),
-    OR_INT(oFlags, (OBJ_FLAG_UPDATE_GFX_POS_AND_ANGLE)),
-    LOAD_COLLISION_DATA(wf_seg7_collision_tower),
-    SET_FLOAT(oDrawingDistance, 20000),
-    CALL_NATIVE(load_object_static_model),
-    BREAK(),
-};
-
 const BehaviorScript bhvBulletBillCannon[] = {
     BEGIN(OBJ_LIST_SURFACE),
     OR_INT(oFlags, OBJ_FLAG_UPDATE_GFX_POS_AND_ANGLE),
@@ -6097,17 +6088,28 @@ extern void bhv_td_init();
 extern void bhv_td_loop();
 const BehaviorScript bhvTD[] = {
     BEGIN(OBJ_LIST_SPAWNER),
-    OR_INT(oFlags, OBJ_FLAG_COMPUTE_DIST_TO_MARIO | OBJ_FLAG_UPDATE_GFX_POS_AND_ANGLE),
+    OR_INT(oFlags, OBJ_FLAG_UPDATE_GFX_POS_AND_ANGLE),
     CALL_NATIVE(bhv_td_init),
     BEGIN_LOOP(),
         CALL_NATIVE(bhv_td_loop),
     END_LOOP(),
 };
 
+extern void bhv_tower_init();
+extern void bhv_tower_loop();
+const BehaviorScript bhvTower[] = {
+    BEGIN(OBJ_LIST_SURFACE),
+    CALL_NATIVE(bhv_tower_init),
+    OR_INT(oFlags, OBJ_FLAG_UPDATE_GFX_POS_AND_ANGLE),
+    BEGIN_LOOP(),
+        CALL_NATIVE(bhv_tower_loop),
+    END_LOOP(),
+};
+
 extern void bhv_fire_tower_loop();
 const BehaviorScript bhvFireTower[] = {
     BEGIN(OBJ_LIST_SURFACE),
-    OR_INT(oFlags, OBJ_FLAG_COMPUTE_DIST_TO_MARIO | OBJ_FLAG_UPDATE_GFX_POS_AND_ANGLE),
+    OR_INT(oFlags, OBJ_FLAG_UPDATE_GFX_POS_AND_ANGLE),
     BEGIN_LOOP(),
         CALL_NATIVE(bhv_fire_tower_loop),
     END_LOOP(),
@@ -6116,7 +6118,7 @@ const BehaviorScript bhvFireTower[] = {
 extern void bhv_water_tower_loop();
 const BehaviorScript bhvWaterTower[] = {
     BEGIN(OBJ_LIST_SURFACE),
-    OR_INT(oFlags, OBJ_FLAG_COMPUTE_DIST_TO_MARIO | OBJ_FLAG_UPDATE_GFX_POS_AND_ANGLE),
+    OR_INT(oFlags, OBJ_FLAG_UPDATE_GFX_POS_AND_ANGLE),
     BEGIN_LOOP(),
         CALL_NATIVE(bhv_water_tower_loop),
     END_LOOP(),
@@ -6126,7 +6128,7 @@ extern void bhv_crystal_tower_init();
 extern void bhv_crystal_tower_loop();
 const BehaviorScript bhvCrystalTower[] = {
     BEGIN(OBJ_LIST_SURFACE),
-    OR_INT(oFlags, OBJ_FLAG_COMPUTE_DIST_TO_MARIO | OBJ_FLAG_UPDATE_GFX_POS_AND_ANGLE),
+    OR_INT(oFlags, OBJ_FLAG_UPDATE_GFX_POS_AND_ANGLE),
     CALL_NATIVE(bhv_crystal_tower_init),
     BEGIN_LOOP(),
         CALL_NATIVE(bhv_crystal_tower_loop),
@@ -6136,7 +6138,7 @@ const BehaviorScript bhvCrystalTower[] = {
 extern void bhv_air_tower_loop();
 const BehaviorScript bhvAirTower[] = {
     BEGIN(OBJ_LIST_SURFACE),
-    OR_INT(oFlags, OBJ_FLAG_COMPUTE_DIST_TO_MARIO | OBJ_FLAG_UPDATE_GFX_POS_AND_ANGLE),
+    OR_INT(oFlags, OBJ_FLAG_UPDATE_GFX_POS_AND_ANGLE),
     BEGIN_LOOP(),
         CALL_NATIVE(bhv_air_tower_loop),
     END_LOOP(),
@@ -6145,7 +6147,7 @@ const BehaviorScript bhvAirTower[] = {
 extern void bhv_steam_tower_loop();
 const BehaviorScript bhvSteamTower[] = {
     BEGIN(OBJ_LIST_SURFACE),
-    OR_INT(oFlags, OBJ_FLAG_COMPUTE_DIST_TO_MARIO | OBJ_FLAG_UPDATE_GFX_POS_AND_ANGLE),
+    OR_INT(oFlags, OBJ_FLAG_UPDATE_GFX_POS_AND_ANGLE),
     BEGIN_LOOP(),
         CALL_NATIVE(bhv_steam_tower_loop),
     END_LOOP(),
@@ -6154,7 +6156,7 @@ const BehaviorScript bhvSteamTower[] = {
 extern void bhv_spire_tower_loop();
 const BehaviorScript bhvSpireTower[] = {
     BEGIN(OBJ_LIST_SURFACE),
-    OR_INT(oFlags, OBJ_FLAG_COMPUTE_DIST_TO_MARIO | OBJ_FLAG_UPDATE_GFX_POS_AND_ANGLE),
+    OR_INT(oFlags, OBJ_FLAG_UPDATE_GFX_POS_AND_ANGLE),
     BEGIN_LOOP(),
         CALL_NATIVE(bhv_spire_tower_loop),
     END_LOOP(),
@@ -6163,7 +6165,7 @@ const BehaviorScript bhvSpireTower[] = {
 extern void bhv_inferno_tower_loop();
 const BehaviorScript bhvInfernoTower[] = {
     BEGIN(OBJ_LIST_SURFACE),
-    OR_INT(oFlags, OBJ_FLAG_COMPUTE_DIST_TO_MARIO | OBJ_FLAG_UPDATE_GFX_POS_AND_ANGLE),
+    OR_INT(oFlags, OBJ_FLAG_UPDATE_GFX_POS_AND_ANGLE),
     BEGIN_LOOP(),
         CALL_NATIVE(bhv_inferno_tower_loop),
     END_LOOP(),
@@ -6172,7 +6174,7 @@ const BehaviorScript bhvInfernoTower[] = {
 extern void bhv_shard_tower_loop();
 const BehaviorScript bhvShardTower[] = {
     BEGIN(OBJ_LIST_SURFACE),
-    OR_INT(oFlags, OBJ_FLAG_COMPUTE_DIST_TO_MARIO | OBJ_FLAG_UPDATE_GFX_POS_AND_ANGLE),
+    OR_INT(oFlags, OBJ_FLAG_UPDATE_GFX_POS_AND_ANGLE),
     BEGIN_LOOP(),
         CALL_NATIVE(bhv_shard_tower_loop),
     END_LOOP(),
@@ -6181,7 +6183,7 @@ const BehaviorScript bhvShardTower[] = {
 extern void bhv_hurricane_tower_loop();
 const BehaviorScript bhvHurricaneTower[] = {
     BEGIN(OBJ_LIST_SURFACE),
-    OR_INT(oFlags, OBJ_FLAG_COMPUTE_DIST_TO_MARIO | OBJ_FLAG_UPDATE_GFX_POS_AND_ANGLE),
+    OR_INT(oFlags, OBJ_FLAG_UPDATE_GFX_POS_AND_ANGLE),
     BEGIN_LOOP(),
         CALL_NATIVE(bhv_hurricane_tower_loop),
     END_LOOP(),
@@ -6190,7 +6192,7 @@ const BehaviorScript bhvHurricaneTower[] = {
 extern void bhv_prism_tower_loop();
 const BehaviorScript bhvPrismTower[] = {
     BEGIN(OBJ_LIST_SURFACE),
-    OR_INT(oFlags, OBJ_FLAG_COMPUTE_DIST_TO_MARIO | OBJ_FLAG_UPDATE_GFX_POS_AND_ANGLE),
+    OR_INT(oFlags, OBJ_FLAG_UPDATE_GFX_POS_AND_ANGLE),
     BEGIN_LOOP(),
         CALL_NATIVE(bhv_prism_tower_loop),
     END_LOOP(),
@@ -6199,7 +6201,7 @@ const BehaviorScript bhvPrismTower[] = {
 extern void bhv_td_enemy_loop();
 const BehaviorScript bhvTdEnemy[] = {
     BEGIN(OBJ_LIST_GENACTOR),
-    OR_INT(oFlags, OBJ_FLAG_COMPUTE_DIST_TO_MARIO | OBJ_FLAG_UPDATE_GFX_POS_AND_ANGLE),
+    OR_INT(oFlags, OBJ_FLAG_UPDATE_GFX_POS_AND_ANGLE),
     BEGIN_LOOP(),
         CALL_NATIVE(bhv_td_enemy_loop),
     END_LOOP(),

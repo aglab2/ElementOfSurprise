@@ -708,7 +708,7 @@ void bhv_movie_loop()
         int movieFrame = realTime * 24.f / 30.f;
 
         u8* out = sTextures[renderFrame];
-        if (movieFrame < sizeof(sMovieFrames) / sizeof(*sMovieFrames))
+        if (movieFrame < (int) (sizeof(sMovieFrames) / sizeof(*sMovieFrames)))
         {
             load_decompress(sMovieFrames[movieFrame].start, sMovieFrames[movieFrame].end, out);
         }
