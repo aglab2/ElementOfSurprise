@@ -66,8 +66,8 @@ static struct TowerBeh kComboTowerBehs[4][4] = {
         { MODEL_BLARGG       , bhvInfernoTower, "Spin Tower"   , "Spawn rotating flame around tower" },
     },
     [TOWER_WATER] = {
-        { MODEL_BOO         , bhvSteamTower    , "Vapor Tower"     , "High damage on short circle range" },
-        { MODEL_PENGUIN     , bhvWaterTower    , "Permafrost Tower", "Heavily freezes enemy" },
+        { MODEL_BOO         , bhvSteamTower    , "Vapor Tower"     , "High damage on around tower" },
+        { MODEL_PENGUIN     , bhvWaterTower    , "Permafrost Tower", "Slows downs enemies around tower" },
         { MODEL_MANTA_RAY   , bhvShardTower    , "Spire Tower"     , "Hops on 5 enemies after attack" },
         { MODEL_ENEMY_LAKITU, bhvHurricaneTower, "Love Tower"      , "Throws projectile that permanently enemies" },
     },
@@ -658,9 +658,11 @@ static const struct TdTrajPoint kTdEnemyPath[] =
 
 static void td_enemy_advance()
 {
-    if (o->oPosZ < -1610.f)
+    if (o->oPosZ < -1610.f && o->activeFlags)
     {
         o->activeFlags = 0;
+        o->parentObj->oTDWaveLeftEnemies--;
+        gMarioStates->health -= 0x100;
         return;
     }
 
@@ -958,7 +960,7 @@ void bhv_water_tower_init()
     }
     else
     {
-        obj_scale(o, 1.5f);
+        obj_scale(o, 1.7f);
         o->oAnimations = (void*) penguin_seg5_anims_05008B74;
         s32 animIndex = PENGUIN_ANIM_IDLE;
         struct Animation **animations = o->oAnimations;
@@ -973,13 +975,34 @@ void bhv_water_tower_loop()
     {
         struct Object* bullet = shoot_closest_enemy(MODEL_WHITE_PARTICLE, 2.f, TOWER_DEFAULT_DAMAGE, TOWER_DEFAULT_RANGE, TOWER_DEFAULT_BULLET_SPEED, TOWER_DEFAULT_ATTACK_CD);
         if (bullet)
-            bullet->oTdBulletSpeedDebuff = 30;
+            bullet->oTdBulletSpeedDebuff = 45;
     }
     else
     {
         struct Object* bullet = shoot_closest_enemy(MODEL_WHITE_PARTICLE, 2.5f, TOWER_DEFAULT_DAMAGE, TOWER_DEFAULT_RANGE, TOWER_DEFAULT_BULLET_SPEED, TOWER_DEFAULT_ATTACK_CD);
         if (bullet)
-            bullet->oTdBulletSpeedDebuff = 90;
+        {
+            bullet->oTdBulletSpeedDebuff = 45;
+            {
+                uintptr_t *behaviorAddr = segmented_to_virtual(bhvTdEnemy);
+                struct ObjectNode *listHead = &gObjectLists[get_object_list_from_behavior(behaviorAddr)];
+                struct Object *obj = (struct Object *) listHead->next;
+
+                while (obj != (struct Object *) listHead) {
+                    if (obj->behavior == behaviorAddr
+                        && obj->activeFlags != ACTIVE_FLAG_DEACTIVATED
+                    ) {
+                        f32 objDist = dist_between_objects(o, obj);
+                        if (objDist < 600.f)
+                        {
+                            obj->oTdEnemySpeedDebuff = obj->oForwardVel * 0.5f;
+                        }
+                    }
+
+                    obj = (struct Object *) obj->header.next;
+                }
+            }
+        }
     }
 }
 
