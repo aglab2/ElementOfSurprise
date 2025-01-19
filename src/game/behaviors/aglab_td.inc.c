@@ -52,10 +52,10 @@ static const struct Color kTowerColors[] = {
 const struct TowerBeh kInitTower = { MODEL_CANNON_BARREL, bhvTower, "Tower", "Shoots projectiles at enemies" };
 
 static struct TowerBeh kBasicTowerBehs[] = {
-    { MODEL_FLYGUY       , bhvFireTower   , "Flame Tower"       , "Has exploding projectiles" }, // AOE traps
-    { MODEL_MR_BLIZZARD  , bhvWaterTower  , "Freeze Tower"      , "Slows down targeted enemy" }, // Slowing down
-    { MODEL_SNUFIT       , bhvCrystalTower, "Sharpshooter Tower", "Far range attacks" }, // Very far range, slow, high damage
-    { MODEL_MONTY_MOLE   , bhvAirTower    , "Dirt Tower"        , "Very fast but weak attacks" }, // Very fast, low damage
+    { MODEL_FLYGUY       , bhvFireTower   , "Flame Tower"       , "Has exploding projectiles" },
+    { MODEL_MR_BLIZZARD  , bhvWaterTower  , "Freeze Tower"      , "Slows down targeted enemy" },
+    { MODEL_SNUFIT       , bhvCrystalTower, "Sharpshooter Tower", "Shoots furthest enemy" },
+    { MODEL_MONTY_MOLE   , bhvAirTower    , "Dirt Tower"        , "Very fast but weak attacks" },
 };
 
 static struct TowerBeh kComboTowerBehs[4][4] = {
@@ -364,7 +364,7 @@ static void handle_tower_spawning()
             if (packed->level == -1)
                 prompt_to_spawn_tower(pslot, "upgrade to", (union TowerTypePacked) { .level = 0, .type0 = o->oTDSelectedTower                        , .totalCost = 20 });
             if (packed->level == 0)
-                prompt_to_spawn_tower(pslot, "upgrade to", (union TowerTypePacked) { .level = 1, .type0 = packed->type0, .type1 = o->oTDSelectedTower, .totalCost = 40 });
+                prompt_to_spawn_tower(pslot, "upgrade to", (union TowerTypePacked) { .level = 1, .type0 = packed->type0, .type1 = o->oTDSelectedTower, .totalCost = 50 });
         }
     }
     else
@@ -520,7 +520,7 @@ static void handle_wave_spawning()
                     struct Object* enemy = spawn_object(o, kEnemyModels[enemyType], bhvTdEnemy);
                     enemy->oBehParams2ndByte = enemyType;
                     enemy->oForwardVel = kSpeeds[enemy->oBehParams2ndByte];
-                    enemy->oHealth = kHealths[enemy->oBehParams2ndByte] * (0.8f + 0.2f * o->oTDWave);
+                    enemy->oHealth = kHealths[enemy->oBehParams2ndByte] * (0.3f + 0.1f * (o->oTDWave * o->oTDWave));
                     enemy->oPosX = -1143;
                     enemy->oPosY = -200;
                     enemy->oPosZ = -1600;
@@ -786,7 +786,7 @@ void bhv_td_bullet_loop()
         {
             o->oTdBulletEnemy->activeFlags = 0;
             o->oTdBulletEnemy->parentObj->oTDWaveLeftEnemies--;
-            gMarioStates->numCoins += 1;
+            gMarioStates->numCoins++;
         }
         else
         {
@@ -821,17 +821,16 @@ void bhv_tower_loop()
     shoot_closest_enemy(MODEL_WATER_BOMB, 1.f, TOWER_DEFAULT_DAMAGE, TOWER_DEFAULT_RANGE, TOWER_DEFAULT_BULLET_SPEED, TOWER_DEFAULT_ATTACK_CD);
 }
 
-void bhv_fire_tower_loop()
+void bhv_fire_tower_init()
 {
     union TowerTypePacked* packed = (union TowerTypePacked*) &o->oBehParams2ndByte;
     if (0 == packed->level)
     {
         obj_scale(o, 2.f);
         o->oAnimations = (void*) flyguy_seg8_anims_08011A64;
-        s32 animIndex = FLY_GUY_ANIM_FLYING;
         struct Animation **animations = o->oAnimations;
+        s32 animIndex = FLY_GUY_ANIM_FLYING;
         geo_obj_init_animation(&o->header.gfx, &animations[animIndex]);
-        shoot_closest_enemy(MODEL_RED_FLAME, 5.f, TOWER_DEFAULT_DAMAGE, TOWER_DEFAULT_RANGE, TOWER_DEFAULT_BULLET_SPEED, TOWER_DEFAULT_ATTACK_CD);
     }
     else
     {
@@ -839,6 +838,19 @@ void bhv_fire_tower_loop()
         s32 animIndex = PIRANHA_PLANT_ANIM_BITE;
         struct Animation **animations = o->oAnimations;
         geo_obj_init_animation(&o->header.gfx, &animations[animIndex]);
+    }
+}
+
+void bhv_fire_tower_loop()
+{
+    union TowerTypePacked* packed = (union TowerTypePacked*) &o->oBehParams2ndByte;
+    if (0 == packed->level)
+    {
+        shoot_closest_enemy(MODEL_RED_FLAME, 5.f, TOWER_DEFAULT_DAMAGE, TOWER_DEFAULT_RANGE, TOWER_DEFAULT_BULLET_SPEED, TOWER_DEFAULT_ATTACK_CD);
+    }
+    else
+    {
+        shoot_closest_enemy(MODEL_RED_FLAME, 8.f, TOWER_DEFAULT_DAMAGE * 3, TOWER_DEFAULT_RANGE, TOWER_DEFAULT_BULLET_SPEED, TOWER_DEFAULT_ATTACK_CD);
     }
 }
 
@@ -945,4 +957,36 @@ void bhv_hurricane_tower_loop()
 void bhv_prism_tower_loop()
 {
 
+}
+
+void bhv_td_flame_linger_loop()
+{
+    if (o->oTimer > 60)
+    {
+        o->activeFlags = 0;
+    }
+
+    uintptr_t *behaviorAddr = segmented_to_virtual(bhvTdEnemy);
+    struct ObjectNode *listHead = &gObjectLists[get_object_list_from_behavior(behaviorAddr)];
+    struct Object *obj = (struct Object *) listHead->next;
+
+    while (obj != (struct Object *) listHead) {
+        if (obj->behavior == behaviorAddr
+            && obj->activeFlags != ACTIVE_FLAG_DEACTIVATED
+        ) {
+            f32 objDist = dist_between_objects(o, obj);
+            if (objDist < 100.f)
+            {
+                obj->oHealth--;
+                if (obj->oHealth <= 0)
+                {
+                    obj->activeFlags = 0;
+                    obj->parentObj->oTDWaveLeftEnemies--;
+                    gMarioStates->numCoins++;
+                }
+            }
+        }
+
+        obj = (struct Object *) obj->header.next;
+    }
 }

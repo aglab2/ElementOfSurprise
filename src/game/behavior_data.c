@@ -6106,10 +6106,12 @@ const BehaviorScript bhvTower[] = {
     END_LOOP(),
 };
 
+extern void bhv_fire_tower_init();
 extern void bhv_fire_tower_loop();
 const BehaviorScript bhvFireTower[] = {
     BEGIN(OBJ_LIST_SURFACE),
     OR_INT(oFlags, OBJ_FLAG_UPDATE_GFX_POS_AND_ANGLE),
+    CALL_NATIVE(bhv_fire_tower_init),
     BEGIN_LOOP(),
         CALL_NATIVE(bhv_fire_tower_loop),
     END_LOOP(),
@@ -6215,5 +6217,15 @@ const BehaviorScript bhvTdBullet[] = {
     OR_INT(oFlags, OBJ_FLAG_UPDATE_GFX_POS_AND_ANGLE),
     BEGIN_LOOP(),
         CALL_NATIVE(bhv_td_bullet_loop),
+    END_LOOP(),
+};
+
+extern void bhv_td_flame_linger_loop();
+const BehaviorScript bhvFlameLinger[] = {
+    BEGIN(OBJ_LIST_LEVEL),
+    BILLBOARD(),
+    OR_INT(oFlags, OBJ_FLAG_UPDATE_GFX_POS_AND_ANGLE),
+    BEGIN_LOOP(),
+        CALL_NATIVE(bhv_td_flame_linger_loop),
     END_LOOP(),
 };
