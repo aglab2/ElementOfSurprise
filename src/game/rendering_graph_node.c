@@ -96,6 +96,7 @@ struct RenderModeContainer renderModeTable_1Cycle[2] = {
 #endif
         [LAYER_SMOKE_ALPHA] = G_RM_AA_TEX_EDGE,
         [LAYER_COIN] = G_RM_AA_TEX_EDGE,
+        [LAYER_WHITE_PARTICLES] = G_RM_AA_XLU_SURF,
         [LAYER_CIRCLE_SHADOW] = G_RM_CLD_SURF,
         [LAYER_CIRCLE_SHADOW_TRANSPARENT] = G_RM_CLD_SURF,
         [LAYER_TRANSPARENT_DECAL] = G_RM_AA_XLU_SURF,
@@ -121,6 +122,7 @@ struct RenderModeContainer renderModeTable_1Cycle[2] = {
 #endif
         [LAYER_SMOKE_ALPHA] = G_RM_AA_ZB_TEX_EDGE,
         [LAYER_COIN] = G_RM_AA_ZB_TEX_EDGE,
+        [LAYER_WHITE_PARTICLES] = G_RM_AA_ZB_XLU_SURF,
         [LAYER_CIRCLE_SHADOW] = G_RM_AA_ZB_XLU_DECAL,
         [LAYER_CIRCLE_SHADOW_TRANSPARENT] = G_RM_ZB_CLD_SURF,
         [LAYER_TRANSPARENT_DECAL] = G_RM_AA_ZB_XLU_DECAL,
@@ -150,6 +152,7 @@ struct RenderModeContainer renderModeTable_2Cycle[2] = {
 #endif
         [LAYER_SMOKE_ALPHA] = G_RM_AA_TEX_EDGE2,
         [LAYER_COIN] = G_RM_AA_TEX_EDGE2,
+        [LAYER_WHITE_PARTICLES] = G_RM_AA_XLU_SURF2,
         [LAYER_CIRCLE_SHADOW] = G_RM_CLD_SURF2,
         [LAYER_CIRCLE_SHADOW_TRANSPARENT] = G_RM_CLD_SURF2,
         [LAYER_TRANSPARENT_DECAL] = G_RM_AA_XLU_SURF2,
@@ -176,6 +179,7 @@ struct RenderModeContainer renderModeTable_2Cycle[2] = {
 #endif
         [LAYER_SMOKE_ALPHA] = G_RM_AA_ZB_TEX_EDGE2,
         [LAYER_COIN] = G_RM_AA_ZB_TEX_EDGE2,
+        [LAYER_WHITE_PARTICLES] = G_RM_AA_ZB_XLU_SURF2,
         [LAYER_CIRCLE_SHADOW] = G_RM_AA_ZB_XLU_DECAL2,
         [LAYER_CIRCLE_SHADOW_TRANSPARENT] = G_RM_ZB_CLD_SURF2,
         [LAYER_TRANSPARENT_DECAL] = G_RM_AA_ZB_XLU_DECAL2,
@@ -322,6 +326,9 @@ extern const Gfx mist_dl_end[];
 extern const Gfx breakable_box_seg8_dl_cork_box_init[];
 extern const Gfx breakable_box_seg8_dl_cork_box_end[];
 
+extern const Gfx white_particle_enter[];
+extern const Gfx white_particle_exit[];
+
 /**
  * Process a master list node. This has been modified, so now it runs twice, for each microcode.
  * It iterates through the first 5 layers of if the first index using F3DLX2.Rej, then it switches
@@ -384,7 +391,6 @@ void geo_process_master_list_sub(struct GraphNodeMasterList *node) {
                 wantMode2 &= ~IM_RD;
             }
 #endif
-            if (currLayer == LAYER_COIN || currLayer == LAYER_SMOKE_ALPHA || wantMode1 != curMode1 || wantMode2 != curMode2)
             {
                 gDPSetRenderMode(tempGfxHead++, wantMode1, wantMode2);
                 curMode1 = wantMode1; curMode2 = wantMode2;
@@ -428,6 +434,12 @@ void geo_process_master_list_sub(struct GraphNodeMasterList *node) {
                 int flFrame = (gGlobalTimer / 2) % 8;
                 startDl = sBlueFlameTextureDls[flFrame];
                 endDl = flame_seg3_dl_end;
+            }
+            if (LAYER_WHITE_PARTICLES == currLayer)
+            {
+                int flFrame = (gGlobalTimer / 2) % 8;
+                startDl = white_particle_enter;
+                endDl = white_particle_exit;
             }
 
             if (currLayer == LAYER_CIRCLE_SHADOW || currLayer == LAYER_CIRCLE_SHADOW_TRANSPARENT)

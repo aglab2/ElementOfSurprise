@@ -51,14 +51,13 @@ ALIGNED8 static const Texture flame_seg3_texture_0301AB20[] = {
 const Gfx flame_seg3_dl_draw[] = {
     gsSPVertex(flame_seg3_vertex_030172E0, 4, 0),
     gsSP2Triangles( 0,  1,  2, 0x0,  0,  2,  3, 0x0),
-    gsDPPipeSync(),
     gsSPEndDisplayList(),
 };
 
 const Gfx flame_seg3_dl_end[] = {
-    gsSPTexture(0xFFFF, 0xFFFF, 0, G_TX_RENDERTILE, G_OFF),
     gsDPPipeSync(),
-    gsSPSetGeometryMode(G_LIGHTING | G_SHADING_SMOOTH),
+    gsSPTexture(0xFFFF, 0xFFFF, 0, G_TX_RENDERTILE, G_OFF),
+    gsSPSetGeometryMode(G_ZBUFFER | G_LIGHTING | G_SHADING_SMOOTH),
     gsDPSetEnvColor(255, 255, 255, 255),
     gsDPSetCombineMode(G_CC_SHADE, G_CC_SHADE),
     gsSPEndDisplayList(),
@@ -66,7 +65,7 @@ const Gfx flame_seg3_dl_end[] = {
 
 // 0x0301B320 - 0x0301B3B0
 const Gfx flame_seg3_dl_0301B320[] = {
-    gsSPClearGeometryMode(G_LIGHTING | G_SHADING_SMOOTH),
+    gsSPClearGeometryMode(G_ZBUFFER | G_LIGHTING | G_SHADING_SMOOTH),
     gsDPSetEnvColor(255, 50, 0, 200),
     gsDPSetCombineMode(G_CC_FADEA, G_CC_FADEA),
     gsDPSetTile(G_IM_FMT_IA, G_IM_SIZ_16b, 0, 0, G_TX_LOADTILE, 0, G_TX_CLAMP, 5, G_TX_NOLOD, G_TX_CLAMP, 5, G_TX_NOLOD),

@@ -577,7 +577,7 @@ void bhv_crystal_tower_loop()
         obj_scale(o, 2.f + sins(o->oTimer * 0x456) / 10.f);
         o->oSnufitRecoil = 0;
         o->oSnufitBodyScale = 1000;
-        shoot_closest_enemy(MODEL_BOWLING_BALL, 0.5f, TOWER_DEFAULT_DAMAGE, TOWER_DEFAULT_RANGE * 2.5f, TOWER_DEFAULT_BULLET_SPEED * 3, TOWER_DEFAULT_ATTACK_CD * 3);
+        shoot_closest_enemy(MODEL_BOWLING_BALL, 0.5f, TOWER_DEFAULT_DAMAGE / 1.5, TOWER_DEFAULT_RANGE * 2.5f, TOWER_DEFAULT_BULLET_SPEED * 3, TOWER_DEFAULT_ATTACK_CD * 3);
     }
     else
     {
