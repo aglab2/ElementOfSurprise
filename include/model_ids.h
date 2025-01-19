@@ -323,7 +323,6 @@
 #define MODEL_BULLY_BOSS                  0x57        // bully_boss_geo
 
 // group 3
-#define MODEL_WATER_BOMB                  0x54        // water_bomb_geo
 #define MODEL_WATER_BOMB_SHADOW           0x55        // water_bomb_shadow_geo
 #define MODEL_KING_BOBOMB                 0x56        // king_bobomb_geo
 
@@ -575,5 +574,6 @@
 #define MODEL_DL_MONTY_MOLE_HOLE MODEL_LEVEL_GEOMETRY_11
 #define MODEL_FWOOSH MODEL_LEVEL_GEOMETRY_12
 #define MODEL_ENEMY_LAKITU MODEL_LEVEL_GEOMETRY_13
+#define MODEL_WATER_BOMB MODEL_LEVEL_GEOMETRY_14
 
 #endif // MODEL_IDS_H

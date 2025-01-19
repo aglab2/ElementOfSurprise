@@ -67,7 +67,7 @@ static struct TowerBeh kComboTowerBehs[4][4] = {
     },
     [TOWER_WATER] = {
         { MODEL_BOO         , bhvSteamTower    , "Vapor Tower"     , "High damage on short circle range" },
-        { MODEL_PENGUIN     , bhvWaterTower    , "Permafrost Tower", "Permanently freezes enemy" },
+        { MODEL_PENGUIN     , bhvWaterTower    , "Permafrost Tower", "Heavily freezes enemy" },
         { MODEL_MANTA_RAY   , bhvShardTower    , "Spire Tower"     , "Hops on 5 enemies after attack" },
         { MODEL_ENEMY_LAKITU, bhvHurricaneTower, "Love Tower"      , "Throws projectile that permanently enemies" },
     },
@@ -75,12 +75,12 @@ static struct TowerBeh kComboTowerBehs[4][4] = {
         { MODEL_YOSHI       , bhvSpireTower  , "0.5A Tower"        , "Has 0.5% chance to instantly kill target" },
         { MODEL_MANTA_RAY   , bhvShardTower  , "Spire Tower"       , "Hops on 5 enemies after attack" },
         { MODEL_HEAVE_HO    , bhvCrystalTower, "Flip Tower"        , "Full field attack, flips enemies" },
-        { MODEL_MR_I        , bhvPrismTower  , "Pupil Tower"       , "Shoot far attacks in 8 directions, no aim" },
+        { MODEL_MR_I        , bhvPrismTower  , "iTower"            , "Shoot far attacks in 8 directions, no aim" },
     },
     [TOWER_AIR] = {
         { MODEL_BLARGG       , bhvInfernoTower  , "Spin Tower"   , "Spawn rotating flame around tower" },
         { MODEL_ENEMY_LAKITU , bhvHurricaneTower, "Love Tower"   , "Throws projectile that permanently enemies" },
-        { MODEL_MR_I         , bhvPrismTower    , "Pupil Tower"  , "Shoot far attacks in 8 directions, no aim" },
+        { MODEL_MR_I         , bhvPrismTower    , "iTower"      , "Shoot far attacks in 8 directions, no aim" },
         { MODEL_UKIKI        , bhvAirTower      , "Banana Tower" , "No attack cd + double projectiles" },
     },
 };
@@ -417,9 +417,12 @@ struct WaveDesc
     struct WaveEnemyGroup enemies[4];
 };
 
+
+
 static const struct WaveDesc kWaveDescs[] = {
-    { { ENEMY_GOOMBA, 20, 0 }, },
-    { { ENEMY_GOOMBA, 40, 0 }, },
+    { (struct WaveEnemyGroup){ ENEMY_GOOMBA, 20, 0 }, },
+    { (struct WaveEnemyGroup){ ENEMY_GOOMBA, 40, 0 }, },
+    { (struct WaveEnemyGroup){ ENEMY_GOOMBA, 20, 2 }, (struct WaveEnemyGroup){ ENEMY_KOOPA, 10, 1 } },
 };
 
 static void handle_wave_spawning()
@@ -450,11 +453,11 @@ static void handle_wave_spawning()
 
                     if (0 == lineOff)
                     {
-                        sprintf(line, "%d %s", waveGroup->count, kNamesMult[waveGroup->enemy]);
+                        lineOff += sprintf(line + lineOff, "%d %s", waveGroup->count, kNamesMult[waveGroup->enemy]);
                     }
                     else
                     {
-                        sprintf(line, "& %d %s", waveGroup->count, kNamesMult[waveGroup->enemy]);
+                        lineOff += sprintf(line + lineOff, " & %d %s", waveGroup->count, kNamesMult[waveGroup->enemy]);
                     }
                 }
                 print_small_text_buffered(160, 22, line, PRINT_TEXT_ALIGN_CENTRE, PRINT_ALL, FONT_OUTLINE);
@@ -517,7 +520,7 @@ static void handle_wave_spawning()
                     struct Object* enemy = spawn_object(o, kEnemyModels[enemyType], bhvTdEnemy);
                     enemy->oBehParams2ndByte = enemyType;
                     enemy->oForwardVel = kSpeeds[enemy->oBehParams2ndByte];
-                    enemy->oHealth = kHealths[enemy->oBehParams2ndByte];
+                    enemy->oHealth = kHealths[enemy->oBehParams2ndByte] * (1.f + 0.2f * o->oTDWave);
                     enemy->oPosX = -1143;
                     enemy->oPosY = -200;
                     enemy->oPosZ = -1600;

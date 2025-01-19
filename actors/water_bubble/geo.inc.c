@@ -1,10 +1,9 @@
 // 0x0C000308
+extern const Gfx water_bubble_seg5_dl_05011000_dl[];
 const GeoLayout water_bomb_geo[] = {
-   GEO_CULLING_RADIUS(150),
+   GEO_NODE_START(),
    GEO_OPEN_NODE(),
-      GEO_OPEN_NODE(),
-         GEO_DISPLAY_LIST(LAYER_TRANSPARENT, water_bubble_seg5_dl_05011000),
-      GEO_CLOSE_NODE(),
+      GEO_DISPLAY_LIST(LAYER_WATERBOMB, water_bubble_seg5_dl_05011000_dl),
    GEO_CLOSE_NODE(),
    GEO_END(),
 };

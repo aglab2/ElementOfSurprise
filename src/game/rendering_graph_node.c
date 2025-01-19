@@ -97,6 +97,7 @@ struct RenderModeContainer renderModeTable_1Cycle[2] = {
         [LAYER_SMOKE_ALPHA] = G_RM_AA_TEX_EDGE,
         [LAYER_COIN] = G_RM_AA_TEX_EDGE,
         [LAYER_WHITE_PARTICLES] = G_RM_AA_XLU_SURF,
+        [LAYER_WATERBOMB] = G_RM_AA_XLU_SURF,
         [LAYER_CIRCLE_SHADOW] = G_RM_CLD_SURF,
         [LAYER_CIRCLE_SHADOW_TRANSPARENT] = G_RM_CLD_SURF,
         [LAYER_TRANSPARENT_DECAL] = G_RM_AA_XLU_SURF,
@@ -124,6 +125,7 @@ struct RenderModeContainer renderModeTable_1Cycle[2] = {
         [LAYER_SMOKE_ALPHA] = G_RM_AA_ZB_TEX_EDGE,
         [LAYER_COIN] = G_RM_AA_ZB_TEX_EDGE,
         [LAYER_WHITE_PARTICLES] = G_RM_AA_ZB_XLU_SURF,
+        [LAYER_WATERBOMB] = G_RM_AA_ZB_XLU_SURF,
         [LAYER_CIRCLE_SHADOW] = G_RM_AA_ZB_XLU_DECAL,
         [LAYER_CIRCLE_SHADOW_TRANSPARENT] = G_RM_ZB_CLD_SURF,
         [LAYER_TRANSPARENT_DECAL] = G_RM_AA_ZB_XLU_DECAL,
@@ -155,6 +157,7 @@ struct RenderModeContainer renderModeTable_2Cycle[2] = {
         [LAYER_SMOKE_ALPHA] = G_RM_AA_TEX_EDGE2,
         [LAYER_COIN] = G_RM_AA_TEX_EDGE2,
         [LAYER_WHITE_PARTICLES] = G_RM_AA_XLU_SURF2,
+        [LAYER_WATERBOMB] = G_RM_AA_XLU_SURF2,
         [LAYER_CIRCLE_SHADOW] = G_RM_CLD_SURF2,
         [LAYER_CIRCLE_SHADOW_TRANSPARENT] = G_RM_CLD_SURF2,
         [LAYER_TRANSPARENT_DECAL] = G_RM_AA_XLU_SURF2,
@@ -183,6 +186,7 @@ struct RenderModeContainer renderModeTable_2Cycle[2] = {
         [LAYER_SMOKE_ALPHA] = G_RM_AA_ZB_TEX_EDGE2,
         [LAYER_COIN] = G_RM_AA_ZB_TEX_EDGE2,
         [LAYER_WHITE_PARTICLES] = G_RM_AA_ZB_XLU_SURF2,
+        [LAYER_WATERBOMB] = G_RM_AA_ZB_XLU_SURF2,
         [LAYER_CIRCLE_SHADOW] = G_RM_AA_ZB_XLU_DECAL2,
         [LAYER_CIRCLE_SHADOW_TRANSPARENT] = G_RM_ZB_CLD_SURF2,
         [LAYER_TRANSPARENT_DECAL] = G_RM_AA_ZB_XLU_DECAL2,
@@ -336,6 +340,9 @@ extern const Gfx white_particle_exit[];
 extern const Gfx dirt_seg3_dl_dirt_particle_enter[];
 extern const Gfx dirt_seg3_dl_dirt_particle_exit[];
 
+extern const Gfx water_bubble_seg5_dl_05011000_enter[];
+extern const Gfx water_bubble_seg5_dl_05011000_exit[];
+
 /**
  * Process a master list node. This has been modified, so now it runs twice, for each microcode.
  * It iterates through the first 5 layers of if the first index using F3DLX2.Rej, then it switches
@@ -446,6 +453,11 @@ void geo_process_master_list_sub(struct GraphNodeMasterList *node) {
             {
                 startDl = white_particle_enter;
                 endDl = white_particle_exit;
+            }
+            if (LAYER_WATERBOMB == currLayer)
+            {
+                startDl = water_bubble_seg5_dl_05011000_enter;
+                endDl = water_bubble_seg5_dl_05011000_exit;
             }
             if (LAYER_DIRT == currLayer)
             {

@@ -783,6 +783,12 @@ extern const Gfx heave_ho_seg5_dl_050149A8[];
 extern const Gfx heave_ho_seg5_dl_05014D80[];
 extern const struct Animation *const heave_ho_seg5_anims_0501534C[];
 
+// water_bubble
+extern const GeoLayout water_bomb_geo[];
+extern const GeoLayout water_bomb_shadow_geo[];
+extern const Gfx water_bubble_seg5_dl_05010D30[];
+extern const Gfx water_bubble_seg5_dl_05011000[];
+
 #include "mario/geo_header.h"
 
 #endif

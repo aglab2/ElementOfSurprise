@@ -51,3 +51,5 @@
 #include "yoshi/geo.inc.c"
 
 #include "heave_ho/geo.inc.c"
+
+#include "water_bubble/geo.inc.c"

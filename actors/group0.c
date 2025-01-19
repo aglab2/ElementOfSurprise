@@ -97,6 +97,8 @@
 
 #include "fwoosh/model.inc.c"
 
+#include "water_bubble/model.inc.c"
+
 #ifdef S2DEX_TEXT_ENGINE
 #include "src/s2d_engine/s2d_config.h"
 #include FONT_C_FILE
