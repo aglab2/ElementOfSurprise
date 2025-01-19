@@ -760,6 +760,7 @@ void bhv_td_enemy_loop()
 #define BULLET_SPAWN_FLAME_LINGER 1
 #define BULLET_SPAWN_FLAME_LINGER2 2
 #define BULLET_FLIP 3
+#define BULLET_INSTA_KILL 4
 
 static struct Object* shoot_closest_enemy(int model, f32 modelScale, int dmg, f32 range, f32 bulletVel, int cd)
 {
@@ -822,6 +823,20 @@ static struct Object* shoot_furthest_enemy(int model, f32 modelScale, int dmg, f
     return bullet;
 }
 
+static void deal_enemy_damage(struct Object* enemy, int dmg)
+{
+    if (!enemy->activeFlags)
+        return;
+
+    enemy->oHealth -= dmg;
+    if (enemy->oHealth <= 0)
+    {
+        enemy->activeFlags = 0;
+        enemy->parentObj->oTDWaveLeftEnemies--;
+        gMarioStates->numCoins++;
+    }
+}
+
 void bhv_td_bullet_loop()
 {
     o->oAnimState++;
@@ -836,22 +851,13 @@ void bhv_td_bullet_loop()
     f32 dmag = vec3_mag(d);
     if (dmag < o->oForwardVel)
     {
-        o->oTdBulletEnemy->oHealth -= o->oBehParams2ndByte;
-        if (o->oTdBulletEnemy->oHealth <= 0)
-        {
-            o->oTdBulletEnemy->activeFlags = 0;
-            o->oTdBulletEnemy->parentObj->oTDWaveLeftEnemies--;
-            gMarioStates->numCoins++;
-        }
-        else
-        {
-            if (o->oTdBulletSpeedDebuff)
-            {
-                o->oTdBulletEnemy->oTdEnemySpeedDebuff = o->oTdBulletEnemy->oForwardVel * o->oTdBulletSpeedDebuff / 50;
-            }
-        }
-
         o->activeFlags = 0;
+
+        deal_enemy_damage(o->oTdBulletEnemy, o->oBehParams2ndByte);
+        if (o->oTdBulletSpeedDebuff)
+        {
+            o->oTdBulletEnemy->oTdEnemySpeedDebuff = o->oTdBulletEnemy->oForwardVel * o->oTdBulletSpeedDebuff / 50;
+        }
 
         switch (o->oBehParams)
         {
@@ -868,6 +874,15 @@ void bhv_td_bullet_loop()
                     flame->oTdBulletEnemy = o->oTdBulletEnemy;
                 else
                     flame->oTdBulletEnemy = NULL;
+            }
+            break;
+
+            case BULLET_INSTA_KILL:
+            {
+                if (random_u16() < (0x10000 * 0.05f))
+                {
+                    deal_enemy_damage(o->oTdBulletEnemy, 100000);
+                }
             }
             break;
         }
@@ -1050,13 +1065,7 @@ static void deal_damage_around(f32 range, int dmg)
             f32 objDist = dist_between_objects(o, obj);
             if (objDist < range)
             {
-                obj->oHealth -= dmg;
-                if (obj->oHealth <= 0)
-                {
-                    obj->activeFlags = 0;
-                    obj->parentObj->oTDWaveLeftEnemies--;
-                    gMarioStates->numCoins++;
-                }
+                deal_enemy_damage(obj, dmg);
             }
         }
 
@@ -1072,12 +1081,14 @@ void bhv_steam_tower_init()
 void bhv_steam_tower_loop()
 {
     obj_scale(o, 1.1f + sins(o->oTimer * 0x456) / 10.f);
-    deal_damage_around(400.f, 3);
+    deal_damage_around(400.f, 4);
 }
 
 void bhv_spire_tower_loop()
 {
-
+    struct Object* bullet = shoot_closest_enemy(MODEL_YOSHI_EGG, 2.f, TOWER_DEFAULT_DAMAGE / 25, TOWER_DEFAULT_RANGE, TOWER_DEFAULT_BULLET_SPEED, TOWER_DEFAULT_ATTACK_CD);
+    if (bullet)
+        bullet->oBehParams = BULLET_INSTA_KILL;
 }
 
 void bhv_inferno_tower_loop()
@@ -1107,7 +1118,7 @@ void bhv_td_flame_linger_loop()
     {
         o->activeFlags = 0;
     }
-    f32 range = 20.f * ((60 - o->oTimer) / 8.f);
+    f32 range = 10.f * ((60 - o->oTimer) / 8.f);
 
     if (o->oTdBulletEnemy)
     {
@@ -1121,7 +1132,7 @@ void bhv_td_flame_linger_loop()
         o->oPosZ = o->oTdBulletEnemy->oPosZ;
     }
 
-    deal_damage_around(range, 1);
+    deal_damage_around(range, 2);
 }
 
 Gfx *geo_hp(s32 callContext, struct GraphNode *node, Mat4 mtx)
