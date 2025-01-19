@@ -1022,7 +1022,13 @@ void bhv_crystal_tower_init()
         s32 animIndex = HEAVE_HO_ANIM_MOVING;
         struct Animation **animations = o->oAnimations;
         geo_obj_init_animation(&o->header.gfx, &animations[animIndex]);
+
+        o->oHomeX = o->oPosX;
+        o->oHomeY = o->oPosY;
+        o->oHomeZ = o->oPosZ;
     }
+
+    o->parentObj = NULL;
 }
 
 void bhv_crystal_tower_loop()
@@ -1031,13 +1037,40 @@ void bhv_crystal_tower_loop()
     if (0 == packed->level)
     {
         obj_scale(o, 2.f + sins(o->oTimer * 0x456) / 10.f);
-        shoot_furthest_enemy(MODEL_BOWLING_BALL, 0.5f, TOWER_DEFAULT_DAMAGE, TOWER_DEFAULT_BULLET_SPEED * 2, TOWER_DEFAULT_ATTACK_CD);
+        shoot_furthest_enemy(MODEL_BOWLING_BALL, 0.7f, TOWER_DEFAULT_DAMAGE, TOWER_DEFAULT_BULLET_SPEED * 2, TOWER_DEFAULT_ATTACK_CD);
     }
     else
     {
-        struct Object* bullet = shoot_furthest_enemy(MODEL_BOWLING_BALL, 0.5f, TOWER_DEFAULT_DAMAGE, TOWER_DEFAULT_BULLET_SPEED * 2, TOWER_DEFAULT_ATTACK_CD);
-        if (bullet)
-            bullet->oBehParams = BULLET_FLIP;
+        if (15 == o->oTimer)
+        {
+            f32 dist;
+            struct Animation **animations = o->oAnimations;
+            struct Object* enemy = cur_obj_find_furthest_object_with_behavior(bhvTdEnemy, &dist);
+            if (!enemy)
+            {
+                o->oTimer = 14;
+                vec3_copy(&o->oPosVec, &o->oHomeVec);
+                geo_obj_init_animation(&o->header.gfx, &animations[HEAVE_HO_ANIM_MOVING]);
+            }
+            else
+            {
+                o->oTimer = -1;
+                geo_obj_init_animation(&o->header.gfx, &animations[HEAVE_HO_ANIM_THROW]);
+                o->parentObj = enemy;
+                o->oPosX = enemy->oPosX;
+                o->oPosY = enemy->oPosY;
+                o->oPosZ = enemy->oPosZ;
+            }
+        }
+        else
+        {
+            if (o->parentObj)
+            {
+                vec3_copy(&o->parentObj->oPosVec, &o->oPosVec);
+                o->parentObj->oPosY += sins(o->oTimer * 0x8000 / 14) * 500.f;
+                deal_enemy_damage(o->parentObj, 5);
+            }
+        }
     }
 }
 
@@ -1303,6 +1336,25 @@ void td_patch_unallocs()
             obj = (struct Object *) obj->header.next;
         }
     }
+    
+    // same thing for crystal tower
+    {
+        uintptr_t *behaviorAddr = segmented_to_virtual(bhvCrystalTower);
+        struct ObjectNode *listHead = &gObjectLists[get_object_list_from_behavior(behaviorAddr)];
+        struct Object *obj = (struct Object *) listHead->next;
+
+        while (obj != (struct Object *) listHead) {
+            if (obj->behavior == behaviorAddr && obj->activeFlags != ACTIVE_FLAG_DEACTIVATED) {
+                if (!obj->parentObj || obj->parentObj->activeFlags == 0)
+                {
+                    obj->parentObj = NULL;
+                }
+            }
+
+            obj = (struct Object *) obj->header.next;
+        }
+    }
+
 
     // clear lingers for flames
     {
