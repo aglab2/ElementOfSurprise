@@ -520,7 +520,7 @@ static void handle_wave_spawning()
                     struct Object* enemy = spawn_object(o, kEnemyModels[enemyType], bhvTdEnemy);
                     enemy->oBehParams2ndByte = enemyType;
                     enemy->oForwardVel = kSpeeds[enemy->oBehParams2ndByte];
-                    enemy->oHealth = kHealths[enemy->oBehParams2ndByte] * (1.f + 0.2f * o->oTDWave);
+                    enemy->oHealth = kHealths[enemy->oBehParams2ndByte] * (0.8f + 0.2f * o->oTDWave);
                     enemy->oPosX = -1143;
                     enemy->oPosY = -200;
                     enemy->oPosZ = -1600;
@@ -736,6 +736,36 @@ static struct Object* shoot_closest_enemy(int model, f32 modelScale, int dmg, f3
     return bullet;
 }
 
+extern struct Object *cur_obj_find_furthest_object_with_behavior(const BehaviorScript *behavior, f32 *dist);
+static struct Object* shoot_furthest_enemy(int model, f32 modelScale, int dmg, f32 bulletVel, int cd)
+{
+    if (o->oTdTowerCooldown) 
+    {
+        o->oTdTowerCooldown--;
+        return NULL;
+    }
+
+    f32 dist;
+    struct Object* enemy = cur_obj_find_furthest_object_with_behavior(bhvTdEnemy, &dist);
+    if (!enemy)
+        return NULL;
+
+    s32 angleTowards = obj_angle_to_object(o, enemy);
+    cur_obj_rotate_yaw_toward(angleTowards, 0x800);
+
+    o->oFaceAngleYaw = angleTowards;
+
+    struct Object* bullet = spawn_object(o, model, bhvTdBullet);
+    bullet->oBehParams2ndByte = dmg;
+    bullet->oForwardVel = bulletVel;
+    bullet->oTdBulletEnemy = enemy;
+    obj_scale(bullet, modelScale);
+    o->parentObj = bullet;
+    o->oTdTowerCooldown = cd;
+
+    return bullet;
+}
+
 void bhv_td_bullet_loop()
 {
     o->oAnimState++;
@@ -847,7 +877,7 @@ void bhv_crystal_tower_loop()
         obj_scale(o, 2.f + sins(o->oTimer * 0x456) / 10.f);
         o->oSnufitRecoil = 0;
         o->oSnufitBodyScale = 1000;
-        shoot_closest_enemy(MODEL_BOWLING_BALL, 0.5f, TOWER_DEFAULT_DAMAGE, TOWER_DEFAULT_RANGE * 2.5f, TOWER_DEFAULT_BULLET_SPEED * 2, TOWER_DEFAULT_ATTACK_CD * 3);
+        shoot_furthest_enemy(MODEL_BOWLING_BALL, 0.5f, TOWER_DEFAULT_DAMAGE, TOWER_DEFAULT_BULLET_SPEED * 2, TOWER_DEFAULT_ATTACK_CD);
     }
     else
     {
