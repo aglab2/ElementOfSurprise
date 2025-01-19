@@ -6161,10 +6161,12 @@ const BehaviorScript bhvSteamTower[] = {
     END_LOOP(),
 };
 
+extern void bhv_spire_tower_init();
 extern void bhv_spire_tower_loop();
 const BehaviorScript bhvSpireTower[] = {
     BEGIN(OBJ_LIST_SURFACE),
     OR_INT(oFlags, OBJ_FLAG_UPDATE_GFX_POS_AND_ANGLE),
+    CALL_NATIVE(bhv_spire_tower_init),
     BEGIN_LOOP(),
         CALL_NATIVE(bhv_spire_tower_loop),
     END_LOOP(),

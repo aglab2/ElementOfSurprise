@@ -906,7 +906,7 @@ void bhv_tower_init()
 
 void bhv_tower_loop()
 {
-    shoot_closest_enemy(MODEL_WATER_BOMB, 1.f, TOWER_DEFAULT_DAMAGE, TOWER_DEFAULT_RANGE, TOWER_DEFAULT_BULLET_SPEED, TOWER_DEFAULT_ATTACK_CD);
+    shoot_closest_enemy(MODEL_WATER_BOMB, 0.7f, TOWER_DEFAULT_DAMAGE, TOWER_DEFAULT_RANGE, TOWER_DEFAULT_BULLET_SPEED, TOWER_DEFAULT_ATTACK_CD);
 }
 
 void bhv_fire_tower_init()
@@ -1084,9 +1084,18 @@ void bhv_steam_tower_loop()
     deal_damage_around(400.f, 4);
 }
 
+void bhv_spire_tower_init()
+{
+    obj_scale(o, 1.2f);
+    o->oAnimations = (void*) yoshi_seg5_anims_05024100;
+    struct Animation **animations = o->oAnimations;
+    s32 animIndex = YOSHI_ANIM_IDLE;
+    geo_obj_init_animation(&o->header.gfx, &animations[animIndex]);
+}
+
 void bhv_spire_tower_loop()
 {
-    struct Object* bullet = shoot_closest_enemy(MODEL_YOSHI_EGG, 2.f, TOWER_DEFAULT_DAMAGE / 25, TOWER_DEFAULT_RANGE, TOWER_DEFAULT_BULLET_SPEED, TOWER_DEFAULT_ATTACK_CD);
+    struct Object* bullet = shoot_closest_enemy(MODEL_YOSHI_EGG, 0.3f, TOWER_DEFAULT_DAMAGE / 25, TOWER_DEFAULT_RANGE * 2, TOWER_DEFAULT_BULLET_SPEED, TOWER_DEFAULT_ATTACK_CD / 2);
     if (bullet)
         bullet->oBehParams = BULLET_INSTA_KILL;
 }

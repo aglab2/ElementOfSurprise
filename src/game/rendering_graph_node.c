@@ -22,6 +22,7 @@
 #include "config.h"
 #include "config/config_world.h"
 #include "actors/common1.h"
+#include "actors/group0.h"
 
 /**
  * This file contains the code that processes the scene graph for rendering.
@@ -106,6 +107,7 @@ struct RenderModeContainer renderModeTable_1Cycle[2] = {
         [LAYER_MIST] = G_RM_AA_XLU_SURF,
         [LAYER_RED_FLAME] = G_RM_AA_XLU_SURF,
         [LAYER_HP] = G_RM_AA_OPA_SURF,
+        [LAYER_YOSHIEGG] = G_RM_AA_XLU_SURF,
         [LAYER_DIRT] = G_RM_AA_XLU_SURF,
         [LAYER_BLUE_FLAME] = G_RM_AA_XLU_SURF,
         [LAYER_TRANSPARENT_INTER] = G_RM_AA_XLU_SURF,
@@ -135,6 +137,7 @@ struct RenderModeContainer renderModeTable_1Cycle[2] = {
         [LAYER_MIST] = G_RM_AA_ZB_XLU_SURF,
         [LAYER_RED_FLAME] = G_RM_AA_ZB_XLU_SURF,
         [LAYER_HP] = G_RM_AA_ZB_OPA_SURF,
+        [LAYER_YOSHIEGG] = G_RM_AA_ZB_XLU_SURF,
         [LAYER_DIRT] = G_RM_AA_ZB_XLU_SURF,
         [LAYER_BLUE_FLAME] = G_RM_AA_ZB_XLU_SURF,
         [LAYER_TRANSPARENT_INTER] = G_RM_AA_ZB_XLU_INTER,
@@ -168,6 +171,7 @@ struct RenderModeContainer renderModeTable_2Cycle[2] = {
         [LAYER_MIST] = G_RM_AA_XLU_SURF2,
         [LAYER_RED_FLAME] = G_RM_AA_XLU_SURF2,
         [LAYER_HP] = G_RM_AA_OPA_SURF2,
+        [LAYER_YOSHIEGG] = G_RM_AA_XLU_SURF2,
         [LAYER_DIRT] = G_RM_AA_XLU_SURF2,
         [LAYER_BLUE_FLAME] = G_RM_AA_XLU_SURF2,
         [LAYER_TRANSPARENT_INTER] = G_RM_AA_XLU_SURF2,
@@ -198,6 +202,7 @@ struct RenderModeContainer renderModeTable_2Cycle[2] = {
         [LAYER_MIST] = G_RM_AA_ZB_XLU_SURF2,
         [LAYER_RED_FLAME] = G_RM_AA_ZB_XLU_SURF2,
         [LAYER_HP] = G_RM_AA_ZB_OPA_SURF2,
+        [LAYER_YOSHIEGG] = G_RM_AA_ZB_XLU_SURF2,
         [LAYER_DIRT] = G_RM_AA_ZB_XLU_SURF2,
         [LAYER_BLUE_FLAME] = G_RM_AA_ZB_XLU_SURF2,
         [LAYER_TRANSPARENT_INTER] = G_RM_AA_ZB_XLU_INTER2,
@@ -350,6 +355,19 @@ extern const Gfx water_bubble_seg5_dl_05011000_exit[];
 extern const Gfx hp_enemy_exit[];
 extern const Gfx hp_enemy_enter[];
 
+static const Gfx* sYoshiEggsDls[] = {
+    yoshi_egg_seg5_dl_05009820,
+    yoshi_egg_seg5_dl_05009838,
+    yoshi_egg_seg5_dl_05009850,
+    yoshi_egg_seg5_dl_05009868,
+    yoshi_egg_seg5_dl_05009880,
+    yoshi_egg_seg5_dl_05009898,
+    yoshi_egg_seg5_dl_050098B0,
+    yoshi_egg_seg5_dl_050098C8,
+};
+
+extern const Gfx yoshi_egg_seg5_dl_exit[];
+
 /**
  * Process a master list node. This has been modified, so now it runs twice, for each microcode.
  * It iterates through the first 5 layers of if the first index using F3DLX2.Rej, then it switches
@@ -493,6 +511,12 @@ void geo_process_master_list_sub(struct GraphNodeMasterList *node) {
             {
                 startDl = burn_smoke_seg4_sub_dl_begin_translucent;
                 endDl   = burn_smoke_seg4_sub_dl_end;
+            }
+
+            if (LAYER_YOSHIEGG == currLayer)
+            {
+                startDl = sYoshiEggsDls[frame];
+                endDl = yoshi_egg_seg5_dl_exit;
             }
 
             if (startDl != curStartDl)

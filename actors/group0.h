@@ -789,6 +789,18 @@ extern const GeoLayout water_bomb_shadow_geo[];
 extern const Gfx water_bubble_seg5_dl_05010D30[];
 extern const Gfx water_bubble_seg5_dl_05011000[];
 
+// yoshi_egg
+extern const GeoLayout yoshi_egg_geo[];
+extern const Gfx yoshi_egg_seg5_dl_050097B8[];
+extern const Gfx yoshi_egg_seg5_dl_05009820[];
+extern const Gfx yoshi_egg_seg5_dl_05009838[];
+extern const Gfx yoshi_egg_seg5_dl_05009850[];
+extern const Gfx yoshi_egg_seg5_dl_05009868[];
+extern const Gfx yoshi_egg_seg5_dl_05009880[];
+extern const Gfx yoshi_egg_seg5_dl_05009898[];
+extern const Gfx yoshi_egg_seg5_dl_050098B0[];
+extern const Gfx yoshi_egg_seg5_dl_050098C8[];
+
 #include "mario/geo_header.h"
 
 #include "hp/geo_header.h"

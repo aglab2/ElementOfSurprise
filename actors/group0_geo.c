@@ -55,3 +55,5 @@
 #include "water_bubble/geo.inc.c"
 
 #include "hp/geo.inc.c"
+
+#include "yoshi_egg/geo.inc.c"
