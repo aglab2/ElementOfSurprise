@@ -59,3 +59,5 @@
 #include "yoshi_egg/geo.inc.c"
 
 #include "thwomp/geo.inc.c"
+
+#include "toad/geo.inc.c"

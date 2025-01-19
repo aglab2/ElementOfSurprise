@@ -121,6 +121,7 @@ enum EnemyTypes
     ENEMY_BOBOMB,
     ENEMY_BULLY,
     ENEMY_BOWSER,
+    ENEMY_TOAD,
 };
 
 static const u8 kEnemyModels[] = {
@@ -129,6 +130,7 @@ static const u8 kEnemyModels[] = {
     [ ENEMY_BOBOMB ] = MODEL_BLACK_BOBOMB,
     [ ENEMY_BULLY ]  = MODEL_BULLY,
     [ ENEMY_BOWSER ] = MODEL_BOWSER,
+    [ ENEMY_TOAD ]   = MODEL_TOAD,
 };
 
 static const f32 kSpeeds[] = { 
@@ -137,6 +139,7 @@ static const f32 kSpeeds[] = {
     [ ENEMY_BOBOMB ] = 25.f,
     [ ENEMY_BULLY ]  = 10.f,
     [ ENEMY_BOWSER ] = 5.f,
+    [ ENEMY_TOAD ]   = 30.f,
 };
 
 static const u8 kHealths[] = {
@@ -145,6 +148,16 @@ static const u8 kHealths[] = {
     [ ENEMY_BOBOMB ] = 30,
     [ ENEMY_BULLY ]  = 80,
     [ ENEMY_BOWSER ] = 400,
+    [ ENEMY_TOAD ]   = 40,
+};
+
+static const u8 kCoinRewards[] = {
+    [ ENEMY_GOOMBA ] = 1,
+    [ ENEMY_KOOPA ]  = 2,
+    [ ENEMY_BOBOMB ] = 3,
+    [ ENEMY_BULLY ]  = 5,
+    [ ENEMY_BOWSER ] = 10,
+    [ ENEMY_TOAD ]   = 0,
 };
 
 static const char* kNamesMult[] = {
@@ -153,6 +166,7 @@ static const char* kNamesMult[] = {
     "Bobombs",
     "Bullies",
     "Bowser",
+    "The True Fiend",
 };
 
 #define TD_BUSY ((void*) 1)
@@ -428,41 +442,17 @@ static const struct WaveDesc kWaveDescs[] = {
     { (struct WaveEnemyGroup){ ENEMY_GOOMBA, 20, 0 }, },
     { (struct WaveEnemyGroup){ ENEMY_GOOMBA, 40, 0 }, },
     { (struct WaveEnemyGroup){ ENEMY_GOOMBA, 20, 2 }, (struct WaveEnemyGroup){ ENEMY_KOOPA, 10, 1 } },
-    { (struct WaveEnemyGroup){ ENEMY_GOOMBA, 20, 2 }, (struct WaveEnemyGroup){ ENEMY_KOOPA, 10, 1 } },
-    { (struct WaveEnemyGroup){ ENEMY_GOOMBA, 20, 2 }, (struct WaveEnemyGroup){ ENEMY_KOOPA, 10, 1 } },
-    { (struct WaveEnemyGroup){ ENEMY_GOOMBA, 20, 2 }, (struct WaveEnemyGroup){ ENEMY_KOOPA, 10, 1 } },
-    { (struct WaveEnemyGroup){ ENEMY_GOOMBA, 20, 2 }, (struct WaveEnemyGroup){ ENEMY_KOOPA, 10, 1 } },
-    { (struct WaveEnemyGroup){ ENEMY_GOOMBA, 20, 2 }, (struct WaveEnemyGroup){ ENEMY_KOOPA, 10, 1 } },
-    { (struct WaveEnemyGroup){ ENEMY_GOOMBA, 20, 2 }, (struct WaveEnemyGroup){ ENEMY_KOOPA, 10, 1 } },
-    { (struct WaveEnemyGroup){ ENEMY_GOOMBA, 20, 2 }, (struct WaveEnemyGroup){ ENEMY_KOOPA, 10, 1 } },
-    { (struct WaveEnemyGroup){ ENEMY_GOOMBA, 20, 2 }, (struct WaveEnemyGroup){ ENEMY_KOOPA, 10, 1 } },
-    { (struct WaveEnemyGroup){ ENEMY_GOOMBA, 20, 2 }, (struct WaveEnemyGroup){ ENEMY_KOOPA, 10, 1 } },
-    { (struct WaveEnemyGroup){ ENEMY_GOOMBA, 20, 2 }, (struct WaveEnemyGroup){ ENEMY_KOOPA, 10, 1 } },
-    { (struct WaveEnemyGroup){ ENEMY_GOOMBA, 20, 2 }, (struct WaveEnemyGroup){ ENEMY_KOOPA, 10, 1 } },
-    { (struct WaveEnemyGroup){ ENEMY_GOOMBA, 20, 2 }, (struct WaveEnemyGroup){ ENEMY_KOOPA, 10, 1 } },
-    { (struct WaveEnemyGroup){ ENEMY_GOOMBA, 20, 2 }, (struct WaveEnemyGroup){ ENEMY_KOOPA, 10, 1 } },
-    { (struct WaveEnemyGroup){ ENEMY_GOOMBA, 20, 2 }, (struct WaveEnemyGroup){ ENEMY_KOOPA, 10, 1 } },
-    { (struct WaveEnemyGroup){ ENEMY_GOOMBA, 20, 2 }, (struct WaveEnemyGroup){ ENEMY_KOOPA, 10, 1 } },
-    { (struct WaveEnemyGroup){ ENEMY_GOOMBA, 20, 2 }, (struct WaveEnemyGroup){ ENEMY_KOOPA, 10, 1 } },
-    { (struct WaveEnemyGroup){ ENEMY_GOOMBA, 20, 2 }, (struct WaveEnemyGroup){ ENEMY_KOOPA, 10, 1 } },
-    { (struct WaveEnemyGroup){ ENEMY_GOOMBA, 20, 2 }, (struct WaveEnemyGroup){ ENEMY_KOOPA, 10, 1 } },
-    { (struct WaveEnemyGroup){ ENEMY_GOOMBA, 20, 2 }, (struct WaveEnemyGroup){ ENEMY_KOOPA, 10, 1 } },
-    { (struct WaveEnemyGroup){ ENEMY_GOOMBA, 20, 2 }, (struct WaveEnemyGroup){ ENEMY_KOOPA, 10, 1 } },
-    { (struct WaveEnemyGroup){ ENEMY_GOOMBA, 20, 2 }, (struct WaveEnemyGroup){ ENEMY_KOOPA, 10, 1 } },
-    { (struct WaveEnemyGroup){ ENEMY_GOOMBA, 20, 2 }, (struct WaveEnemyGroup){ ENEMY_KOOPA, 10, 1 } },
-    { (struct WaveEnemyGroup){ ENEMY_GOOMBA, 20, 2 }, (struct WaveEnemyGroup){ ENEMY_KOOPA, 10, 1 } },
-    { (struct WaveEnemyGroup){ ENEMY_GOOMBA, 20, 2 }, (struct WaveEnemyGroup){ ENEMY_KOOPA, 10, 1 } },
-    { (struct WaveEnemyGroup){ ENEMY_GOOMBA, 20, 2 }, (struct WaveEnemyGroup){ ENEMY_KOOPA, 10, 1 } },
-    { (struct WaveEnemyGroup){ ENEMY_GOOMBA, 20, 2 }, (struct WaveEnemyGroup){ ENEMY_KOOPA, 10, 1 } },
-    { (struct WaveEnemyGroup){ ENEMY_GOOMBA, 20, 2 }, (struct WaveEnemyGroup){ ENEMY_KOOPA, 10, 1 } },
-    { (struct WaveEnemyGroup){ ENEMY_GOOMBA, 20, 2 }, (struct WaveEnemyGroup){ ENEMY_KOOPA, 10, 1 } },
-    { (struct WaveEnemyGroup){ ENEMY_GOOMBA, 20, 2 }, (struct WaveEnemyGroup){ ENEMY_KOOPA, 10, 1 } },
-    { (struct WaveEnemyGroup){ ENEMY_GOOMBA, 20, 2 }, (struct WaveEnemyGroup){ ENEMY_KOOPA, 10, 1 } },
-    { (struct WaveEnemyGroup){ ENEMY_GOOMBA, 20, 2 }, (struct WaveEnemyGroup){ ENEMY_KOOPA, 10, 1 } },
-    { (struct WaveEnemyGroup){ ENEMY_GOOMBA, 20, 2 }, (struct WaveEnemyGroup){ ENEMY_KOOPA, 10, 1 } },
-    { (struct WaveEnemyGroup){ ENEMY_GOOMBA, 20, 2 }, (struct WaveEnemyGroup){ ENEMY_KOOPA, 10, 1 } },
-    { (struct WaveEnemyGroup){ ENEMY_GOOMBA, 20, 2 }, (struct WaveEnemyGroup){ ENEMY_KOOPA, 10, 1 } },
-    { (struct WaveEnemyGroup){ ENEMY_GOOMBA, 20, 2 }, (struct WaveEnemyGroup){ ENEMY_KOOPA, 10, 1 } },
+    { (struct WaveEnemyGroup){ ENEMY_KOOPA, 50, 0 } },
+    { (struct WaveEnemyGroup){ ENEMY_KOOPA, 20, 1 }, (struct WaveEnemyGroup){ ENEMY_BULLY, 20, 1 } },
+
+    { (struct WaveEnemyGroup){ ENEMY_BOWSER, 1, 0 } },
+
+    { (struct WaveEnemyGroup){ ENEMY_BOBOMB, 30, 2 }, (struct WaveEnemyGroup){ ENEMY_KOOPA, 15, 1 } },
+    { (struct WaveEnemyGroup){ ENEMY_BULLY, 30, 1 } },
+    { (struct WaveEnemyGroup){ ENEMY_GOOMBA, 30, 1 } , (struct WaveEnemyGroup){ ENEMY_BOBOMB, 30, 1 } },
+
+    { (struct WaveEnemyGroup){ ENEMY_BOWSER, 1, 0 } },
+    { (struct WaveEnemyGroup){ ENEMY_TOAD, 1, 0 } },
 };
 
 static void handle_wave_spawning()
@@ -745,10 +735,20 @@ void bhv_td_enemy_loop()
             cur_obj_init_animation_with_accel_and_sound(KOOPA_ANIM_WALK, 1.f);
             break;
         case ENEMY_BOBOMB:
+            o->oAnimations = (void*) bobomb_seg8_anims_0802396C;
+            cur_obj_init_animation_with_accel_and_sound(BOBOMB_ANIM_WALKING, 1.f);
             break;
         case ENEMY_BULLY:
+            o->oAnimations = (void*) bully_seg5_anims_0500470C;
+            cur_obj_init_animation_with_accel_and_sound(0, 1.f);
             break;
         case ENEMY_BOWSER:
+            o->oAnimations = (void*) bowser_seg6_anims_06057690;
+            cur_obj_init_animation_with_accel_and_sound(0, 1.f);
+            break;
+        case ENEMY_TOAD:
+            o->oAnimations = (void*) toad_seg6_anims_0600FB58;
+            cur_obj_init_animation_with_accel_and_sound(TOAD_ANIM_WEST_WALKING, 1.f);
             break;
     }
 }
@@ -837,7 +837,7 @@ static void deal_enemy_damage(struct Object* enemy, int dmg)
     {
         enemy->activeFlags = 0;
         enemy->parentObj->oTDWaveLeftEnemies--;
-        gMarioStates->numCoins++;
+        gMarioStates->numCoins += kCoinRewards[enemy->oBehParams2ndByte];
     }
 }
 
