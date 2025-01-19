@@ -791,4 +791,6 @@ extern const Gfx water_bubble_seg5_dl_05011000[];
 
 #include "mario/geo_header.h"
 
+#include "hp/geo_header.h"
+
 #endif

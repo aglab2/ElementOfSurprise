@@ -6206,10 +6206,12 @@ const BehaviorScript bhvPrismTower[] = {
     END_LOOP(),
 };
 
+extern void bhv_td_enemy_init();
 extern void bhv_td_enemy_loop();
 const BehaviorScript bhvTdEnemy[] = {
     BEGIN(OBJ_LIST_GENACTOR),
     OR_INT(oFlags, OBJ_FLAG_UPDATE_GFX_POS_AND_ANGLE),
+    CALL_NATIVE(bhv_td_enemy_init),
     BEGIN_LOOP(),
         CALL_NATIVE(bhv_td_enemy_loop),
     END_LOOP(),
@@ -6233,5 +6235,17 @@ const BehaviorScript bhvTdFlameLinger[] = {
     OR_INT(oFlags, OBJ_FLAG_UPDATE_GFX_POS_AND_ANGLE),
     BEGIN_LOOP(),
         CALL_NATIVE(bhv_td_flame_linger_loop),
+    END_LOOP(),
+};
+
+extern void bhv_td_healthbar_init();
+extern void bhv_td_healthbar_loop();
+const BehaviorScript bhvTdHealthBar[] = {
+    BEGIN(OBJ_LIST_LEVEL),
+    // BILLBOARD(),
+    OR_INT(oFlags, OBJ_FLAG_UPDATE_GFX_POS_AND_ANGLE),
+    CALL_NATIVE(bhv_td_healthbar_init),
+    BEGIN_LOOP(),
+        CALL_NATIVE(bhv_td_healthbar_loop),
     END_LOOP(),
 };

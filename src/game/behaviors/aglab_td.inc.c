@@ -560,7 +560,7 @@ static void handle_wave_spawning()
                     struct Object* enemy = spawn_object(o, kEnemyModels[enemyType], bhvTdEnemy);
                     enemy->oBehParams2ndByte = enemyType;
                     enemy->oForwardVel = kSpeeds[enemy->oBehParams2ndByte];
-                    enemy->oHealth = kHealths[enemy->oBehParams2ndByte] * (0.3f + 0.2f * (o->oTDWave * o->oTDWave));
+                    enemy->oDamageOrCoinValue = enemy->oHealth = kHealths[enemy->oBehParams2ndByte] * (0.3f + 0.2f * (o->oTDWave * o->oTDWave));
                     enemy->oPosX = -1143;
                     enemy->oPosY = -200;
                     enemy->oPosZ = -1600;
@@ -718,6 +718,11 @@ static void td_enemy_advance()
             *nextPosToChange += left * (nextDirectionPositive ? 1 : -1);
         }
     }
+}
+
+void bhv_td_enemy_init()
+{
+    spawn_object(o, MODEL_HP, bhvTdHealthBar);
 }
 
 void bhv_td_enemy_loop()
@@ -1117,4 +1122,81 @@ void bhv_td_flame_linger_loop()
     }
 
     deal_damage_around(range, 1);
+}
+
+Gfx *geo_hp(s32 callContext, struct GraphNode *node, Mat4 mtx)
+{
+    // rawdog the hud rendering
+    struct GraphNodeGenerated *graphNode = (struct GraphNodeGenerated *) node;
+    Gfx *dlist = NULL;
+
+    if (callContext == GEO_CONTEXT_RENDER) {
+        Vtx *verts = alloc_display_list(6 * sizeof(Vtx));
+        dlist = alloc_display_list(12 * sizeof(Gfx));
+        Gfx* dplistp = dlist;
+
+        struct Object *objectGraphNode = (struct Object *) gCurGraphNodeObject;
+
+        const s16 left = -247 / 2;
+        const s16 right = 247 / 2;
+        int relHp = objectGraphNode->oHealth * (right - left) / objectGraphNode->oDamageOrCoinValue;
+        s16 mid = relHp + left;
+
+        verts[0].v.ob[0] = 0;
+        verts[0].v.ob[1] = 310 / 2;
+        verts[0].v.ob[2] = right / 4;
+
+        verts[1].v.ob[0] = 0;
+        verts[1].v.ob[1] = 238 / 2;
+        verts[1].v.ob[2] = right / 4;
+
+        verts[2].v.ob[0] = 0;
+        verts[2].v.ob[1] = 238 / 2;
+        verts[2].v.ob[2] = mid / 4;
+
+        verts[3].v.ob[0] = 0;
+        verts[3].v.ob[1] = 310 / 2;
+        verts[3].v.ob[2] = mid / 4;
+
+        verts[4].v.ob[0] = 0;
+        verts[4].v.ob[1] = 238 / 2;
+        verts[4].v.ob[2] = left / 4;
+
+        verts[5].v.ob[0] = 0;
+        verts[5].v.ob[1] = 310 / 2;
+        verts[5].v.ob[2] = left / 4;
+
+	    gSPVertex(dplistp++, PHYSICAL_TO_VIRTUAL(verts), 6, 0);
+
+        gDPSetPrimColor(dplistp++, 0, 0, 0, 0, 0, 255);
+	    gSP2Triangles(dplistp++, 0, 2, 1, 0, 0, 3, 2, 0);
+
+        gDPSetPrimColor(dplistp++, 0, 0, 255 - relHp, relHp, 0, 255);
+	    gSP2Triangles(dplistp++, 0+4, 2, 1+4, 0, 0+4, 2, 3, 0);
+
+        gSPEndDisplayList(dplistp);
+
+        SET_GRAPH_NODE_LAYER(graphNode->fnNode.node.flags, LAYER_HP);
+    }
+    return dlist;
+}
+
+void bhv_td_healthbar_init()
+{
+    o->oFaceAngleYaw = 0x4000;
+    o->oFaceAngleRoll = -0x4000;
+    o->oDamageOrCoinValue = o->parentObj->oDamageOrCoinValue;
+}
+
+void bhv_td_healthbar_loop()
+{
+    if (0 == o->parentObj->activeFlags)
+    {
+        o->activeFlags = 0;
+        return;
+    }
+
+    o->oHealth = o->parentObj->oHealth;
+
+    vec3_copy(&o->oPosVec, &o->parentObj->oPosVec);
 }

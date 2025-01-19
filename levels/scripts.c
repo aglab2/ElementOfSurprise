@@ -230,6 +230,8 @@ const LevelScript script_func_global_1[] = {
     
     LOAD_MODEL_FROM_GEO(MODEL_WATER_BOMB,              water_bomb_geo),
 
+    LOAD_MODEL_FROM_GEO(MODEL_HP,                      hp_geo),
+
     RETURN(),
 };
 

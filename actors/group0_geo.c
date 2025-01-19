@@ -53,3 +53,5 @@
 #include "heave_ho/geo.inc.c"
 
 #include "water_bubble/geo.inc.c"
+
+#include "hp/geo.inc.c"
