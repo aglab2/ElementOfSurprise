@@ -77,8 +77,9 @@ static const struct Color kTowerColors[] = {
 };
 
 #define TOWER_DEFAULT_RANGE 600.f
-#define TOWER_DEFAULT_DAMAGE 10
+#define TOWER_DEFAULT_DAMAGE 20
 #define TOWER_DEFAULT_BULLET_SPEED 50.f
+#define TOWER_DEFAULT_ATTACK_CD 10
 
 union TowerTypePacked
 {
@@ -443,10 +444,16 @@ void bhv_td_enemy_loop()
 #define oTdBulletTarget oObjF4
 #define oTdBulletSpeedDebuff oF8
 
-static struct Object* shoot_closest_enemy(int model, int dmg, f32 range, f32 bulletVel)
+// F4 and F8 are booked by snufit code
+#define oTdTowerCooldown oFC
+
+static struct Object* shoot_closest_enemy(int model, f32 modelScale, int dmg, f32 range, f32 bulletVel, int cd)
 {
-    if (o->parentObj)
+    if (o->oTdTowerCooldown) 
+    {
+        o->oTdTowerCooldown--;
         return NULL;
+    }
 
     f32 dist;
     struct Object* enemy = cur_obj_find_nearest_object_with_behavior(bhvTdEnemy, &dist);
@@ -465,8 +472,9 @@ static struct Object* shoot_closest_enemy(int model, int dmg, f32 range, f32 bul
     bullet->oBehParams2ndByte = dmg;
     bullet->oForwardVel = bulletVel;
     bullet->oTdBulletTarget = enemy;
-    obj_scale(bullet, 3.f);
+    obj_scale(bullet, modelScale);
     o->parentObj = bullet;
+    o->oTdTowerCooldown = cd;
 
     return bullet;
 }
@@ -523,7 +531,7 @@ void bhv_fire_tower_loop()
         s32 animIndex = FLY_GUY_ANIM_FLYING;
         struct Animation **animations = o->oAnimations;
         geo_obj_init_animation(&o->header.gfx, &animations[animIndex]);
-        shoot_closest_enemy(MODEL_RED_FLAME, TOWER_DEFAULT_DAMAGE, TOWER_DEFAULT_RANGE, TOWER_DEFAULT_BULLET_SPEED);
+        shoot_closest_enemy(MODEL_RED_FLAME, 5.f, TOWER_DEFAULT_DAMAGE, TOWER_DEFAULT_RANGE, TOWER_DEFAULT_BULLET_SPEED, TOWER_DEFAULT_ATTACK_CD);
     }
     else
     {
@@ -543,7 +551,7 @@ void bhv_water_tower_loop()
         s32 animIndex = MR_BLIZZARD_ANIM_SPAWN_SNOWBALL;
         struct Animation **animations = o->oAnimations;
         geo_obj_init_animation(&o->header.gfx, &animations[animIndex]);
-        shoot_closest_enemy(MODEL_WHITE_PARTICLE, TOWER_DEFAULT_DAMAGE, TOWER_DEFAULT_RANGE, TOWER_DEFAULT_BULLET_SPEED);
+        shoot_closest_enemy(MODEL_WHITE_PARTICLE, 2.f, TOWER_DEFAULT_DAMAGE, TOWER_DEFAULT_RANGE, TOWER_DEFAULT_BULLET_SPEED, TOWER_DEFAULT_ATTACK_CD);
     }
     else
     {
@@ -569,7 +577,7 @@ void bhv_crystal_tower_loop()
         obj_scale(o, 2.f + sins(o->oTimer * 0x456) / 10.f);
         o->oSnufitRecoil = 0;
         o->oSnufitBodyScale = 1000;
-        shoot_closest_enemy(MODEL_BOWLING_BALL, TOWER_DEFAULT_DAMAGE, TOWER_DEFAULT_RANGE * 2.5f, TOWER_DEFAULT_BULLET_SPEED);
+        shoot_closest_enemy(MODEL_BOWLING_BALL, 0.5f, TOWER_DEFAULT_DAMAGE, TOWER_DEFAULT_RANGE * 2.5f, TOWER_DEFAULT_BULLET_SPEED * 3, TOWER_DEFAULT_ATTACK_CD * 3);
     }
     else
     {
@@ -590,7 +598,7 @@ void bhv_air_tower_loop()
         s32 animIndex = MONTY_MOLE_ANIM_BEGIN_JUMP_INTO_HOLE;
         struct Animation **animations = o->oAnimations;
         geo_obj_init_animation(&o->header.gfx, &animations[animIndex]);
-        shoot_closest_enemy(MODEL_DIRT_ANIMATION, TOWER_DEFAULT_DAMAGE / 3, TOWER_DEFAULT_RANGE, TOWER_DEFAULT_BULLET_SPEED * 2.f);
+        shoot_closest_enemy(MODEL_DIRT_ANIMATION, 1.f, TOWER_DEFAULT_DAMAGE / 3, TOWER_DEFAULT_RANGE, TOWER_DEFAULT_BULLET_SPEED * 2.f, TOWER_DEFAULT_ATTACK_CD / 2);
     }
     else
     {
