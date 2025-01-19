@@ -69,7 +69,7 @@ static struct TowerBeh kComboTowerBehs[4][4] = {
         { MODEL_BOO         , bhvSteamTower    , "Vapor Tower"     , "High damage on around tower" },
         { MODEL_PENGUIN     , bhvWaterTower    , "Permafrost Tower", "Slows downs enemies around tower" },
         { MODEL_MANTA_RAY   , bhvShardTower    , "LINK Tower"      , "Hops on 3 enemies after attack" },
-        { MODEL_ENEMY_LAKITU, bhvHurricaneTower, "Love Tower"      , "Throws projectile that permanently enemies" },
+        { MODEL_ENEMY_LAKITU, bhvHurricaneTower, "Love Tower"      , "Throws projectile that follow enemies" },
     },
     [TOWER_CRYSTAL] = {
         { MODEL_YOSHI       , bhvSpireTower  , "0.5A Tower"        , "Has 0.5% chance to instantly kill target" },
@@ -79,7 +79,7 @@ static struct TowerBeh kComboTowerBehs[4][4] = {
     },
     [TOWER_AIR] = {
         { MODEL_BLARGG       , bhvInfernoTower  , "Spin Tower"   , "Spawn rotating flame around tower" },
-        { MODEL_ENEMY_LAKITU , bhvHurricaneTower, "Love Tower"   , "Throws projectile that permanently enemies" },
+        { MODEL_ENEMY_LAKITU , bhvHurricaneTower, "Love Tower"   , "Throws projectile that follow enemies" },
         { MODEL_MR_I         , bhvPrismTower    , "iTower"       , "Shoots slow linear projectiles" },
         { MODEL_UKIKI        , bhvAirTower      , "Banana Tower" , "Even faster attacks" },
     },
@@ -841,7 +841,6 @@ static void deal_enemy_damage(struct Object* enemy, int dmg)
 
 void bhv_td_bullet_loop()
 {
-    o->oAnimState++;
     if (o->oTdBulletEnemy->activeFlags == 0)
     {
         o->activeFlags = 0;
@@ -851,7 +850,7 @@ void bhv_td_bullet_loop()
     Vec3f d;
     vec3_diff(d, &o->oPosVec, &o->oTdBulletEnemy->oPosVec);
     f32 dmag = vec3_mag(d);
-    if (dmag < o->oForwardVel)
+    if (dmag < o->oForwardVel + 5.f)
     {
         o->activeFlags = 0;
 
@@ -1172,6 +1171,7 @@ void bhv_inferno_tower_init()
     geo_obj_init_animation(&o->header.gfx, &animations[animIndex]);
 
     o->parentObj = spawn_object(o, MODEL_RED_FLAME, bhvTdFlame);
+    o->parentObj->oTdBulletEnemy = NULL;
     obj_scale(o->parentObj, 5.f);
     obj_scale(o, 0.5f);
 }
@@ -1185,12 +1185,75 @@ void bhv_inferno_tower_loop()
 
 void bhv_shard_tower_loop()
 {
+}
 
+void bhv_hurricane_tower_init()
+{
+    obj_scale(o, 1.2f);
+    o->oAnimations = (void*) lakitu_enemy_seg5_anims_050144D4;
+    struct Animation **animations = o->oAnimations;
+    s32 animIndex = ENEMY_LAKITU_ANIM_SPAWN;
+    geo_obj_init_animation(&o->header.gfx, &animations[animIndex]);
+    o->parentObj = NULL;
 }
 
 void bhv_hurricane_tower_loop()
 {
+    if (!o->parentObj)
+    {
+        f32 d;
+        struct Object* enemy = cur_obj_find_nearest_object_with_behavior(bhvTdEnemy, &d);
+        if (d < TOWER_DEFAULT_RANGE * 3.f)
+        {
+            o->parentObj = spawn_object(o, MODEL_SPINY_BALL, bhvTdSpiny);
+            o->oFaceAngleYaw = o->parentObj->oFaceAngleYaw = obj_angle_to_object(o, enemy);
+            o->parentObj->oForwardVel = 60.f;
+        }
+    }
+}
 
+void bhv_td_spiny_loop()
+{
+    f32 dist;
+    struct Object* enemy = cur_obj_find_nearest_object_with_behavior(bhvTdEnemy, &dist);
+    if (!enemy)
+    {
+        o->parentObj->parentObj = NULL;
+        o->activeFlags = 0;
+        return;
+    }
+
+    if (o->oAction && dist > 200.f)
+    {
+        o->parentObj->parentObj = NULL;
+        o->activeFlags = 0;
+        return;
+    }
+
+    Vec3f d;
+    vec3_diff(d, &o->oPosVec, &enemy->oPosVec);
+    f32 dmag = vec3_mag(d);
+    if (dmag < o->oForwardVel + 5.f)
+    {
+        o->oAction = 1;
+        cur_obj_set_model(MODEL_SPINY);
+        o->oForwardVel = 10.f;
+        o->oAnimations = (void*) spiny_seg5_anims_05016EAC;
+        struct Animation **animations = o->oAnimations;
+        s32 animIndex = SPINY_ANIM_DEFAULT;
+        geo_obj_init_animation(&o->header.gfx, &animations[animIndex]);
+    }
+    else
+    {
+        d[0] /= dmag;
+        d[1] /= dmag;
+        d[2] /= dmag;
+        o->oPosX -= d[0] * o->oForwardVel;
+        o->oPosY -= d[1] * o->oForwardVel;
+        o->oPosZ -= d[2] * o->oForwardVel;
+    }
+    
+    deal_damage_around(100.f, 2);
 }
 
 void bhv_prism_tower_init()
@@ -1208,6 +1271,7 @@ void bhv_prism_tower_loop()
         if (d < TOWER_DEFAULT_RANGE * 1.5f)
         {
             o->parentObj = spawn_object(o, MODEL_PURPLE_MARBLE, bhvTdFlame);
+            o->parentObj->oTdBulletEnemy = NULL;
             o->oFaceAngleYaw = o->parentObj->oFaceAngleYaw = obj_angle_to_object(o, enemy);
             o->parentObj->oPosY -= 100.f;
             obj_scale(o->parentObj, 5.f);
@@ -1352,6 +1416,23 @@ void td_patch_unallocs()
     // delete bullets referenncing dead enemies
     {
         uintptr_t *behaviorAddr = segmented_to_virtual(bhvTdBullet);
+        struct ObjectNode *listHead = &gObjectLists[get_object_list_from_behavior(behaviorAddr)];
+        struct Object *obj = (struct Object *) listHead->next;
+
+        while (obj != (struct Object *) listHead) {
+            if (obj->behavior == behaviorAddr && obj->activeFlags != ACTIVE_FLAG_DEACTIVATED) {
+                if (!obj->oTdBulletEnemy || obj->oTdBulletEnemy->activeFlags == 0)
+                {
+                    obj->activeFlags = 0;
+                }
+            }
+
+            obj = (struct Object *) obj->header.next;
+        }
+    }
+    
+    {
+        uintptr_t *behaviorAddr = segmented_to_virtual(bhvTdFlame);
         struct ObjectNode *listHead = &gObjectLists[get_object_list_from_behavior(behaviorAddr)];
         struct Object *obj = (struct Object *) listHead->next;
 
