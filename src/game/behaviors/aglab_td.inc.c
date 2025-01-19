@@ -1237,7 +1237,7 @@ void bhv_td_spiny_loop()
     {
         o->oAction = 1;
         cur_obj_set_model(MODEL_SPINY);
-        o->oForwardVel = 10.f;
+        o->oForwardVel = 5.f;
         o->oAnimations = (void*) spiny_seg5_anims_05016EAC;
         struct Animation **animations = o->oAnimations;
         s32 animIndex = SPINY_ANIM_DEFAULT;
