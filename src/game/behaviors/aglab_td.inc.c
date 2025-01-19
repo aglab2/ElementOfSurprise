@@ -52,7 +52,7 @@ static const struct Color kTowerColors[] = {
 const struct TowerBeh kInitTower = { MODEL_CANNON_BARREL, bhvTower, "Tower", "Shoots projectiles at enemies" };
 
 static struct TowerBeh kBasicTowerBehs[] = {
-    { MODEL_FLYGUY       , bhvFireTower   , "Flame Tower"       , "Has exploding projectiles" },
+    { MODEL_FLYGUY       , bhvFireTower   , "Flame Tower"       , "Spawn fire trap on hit" },
     { MODEL_MR_BLIZZARD  , bhvWaterTower  , "Freeze Tower"      , "Slows down targeted enemy" },
     { MODEL_SNUFIT       , bhvCrystalTower, "Sharpshooter Tower", "Shoots furthest enemy" },
     { MODEL_MONTY_MOLE   , bhvAirTower    , "Dirt Tower"        , "Very fast but weak attacks" },
@@ -60,7 +60,7 @@ static struct TowerBeh kBasicTowerBehs[] = {
 
 static struct TowerBeh kComboTowerBehs[4][4] = {
     [TOWER_FIRE] = {
-        { MODEL_PIRANHA_PLANT, bhvFireTower   , "Inferno Tower", "Enemy burn damaging surrounding enemies" },
+        { MODEL_PIRANHA_PLANT, bhvFireTower   , "Inferno Tower", "Enemy catches on fire" },
         { MODEL_BOO          , bhvSteamTower  , "Vapor Tower"  , "High damage on short circle range" },
         { MODEL_YOSHI        , bhvSpireTower  , "0.5A Tower"   , "Has 0.5% chance to instantly kill target" },
         { MODEL_BLARGG       , bhvInfernoTower, "Spin Tower"   , "Spawn rotating flame around tower" },
@@ -81,7 +81,7 @@ static struct TowerBeh kComboTowerBehs[4][4] = {
         { MODEL_BLARGG       , bhvInfernoTower  , "Spin Tower"   , "Spawn rotating flame around tower" },
         { MODEL_ENEMY_LAKITU , bhvHurricaneTower, "Love Tower"   , "Throws projectile that permanently enemies" },
         { MODEL_MR_I         , bhvPrismTower    , "iTower"      , "Shoot far attacks in 8 directions, no aim" },
-        { MODEL_UKIKI        , bhvAirTower      , "Banana Tower" , "No attack cd + double projectiles" },
+        { MODEL_UKIKI        , bhvAirTower      , "Banana Tower" , "Even faster attacks" },
     },
 };
 
@@ -232,12 +232,19 @@ static void handle_tower_style_selection()
     }
 }
 
-static void prompt_to_spawn_tower(struct Object** pslot, const char* msg, union TowerTypePacked towerType)
+static void prompt_to_spawn_tower(struct Object** pslot, int upgrade, union TowerTypePacked towerType)
 {
 #define slot (*pslot)
+    print_set_envcolour(255, 255, 255, 255);
+
     int cost = towerType.totalCost;
     if (gMarioStates->numCoins < cost)
+    {
+        char line[100];
+        sprintf(line, "Need %d coins %s", cost, upgrade ? "for next upgrade" : "to place tower");
+        print_small_text_buffered(160, 205, line, PRINT_TEXT_ALIGN_CENTRE, PRINT_ALL, FONT_OUTLINE);
         return;
+    }
 
     const struct TowerBeh* towerBeh = NULL;
     struct Color color;
@@ -264,7 +271,7 @@ static void prompt_to_spawn_tower(struct Object** pslot, const char* msg, union 
     }
 
     char line[100];
-    sprintf(line, "A to %s <COL_%02X%02X%02XFF>%s<COL_FFFFFFFF> for %d coins", msg, color.r, color.g, color.b, towerBeh->name, cost);
+    sprintf(line, "A to %s <COL_%02X%02X%02XFF>%s<COL_FFFFFFFF> for %d coins", upgrade ? "upgrade" : "place", color.r, color.g, color.b, towerBeh->name, cost);
 
     print_set_envcolour(255, 255, 255, 255);
     print_small_text_buffered(160, 205, line, PRINT_TEXT_ALIGN_CENTRE, PRINT_ALL, FONT_OUTLINE);
@@ -291,8 +298,6 @@ static void prompt_to_spawn_tower(struct Object** pslot, const char* msg, union 
         union TowerTypePacked* packed = (union TowerTypePacked*) &slot->oBehParams2ndByte;
         *packed = towerType;
         packed->totalCost += prevCost;
-        // needed to be set to NULL for handling bullets spawning, probably should be reworked
-        slot->parentObj = NULL;
     }
 #undef slot
 }
@@ -362,9 +367,9 @@ static void handle_tower_spawning()
         {
             union TowerTypePacked* packed = (union TowerTypePacked*) &slot->oBehParams2ndByte;
             if (packed->level == -1)
-                prompt_to_spawn_tower(pslot, "upgrade to", (union TowerTypePacked) { .level = 0, .type0 = o->oTDSelectedTower                        , .totalCost = 20 });
+                prompt_to_spawn_tower(pslot, 1, (union TowerTypePacked) { .level = 0, .type0 = o->oTDSelectedTower                        , .totalCost = 20 });
             if (packed->level == 0)
-                prompt_to_spawn_tower(pslot, "upgrade to", (union TowerTypePacked) { .level = 1, .type0 = packed->type0, .type1 = o->oTDSelectedTower, .totalCost = 50 });
+                prompt_to_spawn_tower(pslot, 1, (union TowerTypePacked) { .level = 1, .type0 = packed->type0, .type1 = o->oTDSelectedTower, .totalCost = 50 });
         }
     }
     else
@@ -378,7 +383,7 @@ static void handle_tower_spawning()
         }
 
         if (canSpawnSimpleTower)
-            prompt_to_spawn_tower(pslot, "place", (union TowerTypePacked) { .level = -1, .totalCost = 10 });
+            prompt_to_spawn_tower(pslot, 0, (union TowerTypePacked) { .level = -1, .totalCost = 10 });
     }
 #undef slot
 }
@@ -422,6 +427,41 @@ struct WaveDesc
 static const struct WaveDesc kWaveDescs[] = {
     { (struct WaveEnemyGroup){ ENEMY_GOOMBA, 20, 0 }, },
     { (struct WaveEnemyGroup){ ENEMY_GOOMBA, 40, 0 }, },
+    { (struct WaveEnemyGroup){ ENEMY_GOOMBA, 20, 2 }, (struct WaveEnemyGroup){ ENEMY_KOOPA, 10, 1 } },
+    { (struct WaveEnemyGroup){ ENEMY_GOOMBA, 20, 2 }, (struct WaveEnemyGroup){ ENEMY_KOOPA, 10, 1 } },
+    { (struct WaveEnemyGroup){ ENEMY_GOOMBA, 20, 2 }, (struct WaveEnemyGroup){ ENEMY_KOOPA, 10, 1 } },
+    { (struct WaveEnemyGroup){ ENEMY_GOOMBA, 20, 2 }, (struct WaveEnemyGroup){ ENEMY_KOOPA, 10, 1 } },
+    { (struct WaveEnemyGroup){ ENEMY_GOOMBA, 20, 2 }, (struct WaveEnemyGroup){ ENEMY_KOOPA, 10, 1 } },
+    { (struct WaveEnemyGroup){ ENEMY_GOOMBA, 20, 2 }, (struct WaveEnemyGroup){ ENEMY_KOOPA, 10, 1 } },
+    { (struct WaveEnemyGroup){ ENEMY_GOOMBA, 20, 2 }, (struct WaveEnemyGroup){ ENEMY_KOOPA, 10, 1 } },
+    { (struct WaveEnemyGroup){ ENEMY_GOOMBA, 20, 2 }, (struct WaveEnemyGroup){ ENEMY_KOOPA, 10, 1 } },
+    { (struct WaveEnemyGroup){ ENEMY_GOOMBA, 20, 2 }, (struct WaveEnemyGroup){ ENEMY_KOOPA, 10, 1 } },
+    { (struct WaveEnemyGroup){ ENEMY_GOOMBA, 20, 2 }, (struct WaveEnemyGroup){ ENEMY_KOOPA, 10, 1 } },
+    { (struct WaveEnemyGroup){ ENEMY_GOOMBA, 20, 2 }, (struct WaveEnemyGroup){ ENEMY_KOOPA, 10, 1 } },
+    { (struct WaveEnemyGroup){ ENEMY_GOOMBA, 20, 2 }, (struct WaveEnemyGroup){ ENEMY_KOOPA, 10, 1 } },
+    { (struct WaveEnemyGroup){ ENEMY_GOOMBA, 20, 2 }, (struct WaveEnemyGroup){ ENEMY_KOOPA, 10, 1 } },
+    { (struct WaveEnemyGroup){ ENEMY_GOOMBA, 20, 2 }, (struct WaveEnemyGroup){ ENEMY_KOOPA, 10, 1 } },
+    { (struct WaveEnemyGroup){ ENEMY_GOOMBA, 20, 2 }, (struct WaveEnemyGroup){ ENEMY_KOOPA, 10, 1 } },
+    { (struct WaveEnemyGroup){ ENEMY_GOOMBA, 20, 2 }, (struct WaveEnemyGroup){ ENEMY_KOOPA, 10, 1 } },
+    { (struct WaveEnemyGroup){ ENEMY_GOOMBA, 20, 2 }, (struct WaveEnemyGroup){ ENEMY_KOOPA, 10, 1 } },
+    { (struct WaveEnemyGroup){ ENEMY_GOOMBA, 20, 2 }, (struct WaveEnemyGroup){ ENEMY_KOOPA, 10, 1 } },
+    { (struct WaveEnemyGroup){ ENEMY_GOOMBA, 20, 2 }, (struct WaveEnemyGroup){ ENEMY_KOOPA, 10, 1 } },
+    { (struct WaveEnemyGroup){ ENEMY_GOOMBA, 20, 2 }, (struct WaveEnemyGroup){ ENEMY_KOOPA, 10, 1 } },
+    { (struct WaveEnemyGroup){ ENEMY_GOOMBA, 20, 2 }, (struct WaveEnemyGroup){ ENEMY_KOOPA, 10, 1 } },
+    { (struct WaveEnemyGroup){ ENEMY_GOOMBA, 20, 2 }, (struct WaveEnemyGroup){ ENEMY_KOOPA, 10, 1 } },
+    { (struct WaveEnemyGroup){ ENEMY_GOOMBA, 20, 2 }, (struct WaveEnemyGroup){ ENEMY_KOOPA, 10, 1 } },
+    { (struct WaveEnemyGroup){ ENEMY_GOOMBA, 20, 2 }, (struct WaveEnemyGroup){ ENEMY_KOOPA, 10, 1 } },
+    { (struct WaveEnemyGroup){ ENEMY_GOOMBA, 20, 2 }, (struct WaveEnemyGroup){ ENEMY_KOOPA, 10, 1 } },
+    { (struct WaveEnemyGroup){ ENEMY_GOOMBA, 20, 2 }, (struct WaveEnemyGroup){ ENEMY_KOOPA, 10, 1 } },
+    { (struct WaveEnemyGroup){ ENEMY_GOOMBA, 20, 2 }, (struct WaveEnemyGroup){ ENEMY_KOOPA, 10, 1 } },
+    { (struct WaveEnemyGroup){ ENEMY_GOOMBA, 20, 2 }, (struct WaveEnemyGroup){ ENEMY_KOOPA, 10, 1 } },
+    { (struct WaveEnemyGroup){ ENEMY_GOOMBA, 20, 2 }, (struct WaveEnemyGroup){ ENEMY_KOOPA, 10, 1 } },
+    { (struct WaveEnemyGroup){ ENEMY_GOOMBA, 20, 2 }, (struct WaveEnemyGroup){ ENEMY_KOOPA, 10, 1 } },
+    { (struct WaveEnemyGroup){ ENEMY_GOOMBA, 20, 2 }, (struct WaveEnemyGroup){ ENEMY_KOOPA, 10, 1 } },
+    { (struct WaveEnemyGroup){ ENEMY_GOOMBA, 20, 2 }, (struct WaveEnemyGroup){ ENEMY_KOOPA, 10, 1 } },
+    { (struct WaveEnemyGroup){ ENEMY_GOOMBA, 20, 2 }, (struct WaveEnemyGroup){ ENEMY_KOOPA, 10, 1 } },
+    { (struct WaveEnemyGroup){ ENEMY_GOOMBA, 20, 2 }, (struct WaveEnemyGroup){ ENEMY_KOOPA, 10, 1 } },
+    { (struct WaveEnemyGroup){ ENEMY_GOOMBA, 20, 2 }, (struct WaveEnemyGroup){ ENEMY_KOOPA, 10, 1 } },
     { (struct WaveEnemyGroup){ ENEMY_GOOMBA, 20, 2 }, (struct WaveEnemyGroup){ ENEMY_KOOPA, 10, 1 } },
 };
 
@@ -639,6 +679,9 @@ static void td_enemy_advance()
         pointToCompare = &nextPoint->z;
         nextDirectionPositive = nextPoint->x > nextPoint2->x;
         vel = o->oForwardVel - o->oTdEnemySpeedDebuff;
+        if (vel < 0)
+            vel = 0;
+
         if (curPoint->z > nextPoint->z)
             vel = -vel;
     }
@@ -649,6 +692,9 @@ static void td_enemy_advance()
         pointToCompare = &nextPoint->x;
         nextDirectionPositive = nextPoint->z > nextPoint2->z;
         vel = o->oForwardVel - o->oTdEnemySpeedDebuff;
+        if (vel < 0)
+            vel = 0;
+
         if (curPoint->x > nextPoint->x)
             vel = -vel;
     }
@@ -684,10 +730,12 @@ void bhv_td_enemy_loop()
     switch (enemyType)
     {
         case ENEMY_GOOMBA:
-            o->oAnimations = (void*) goomba_seg8_anims_0801DA4C;            
+            o->oAnimations = (void*) goomba_seg8_anims_0801DA4C;
             cur_obj_init_animation_with_accel_and_sound(GOOMBA_ANIM_DEFAULT, 1.f);
             break;
         case ENEMY_KOOPA:
+            o->oAnimations = (void*) koopa_seg6_anims_06011364;
+            cur_obj_init_animation_with_accel_and_sound(KOOPA_ANIM_WALK, 1.f);
             break;
         case ENEMY_BOBOMB:
             break;
@@ -703,6 +751,10 @@ void bhv_td_enemy_loop()
 
 // F4 and F8 are booked by snufit code
 #define oTdTowerCooldown oFC
+
+#define BULLET_SPAWN_FLAME_LINGER 1
+#define BULLET_SPAWN_FLAME_LINGER2 2
+#define BULLET_FLIP 3
 
 static struct Object* shoot_closest_enemy(int model, f32 modelScale, int dmg, f32 range, f32 bulletVel, int cd)
 {
@@ -729,8 +781,8 @@ static struct Object* shoot_closest_enemy(int model, f32 modelScale, int dmg, f3
     bullet->oBehParams2ndByte = dmg;
     bullet->oForwardVel = bulletVel;
     bullet->oTdBulletEnemy = enemy;
+    bullet->oBehParams = 0;
     obj_scale(bullet, modelScale);
-    o->parentObj = bullet;
     o->oTdTowerCooldown = cd;
 
     return bullet;
@@ -760,7 +812,6 @@ static struct Object* shoot_furthest_enemy(int model, f32 modelScale, int dmg, f
     bullet->oForwardVel = bulletVel;
     bullet->oTdBulletEnemy = enemy;
     obj_scale(bullet, modelScale);
-    o->parentObj = bullet;
     o->oTdTowerCooldown = cd;
 
     return bullet;
@@ -772,7 +823,6 @@ void bhv_td_bullet_loop()
     if (o->oTdBulletEnemy->activeFlags == 0)
     {
         o->activeFlags = 0;
-        o->parentObj->parentObj = NULL;
         return;
     }
 
@@ -797,7 +847,25 @@ void bhv_td_bullet_loop()
         }
 
         o->activeFlags = 0;
-        o->parentObj->parentObj = NULL;
+
+        switch (o->oBehParams)
+        {
+            case BULLET_SPAWN_FLAME_LINGER:
+            case BULLET_SPAWN_FLAME_LINGER2:
+            {
+                struct Object* flame = spawn_object(o, MODEL_BLUE_FLAME, bhvTdFlameLinger);
+                flame->oPosX = o->oTdBulletEnemy->oPosX;
+                flame->oPosY = o->oTdBulletEnemy->oPosY;
+                flame->oPosZ = o->oTdBulletEnemy->oPosZ;
+                // this is required to properly manage oTDWaveLeftEnemies
+                flame->parentObj = o->oTdBulletEnemy->parentObj;
+                if (BULLET_SPAWN_FLAME_LINGER2 == o->oBehParams)
+                    flame->oTdBulletEnemy = o->oTdBulletEnemy;
+                else
+                    flame->oTdBulletEnemy = NULL;
+            }
+            break;
+        }
     }
     else
     {
@@ -846,15 +914,19 @@ void bhv_fire_tower_loop()
     union TowerTypePacked* packed = (union TowerTypePacked*) &o->oBehParams2ndByte;
     if (0 == packed->level)
     {
-        shoot_closest_enemy(MODEL_RED_FLAME, 5.f, TOWER_DEFAULT_DAMAGE, TOWER_DEFAULT_RANGE, TOWER_DEFAULT_BULLET_SPEED, TOWER_DEFAULT_ATTACK_CD);
+        struct Object* bullet = shoot_closest_enemy(MODEL_RED_FLAME, 5.f, TOWER_DEFAULT_DAMAGE, TOWER_DEFAULT_RANGE, TOWER_DEFAULT_BULLET_SPEED, TOWER_DEFAULT_ATTACK_CD);
+        if (bullet)
+            bullet->oBehParams = BULLET_SPAWN_FLAME_LINGER;
     }
     else
     {
-        shoot_closest_enemy(MODEL_RED_FLAME, 8.f, TOWER_DEFAULT_DAMAGE * 3, TOWER_DEFAULT_RANGE, TOWER_DEFAULT_BULLET_SPEED, TOWER_DEFAULT_ATTACK_CD);
+        struct Object* bullet = shoot_closest_enemy(MODEL_RED_FLAME, 8.f, TOWER_DEFAULT_DAMAGE * 3, TOWER_DEFAULT_RANGE, TOWER_DEFAULT_BULLET_SPEED, TOWER_DEFAULT_ATTACK_CD);
+        if (bullet)
+            bullet->oBehParams = BULLET_SPAWN_FLAME_LINGER2;
     }
 }
 
-void bhv_water_tower_loop()
+void bhv_water_tower_init()
 {
     union TowerTypePacked* packed = (union TowerTypePacked*) &o->oBehParams2ndByte;
     if (0 == packed->level)
@@ -863,10 +935,10 @@ void bhv_water_tower_loop()
         s32 animIndex = MR_BLIZZARD_ANIM_SPAWN_SNOWBALL;
         struct Animation **animations = o->oAnimations;
         geo_obj_init_animation(&o->header.gfx, &animations[animIndex]);
-        shoot_closest_enemy(MODEL_WHITE_PARTICLE, 2.f, TOWER_DEFAULT_DAMAGE, TOWER_DEFAULT_RANGE, TOWER_DEFAULT_BULLET_SPEED, TOWER_DEFAULT_ATTACK_CD);
     }
     else
     {
+        obj_scale(o, 1.5f);
         o->oAnimations = (void*) penguin_seg5_anims_05008B74;
         s32 animIndex = PENGUIN_ANIM_IDLE;
         struct Animation **animations = o->oAnimations;
@@ -874,14 +946,24 @@ void bhv_water_tower_loop()
     }
 }
 
-void bhv_crystal_tower_init()
+void bhv_water_tower_loop()
 {
     union TowerTypePacked* packed = (union TowerTypePacked*) &o->oBehParams2ndByte;
     if (0 == packed->level)
-        o->oPosY += 100.f;
+    {
+        struct Object* bullet = shoot_closest_enemy(MODEL_WHITE_PARTICLE, 2.f, TOWER_DEFAULT_DAMAGE, TOWER_DEFAULT_RANGE, TOWER_DEFAULT_BULLET_SPEED, TOWER_DEFAULT_ATTACK_CD);
+        if (bullet)
+            bullet->oTdBulletSpeedDebuff = 30;
+    }
+    else
+    {
+        struct Object* bullet = shoot_closest_enemy(MODEL_WHITE_PARTICLE, 2.5f, TOWER_DEFAULT_DAMAGE, TOWER_DEFAULT_RANGE, TOWER_DEFAULT_BULLET_SPEED, TOWER_DEFAULT_ATTACK_CD);
+        if (bullet)
+            bullet->oTdBulletSpeedDebuff = 90;
+    }
 }
 
-void bhv_crystal_tower_loop()
+void bhv_crystal_tower_init()
 {
     union TowerTypePacked* packed = (union TowerTypePacked*) &o->oBehParams2ndByte;
     if (0 == packed->level)
@@ -889,7 +971,7 @@ void bhv_crystal_tower_loop()
         obj_scale(o, 2.f + sins(o->oTimer * 0x456) / 10.f);
         o->oSnufitRecoil = 0;
         o->oSnufitBodyScale = 1000;
-        shoot_furthest_enemy(MODEL_BOWLING_BALL, 0.5f, TOWER_DEFAULT_DAMAGE, TOWER_DEFAULT_BULLET_SPEED * 2, TOWER_DEFAULT_ATTACK_CD);
+        o->oPosY += 100.f;
     }
     else
     {
@@ -901,7 +983,22 @@ void bhv_crystal_tower_loop()
     }
 }
 
-void bhv_air_tower_loop()
+void bhv_crystal_tower_loop()
+{
+    union TowerTypePacked* packed = (union TowerTypePacked*) &o->oBehParams2ndByte;
+    if (0 == packed->level)
+    {
+        shoot_furthest_enemy(MODEL_BOWLING_BALL, 0.5f, TOWER_DEFAULT_DAMAGE, TOWER_DEFAULT_BULLET_SPEED * 2, TOWER_DEFAULT_ATTACK_CD);
+    }
+    else
+    {
+        struct Object* bullet = shoot_furthest_enemy(MODEL_BOWLING_BALL, 0.5f, TOWER_DEFAULT_DAMAGE, TOWER_DEFAULT_BULLET_SPEED * 2, TOWER_DEFAULT_ATTACK_CD);
+        if (bullet)
+            bullet->oBehParams = BULLET_FLIP;
+    }
+}
+
+void bhv_air_tower_init()
 {
     union TowerTypePacked* packed = (union TowerTypePacked*) &o->oBehParams2ndByte;
     if (0 == packed->level)
@@ -911,14 +1008,27 @@ void bhv_air_tower_loop()
         s32 animIndex = MONTY_MOLE_ANIM_BEGIN_JUMP_INTO_HOLE;
         struct Animation **animations = o->oAnimations;
         geo_obj_init_animation(&o->header.gfx, &animations[animIndex]);
-        shoot_closest_enemy(MODEL_DIRT, 0.7f, TOWER_DEFAULT_DAMAGE, TOWER_DEFAULT_RANGE, TOWER_DEFAULT_BULLET_SPEED * 2.f, TOWER_DEFAULT_ATTACK_CD / 2);
     }
     else
     {
+        obj_scale(o, 1.5f);
         o->oAnimations = (void*) ukiki_seg5_anims_05015784;
         s32 animIndex = UKIKI_ANIM_RUN;
         struct Animation **animations = o->oAnimations;
         geo_obj_init_animation(&o->header.gfx, &animations[animIndex]);
+    }
+}
+
+void bhv_air_tower_loop()
+{
+    union TowerTypePacked* packed = (union TowerTypePacked*) &o->oBehParams2ndByte;
+    if (0 == packed->level)
+    {
+        shoot_closest_enemy(MODEL_DIRT, 0.7f, TOWER_DEFAULT_DAMAGE, TOWER_DEFAULT_RANGE, TOWER_DEFAULT_BULLET_SPEED * 2.f, TOWER_DEFAULT_ATTACK_CD / 2);
+    }
+    else
+    {
+        shoot_closest_enemy(MODEL_DIRT, 0.7f, TOWER_DEFAULT_DAMAGE, TOWER_DEFAULT_RANGE, TOWER_DEFAULT_BULLET_SPEED * 4.f, TOWER_DEFAULT_ATTACK_CD / 4);
     }
 }
 
@@ -961,9 +1071,23 @@ void bhv_prism_tower_loop()
 
 void bhv_td_flame_linger_loop()
 {
-    if (o->oTimer > 60)
+    obj_scale(o, (60 - o->oTimer) / 8.f);
+    if (o->oTimer == 59)
     {
         o->activeFlags = 0;
+    }
+    f32 range = 20.f * ((60 - o->oTimer) / 8.f);
+
+    if (o->oTdBulletEnemy)
+    {
+        if (!o->oTdBulletEnemy->activeFlags)
+            o->oTdBulletEnemy = NULL;
+    }
+    if (o->oTdBulletEnemy)
+    {
+        o->oPosX = o->oTdBulletEnemy->oPosX;
+        o->oPosY = o->oTdBulletEnemy->oPosY;
+        o->oPosZ = o->oTdBulletEnemy->oPosZ;
     }
 
     uintptr_t *behaviorAddr = segmented_to_virtual(bhvTdEnemy);
@@ -975,7 +1099,7 @@ void bhv_td_flame_linger_loop()
             && obj->activeFlags != ACTIVE_FLAG_DEACTIVATED
         ) {
             f32 objDist = dist_between_objects(o, obj);
-            if (objDist < 100.f)
+            if (objDist < range)
             {
                 obj->oHealth--;
                 if (obj->oHealth <= 0)
