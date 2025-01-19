@@ -1210,21 +1210,33 @@ UNUSED static s32 play_mode_unused(void) {
 s32 update_level(void) {
     s32 changeLevel = FALSE;
 
-    switch (sCurrPlayMode) {
-        case PLAY_MODE_NORMAL:
-            changeLevel = play_mode_normal();
-            break;
-        case PLAY_MODE_PAUSED:
-            changeLevel = play_mode_paused();
-            break;
-        case PLAY_MODE_CHANGE_AREA:
-            changeLevel = play_mode_change_area();
-            break;
-        case PLAY_MODE_CHANGE_LEVEL:
-            changeLevel = play_mode_change_level();
-            break;
-        case PLAY_MODE_FRAME_ADVANCE:
-            changeLevel = play_mode_frame_advance();
+    int repeats = 1;
+    if (gCurrLevelNum == LEVEL_CASTLE_COURTYARD && gPlayer1Controller->buttonDown & (C_BUTTONS))
+    {
+        repeats = 4;
+    }
+
+    for (int i = 0; i < repeats; i++)
+    {
+        switch (sCurrPlayMode) {
+            case PLAY_MODE_NORMAL:
+                changeLevel = play_mode_normal();
+                break;
+            case PLAY_MODE_PAUSED:
+                changeLevel = play_mode_paused();
+                break;
+            case PLAY_MODE_CHANGE_AREA:
+                changeLevel = play_mode_change_area();
+                break;
+            case PLAY_MODE_CHANGE_LEVEL:
+                changeLevel = play_mode_change_level();
+                break;
+            case PLAY_MODE_FRAME_ADVANCE:
+                changeLevel = play_mode_frame_advance();
+                break;
+        }
+
+        if (changeLevel)
             break;
     }
 

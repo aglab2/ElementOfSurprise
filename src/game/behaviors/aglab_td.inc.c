@@ -560,7 +560,7 @@ static void handle_wave_spawning()
                     struct Object* enemy = spawn_object(o, kEnemyModels[enemyType], bhvTdEnemy);
                     enemy->oBehParams2ndByte = enemyType;
                     enemy->oForwardVel = kSpeeds[enemy->oBehParams2ndByte];
-                    enemy->oHealth = kHealths[enemy->oBehParams2ndByte] * (0.3f + 0.1f * (o->oTDWave * o->oTDWave));
+                    enemy->oHealth = kHealths[enemy->oBehParams2ndByte] * (0.3f + 0.2f * (o->oTDWave * o->oTDWave));
                     enemy->oPosX = -1143;
                     enemy->oPosY = -200;
                     enemy->oPosZ = -1600;
