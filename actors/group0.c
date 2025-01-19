@@ -101,6 +101,9 @@
 
 #include "yoshi_egg/model.inc.c"
 
+#include "thwomp/model.inc.c"
+#include "thwomp/collision.inc.c"
+
 #ifdef S2DEX_TEXT_ENGINE
 #include "src/s2d_engine/s2d_config.h"
 #include FONT_C_FILE

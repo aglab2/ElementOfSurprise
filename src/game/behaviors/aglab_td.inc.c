@@ -61,12 +61,12 @@ static struct TowerBeh kBasicTowerBehs[] = {
 static struct TowerBeh kComboTowerBehs[4][4] = {
     [TOWER_FIRE] = {
         { MODEL_PIRANHA_PLANT, bhvFireTower   , "Inferno Tower", "Enemy catches on fire" },
-        { MODEL_BOO          , bhvSteamTower  , "Vapor Tower"  , "High damage on short circle range" },
+        { MODEL_THWOMP       , bhvSteamTower  , "URGH Tower"   , "High damage on short circle range" },
         { MODEL_YOSHI        , bhvSpireTower  , "0.5A Tower"   , "Has 0.5% chance to instantly kill target" },
         { MODEL_BLARGG       , bhvInfernoTower, "Spin Tower"   , "Spawn rotating flame around tower" },
     },
     [TOWER_WATER] = {
-        { MODEL_BOO         , bhvSteamTower    , "Vapor Tower"     , "High damage on around tower" },
+        { MODEL_THWOMP      , bhvSteamTower    , "URGH Tower"      , "High damage on around tower" },
         { MODEL_PENGUIN     , bhvWaterTower    , "Permafrost Tower", "Slows downs enemies around tower" },
         { MODEL_MANTA_RAY   , bhvShardTower    , "LINK Tower"      , "Hops on 3 enemies after attack" },
         { MODEL_ENEMY_LAKITU, bhvHurricaneTower, "Love Tower"      , "Throws projectile that follow enemies" },
@@ -1135,7 +1135,7 @@ void bhv_steam_tower_init()
 
 void bhv_steam_tower_loop()
 {
-    obj_scale(o, 1.1f + sins(o->oTimer * 0x456) / 10.f);
+    obj_scale(o, 0.9f + sins(o->oTimer * 0x456) / 10.f);
     deal_damage_around(400.f, 4);
 }
 

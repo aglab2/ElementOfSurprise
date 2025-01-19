@@ -57,3 +57,5 @@
 #include "hp/geo.inc.c"
 
 #include "yoshi_egg/geo.inc.c"
+
+#include "thwomp/geo.inc.c"

@@ -316,7 +316,6 @@
 #define MODEL_BULLET_BILL                 0x54        // bullet_bill_geo
 #define MODEL_YELLOW_SPHERE               0x55        // yellow_sphere_geo
 #define MODEL_HOOT                        0x56        // hoot_geo
-#define MODEL_THWOMP                      0x58        // thwomp_geo
 
 // group 2
 #define MODEL_BULLY                       0x56        // bully_geo
@@ -576,5 +575,6 @@
 #define MODEL_FWOOSH MODEL_LEVEL_GEOMETRY_12
 #define MODEL_ENEMY_LAKITU MODEL_LEVEL_GEOMETRY_13
 #define MODEL_WATER_BOMB MODEL_LEVEL_GEOMETRY_14
+#define MODEL_THWOMP MODEL_LEVEL_GEOMETRY_15
 
 #endif // MODEL_IDS_H
