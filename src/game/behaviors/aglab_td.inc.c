@@ -968,7 +968,6 @@ void bhv_crystal_tower_init()
     union TowerTypePacked* packed = (union TowerTypePacked*) &o->oBehParams2ndByte;
     if (0 == packed->level)
     {
-        obj_scale(o, 2.f + sins(o->oTimer * 0x456) / 10.f);
         o->oSnufitRecoil = 0;
         o->oSnufitBodyScale = 1000;
         o->oPosY += 100.f;
@@ -988,6 +987,7 @@ void bhv_crystal_tower_loop()
     union TowerTypePacked* packed = (union TowerTypePacked*) &o->oBehParams2ndByte;
     if (0 == packed->level)
     {
+        obj_scale(o, 2.f + sins(o->oTimer * 0x456) / 10.f);
         shoot_furthest_enemy(MODEL_BOWLING_BALL, 0.5f, TOWER_DEFAULT_DAMAGE, TOWER_DEFAULT_BULLET_SPEED * 2, TOWER_DEFAULT_ATTACK_CD);
     }
     else
@@ -1032,16 +1032,42 @@ void bhv_air_tower_loop()
     }
 }
 
+static void deal_damage_around(f32 range, int dmg)
+{
+    uintptr_t *behaviorAddr = segmented_to_virtual(bhvTdEnemy);
+    struct ObjectNode *listHead = &gObjectLists[get_object_list_from_behavior(behaviorAddr)];
+    struct Object *obj = (struct Object *) listHead->next;
+
+    while (obj != (struct Object *) listHead) {
+        if (obj->behavior == behaviorAddr
+            && obj->activeFlags != ACTIVE_FLAG_DEACTIVATED
+        ) {
+            f32 objDist = dist_between_objects(o, obj);
+            if (objDist < range)
+            {
+                obj->oHealth -= dmg;
+                if (obj->oHealth <= 0)
+                {
+                    obj->activeFlags = 0;
+                    obj->parentObj->oTDWaveLeftEnemies--;
+                    gMarioStates->numCoins++;
+                }
+            }
+        }
+
+        obj = (struct Object *) obj->header.next;
+    }
+}
+
+void bhv_steam_tower_init()
+{
+    o->oOpacity = 255;
+}
+
 void bhv_steam_tower_loop()
 {
-    #if 0
-    obj_scale(o, 2.f);
-    o->oAnimations = (void*) monty_mole_seg5_anims_05007248;
-    s32 animIndex = MONTY_MOLE_ANIM_BEGIN_JUMP_INTO_HOLE;
-    struct Animation **animations = o->oAnimations;
-    geo_obj_init_animation(&o->header.gfx, &animations[animIndex]);
-    shoot_closest_enemy(MODEL_DIRT, 1.f, TOWER_DEFAULT_DAMAGE / 3, TOWER_DEFAULT_RANGE, TOWER_DEFAULT_BULLET_SPEED * 2.f, TOWER_DEFAULT_ATTACK_CD / 2);
-    #endif
+    obj_scale(o, 1.1f + sins(o->oTimer * 0x456) / 10.f);
+    deal_damage_around(400.f, 1);
 }
 
 void bhv_spire_tower_loop()
@@ -1090,27 +1116,5 @@ void bhv_td_flame_linger_loop()
         o->oPosZ = o->oTdBulletEnemy->oPosZ;
     }
 
-    uintptr_t *behaviorAddr = segmented_to_virtual(bhvTdEnemy);
-    struct ObjectNode *listHead = &gObjectLists[get_object_list_from_behavior(behaviorAddr)];
-    struct Object *obj = (struct Object *) listHead->next;
-
-    while (obj != (struct Object *) listHead) {
-        if (obj->behavior == behaviorAddr
-            && obj->activeFlags != ACTIVE_FLAG_DEACTIVATED
-        ) {
-            f32 objDist = dist_between_objects(o, obj);
-            if (objDist < range)
-            {
-                obj->oHealth--;
-                if (obj->oHealth <= 0)
-                {
-                    obj->activeFlags = 0;
-                    obj->parentObj->oTDWaveLeftEnemies--;
-                    gMarioStates->numCoins++;
-                }
-            }
-        }
-
-        obj = (struct Object *) obj->header.next;
-    }
+    deal_damage_around(range, 1);
 }

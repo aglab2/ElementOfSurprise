@@ -6150,10 +6150,12 @@ const BehaviorScript bhvAirTower[] = {
     END_LOOP(),
 };
 
+extern void bhv_steam_tower_init();
 extern void bhv_steam_tower_loop();
 const BehaviorScript bhvSteamTower[] = {
     BEGIN(OBJ_LIST_SURFACE),
     OR_INT(oFlags, OBJ_FLAG_UPDATE_GFX_POS_AND_ANGLE),
+    CALL_NATIVE(bhv_steam_tower_init),
     BEGIN_LOOP(),
         CALL_NATIVE(bhv_steam_tower_loop),
     END_LOOP(),
