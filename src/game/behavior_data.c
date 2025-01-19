@@ -6201,10 +6201,14 @@ const BehaviorScript bhvHurricaneTower[] = {
     END_LOOP(),
 };
 
+extern void bhv_prism_tower_init();
 extern void bhv_prism_tower_loop();
 const BehaviorScript bhvPrismTower[] = {
     BEGIN(OBJ_LIST_SURFACE),
+    BILLBOARD(),
     OR_INT(oFlags, OBJ_FLAG_UPDATE_GFX_POS_AND_ANGLE),
+    CALL_NATIVE(bhv_prism_tower_init),
+    SPAWN_CHILD(/*Model*/ MODEL_MR_I_IRIS, /*Behavior*/ bhvMrIIris),
     BEGIN_LOOP(),
         CALL_NATIVE(bhv_prism_tower_loop),
     END_LOOP(),

@@ -109,6 +109,7 @@ struct RenderModeContainer renderModeTable_1Cycle[2] = {
         [LAYER_HP] = G_RM_AA_OPA_SURF,
         [LAYER_YOSHIEGG] = G_RM_AA_XLU_SURF,
         [LAYER_DIRT] = G_RM_AA_XLU_SURF,
+        [LAYER_PUPIL] = G_RM_AA_XLU_SURF,
         [LAYER_BLUE_FLAME] = G_RM_AA_XLU_SURF,
         [LAYER_TRANSPARENT_INTER] = G_RM_AA_XLU_SURF,
     } },
@@ -139,6 +140,7 @@ struct RenderModeContainer renderModeTable_1Cycle[2] = {
         [LAYER_HP] = G_RM_AA_ZB_OPA_SURF,
         [LAYER_YOSHIEGG] = G_RM_AA_ZB_XLU_SURF,
         [LAYER_DIRT] = G_RM_AA_ZB_XLU_SURF,
+        [LAYER_PUPIL] = G_RM_AA_ZB_XLU_SURF,
         [LAYER_BLUE_FLAME] = G_RM_AA_ZB_XLU_SURF,
         [LAYER_TRANSPARENT_INTER] = G_RM_AA_ZB_XLU_INTER,
     } } };
@@ -173,6 +175,7 @@ struct RenderModeContainer renderModeTable_2Cycle[2] = {
         [LAYER_HP] = G_RM_AA_OPA_SURF2,
         [LAYER_YOSHIEGG] = G_RM_AA_XLU_SURF2,
         [LAYER_DIRT] = G_RM_AA_XLU_SURF2,
+        [LAYER_PUPIL] = G_RM_AA_XLU_SURF2,
         [LAYER_BLUE_FLAME] = G_RM_AA_XLU_SURF2,
         [LAYER_TRANSPARENT_INTER] = G_RM_AA_XLU_SURF2,
     } },
@@ -204,6 +207,7 @@ struct RenderModeContainer renderModeTable_2Cycle[2] = {
         [LAYER_HP] = G_RM_AA_ZB_OPA_SURF2,
         [LAYER_YOSHIEGG] = G_RM_AA_ZB_XLU_SURF2,
         [LAYER_DIRT] = G_RM_AA_ZB_XLU_SURF2,
+        [LAYER_PUPIL] = G_RM_AA_ZB_XLU_SURF2,
         [LAYER_BLUE_FLAME] = G_RM_AA_ZB_XLU_SURF2,
         [LAYER_TRANSPARENT_INTER] = G_RM_AA_ZB_XLU_INTER2,
     } } };
@@ -368,6 +372,9 @@ static const Gfx* sYoshiEggsDls[] = {
 
 extern const Gfx yoshi_egg_seg5_dl_exit[];
 
+extern const Gfx bubble_seg4_dl_0401DDE0_enter[];
+extern const Gfx bubble_seg4_dl_0401DDE0_exit[];
+
 /**
  * Process a master list node. This has been modified, so now it runs twice, for each microcode.
  * It iterates through the first 5 layers of if the first index using F3DLX2.Rej, then it switches
@@ -493,6 +500,11 @@ void geo_process_master_list_sub(struct GraphNodeMasterList *node) {
             {
                 startDl = dirt_seg3_dl_dirt_particle_enter;
                 endDl = dirt_seg3_dl_dirt_particle_exit;
+            }
+            if (LAYER_PUPIL == currLayer)
+            {
+                startDl = bubble_seg4_dl_0401DDE0_enter;
+                endDl = bubble_seg4_dl_0401DDE0_exit;
             }
 
             if (currLayer == LAYER_CIRCLE_SHADOW || currLayer == LAYER_CIRCLE_SHADOW_TRANSPARENT)

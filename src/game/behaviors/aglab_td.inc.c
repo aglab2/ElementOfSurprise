@@ -68,19 +68,19 @@ static struct TowerBeh kComboTowerBehs[4][4] = {
     [TOWER_WATER] = {
         { MODEL_BOO         , bhvSteamTower    , "Vapor Tower"     , "High damage on around tower" },
         { MODEL_PENGUIN     , bhvWaterTower    , "Permafrost Tower", "Slows downs enemies around tower" },
-        { MODEL_MANTA_RAY   , bhvShardTower    , "Spire Tower"     , "Hops on 5 enemies after attack" },
+        { MODEL_MANTA_RAY   , bhvShardTower    , "LINK Tower"      , "Hops on 3 enemies after attack" },
         { MODEL_ENEMY_LAKITU, bhvHurricaneTower, "Love Tower"      , "Throws projectile that permanently enemies" },
     },
     [TOWER_CRYSTAL] = {
         { MODEL_YOSHI       , bhvSpireTower  , "0.5A Tower"        , "Has 0.5% chance to instantly kill target" },
-        { MODEL_MANTA_RAY   , bhvShardTower  , "Spire Tower"       , "Hops on 5 enemies after attack" },
+        { MODEL_MANTA_RAY   , bhvShardTower  , "LINK Tower"        , "Hops on 3 enemies after attack" },
         { MODEL_HEAVE_HO    , bhvCrystalTower, "Flip Tower"        , "Full field attack, flips enemies" },
-        { MODEL_MR_I        , bhvPrismTower  , "iTower"            , "Shoot far attacks in 8 directions, no aim" },
+        { MODEL_MR_I        , bhvPrismTower  , "iTower"            , "Shoots slow linear projectiles" },
     },
     [TOWER_AIR] = {
         { MODEL_BLARGG       , bhvInfernoTower  , "Spin Tower"   , "Spawn rotating flame around tower" },
         { MODEL_ENEMY_LAKITU , bhvHurricaneTower, "Love Tower"   , "Throws projectile that permanently enemies" },
-        { MODEL_MR_I         , bhvPrismTower    , "iTower"      , "Shoot far attacks in 8 directions, no aim" },
+        { MODEL_MR_I         , bhvPrismTower    , "iTower"       , "Shoots slow linear projectiles" },
         { MODEL_UKIKI        , bhvAirTower      , "Banana Tower" , "Even faster attacks" },
     },
 };
@@ -1193,9 +1193,39 @@ void bhv_hurricane_tower_loop()
 
 }
 
+void bhv_prism_tower_init()
+{
+    o->oPosY += 100.f;
+    o->parentObj = NULL;
+}
+
 void bhv_prism_tower_loop()
 {
+    if (!o->parentObj)
+    {
+        f32 d;
+        struct Object* enemy = cur_obj_find_nearest_object_with_behavior(bhvTdEnemy, &d);
+        if (d < TOWER_DEFAULT_RANGE * 1.5f)
+        {
+            o->parentObj = spawn_object(o, MODEL_PURPLE_MARBLE, bhvTdFlame);
+            o->oFaceAngleYaw = o->parentObj->oFaceAngleYaw = obj_angle_to_object(o, enemy);
+            o->parentObj->oPosY -= 100.f;
+            obj_scale(o->parentObj, 5.f);
+        }
+    }
+    else
+    {
+        o->parentObj->oPosX += sins(o->parentObj->oFaceAngleYaw) * 30.f;
+        o->parentObj->oPosZ += coss(o->parentObj->oFaceAngleYaw) * 30.f;
+        if (absf(o->parentObj->oPosX) > 1500.f || absf(o->parentObj->oPosZ) > 1500.f)
+        {
+            o->parentObj->activeFlags = 0;
+            o->parentObj = NULL;
+        }
+    }
 
+    o->oFaceAngleYaw += 0x100;
+    o->oMoveAngleYaw = o->oFaceAngleYaw;
 }
 
 void bhv_td_flame_linger_loop()
