@@ -68,12 +68,12 @@ static struct TowerBeh kComboTowerBehs[4][4] = {
     [TOWER_WATER] = {
         { MODEL_THWOMP      , bhvSteamTower    , "URGH Tower"      , "High damage on around tower" },
         { MODEL_PENGUIN     , bhvWaterTower    , "Permafrost Tower", "Slows downs enemies around tower" },
-        { MODEL_MANTA_RAY   , bhvShardTower    , "LINK Tower"      , "Hops on 3 enemies after attack" },
+        { MODEL_MANTA_RAY   , bhvShardTower    , "LINK Tower"      , "Hops on 3 far enemies after attack" },
         { MODEL_ENEMY_LAKITU, bhvHurricaneTower, "Love Tower"      , "Throws projectile that follow enemies" },
     },
     [TOWER_CRYSTAL] = {
         { MODEL_YOSHI       , bhvSpireTower  , "0.5A Tower"        , "Has 0.5% chance to instantly kill target" },
-        { MODEL_MANTA_RAY   , bhvShardTower  , "LINK Tower"        , "Hops on 3 enemies after attack" },
+        { MODEL_MANTA_RAY   , bhvShardTower  , "LINK Tower"        , "Hops on 3 far enemies after attack" },
         { MODEL_HEAVE_HO    , bhvCrystalTower, "Flip Tower"        , "Full field attack, flips enemies" },
         { MODEL_MR_I        , bhvPrismTower  , "iTower"            , "Shoots slow linear projectiles" },
     },
@@ -144,7 +144,7 @@ static const u8 kHealths[] = {
     [ ENEMY_KOOPA ]  = 10,
     [ ENEMY_BOBOMB ] = 30,
     [ ENEMY_BULLY ]  = 80,
-    [ ENEMY_BOWSER ] = 200,
+    [ ENEMY_BOWSER ] = 400,
 };
 
 static const char* kNamesMult[] = {
@@ -560,7 +560,7 @@ static void handle_wave_spawning()
                     struct Object* enemy = spawn_object(o, kEnemyModels[enemyType], bhvTdEnemy);
                     enemy->oBehParams2ndByte = enemyType;
                     enemy->oForwardVel = kSpeeds[enemy->oBehParams2ndByte];
-                    enemy->oDamageOrCoinValue = enemy->oHealth = kHealths[enemy->oBehParams2ndByte] * (0.3f + 0.5f * (o->oTDWave * o->oTDWave));
+                    enemy->oDamageOrCoinValue = enemy->oHealth = kHealths[enemy->oBehParams2ndByte] * (0.3f + 0.4f * (o->oTDWave * o->oTDWave));
                     enemy->oPosX = -1143;
                     enemy->oPosY = -200;
                     enemy->oPosZ = -1600;
@@ -763,6 +763,8 @@ void bhv_td_enemy_loop()
 #define BULLET_SPAWN_FLAME_LINGER2 2
 #define BULLET_FLIP 3
 #define BULLET_INSTA_KILL 4
+#define BULLET_JUMP1 5
+#define BULLET_JUMP2 6
 
 static struct Object* shoot_closest_enemy(int model, f32 modelScale, int dmg, f32 range, f32 bulletVel, int cd)
 {
@@ -852,6 +854,7 @@ void bhv_td_bullet_loop()
     f32 dmag = vec3_mag(d);
     if (dmag < o->oForwardVel + 5.f)
     {
+        int activeFlagsBackup = o->activeFlags;
         o->activeFlags = 0;
 
         deal_enemy_damage(o->oTdBulletEnemy, o->oBehParams2ndByte);
@@ -886,6 +889,18 @@ void bhv_td_bullet_loop()
                 }
             }
             break;
+
+            case BULLET_JUMP1:
+            case BULLET_JUMP2:
+                f32 d;
+                o->oTdBulletEnemy = cur_obj_find_nearest_object_with_behavior(bhvTdEnemy, &d);
+                if (o->oTdBulletEnemy)
+                {
+                    o->activeFlags = activeFlagsBackup;
+                    o->oBehParams++;
+                    o->oBehParams2ndByte /= 2;
+                }
+                break;
         }
     }
     else
@@ -935,13 +950,13 @@ void bhv_fire_tower_loop()
     union TowerTypePacked* packed = (union TowerTypePacked*) &o->oBehParams2ndByte;
     if (0 == packed->level)
     {
-        struct Object* bullet = shoot_closest_enemy(MODEL_RED_FLAME, 5.f, TOWER_DEFAULT_DAMAGE, TOWER_DEFAULT_RANGE, TOWER_DEFAULT_BULLET_SPEED, TOWER_DEFAULT_ATTACK_CD);
+        struct Object* bullet = shoot_closest_enemy(MODEL_RED_FLAME, 5.f, TOWER_DEFAULT_DAMAGE / 0.8f, TOWER_DEFAULT_RANGE, TOWER_DEFAULT_BULLET_SPEED, TOWER_DEFAULT_ATTACK_CD);
         if (bullet)
             bullet->oBehParams = BULLET_SPAWN_FLAME_LINGER;
     }
     else
     {
-        struct Object* bullet = shoot_closest_enemy(MODEL_RED_FLAME, 8.f, TOWER_DEFAULT_DAMAGE * 3, TOWER_DEFAULT_RANGE, TOWER_DEFAULT_BULLET_SPEED, TOWER_DEFAULT_ATTACK_CD);
+        struct Object* bullet = shoot_closest_enemy(MODEL_RED_FLAME, 8.f, TOWER_DEFAULT_DAMAGE * 2, TOWER_DEFAULT_RANGE, TOWER_DEFAULT_BULLET_SPEED, TOWER_DEFAULT_ATTACK_CD);
         if (bullet)
             bullet->oBehParams = BULLET_SPAWN_FLAME_LINGER2;
     }
@@ -972,16 +987,16 @@ void bhv_water_tower_loop()
     union TowerTypePacked* packed = (union TowerTypePacked*) &o->oBehParams2ndByte;
     if (0 == packed->level)
     {
-        struct Object* bullet = shoot_closest_enemy(MODEL_WHITE_PARTICLE, 2.f, TOWER_DEFAULT_DAMAGE, TOWER_DEFAULT_RANGE, TOWER_DEFAULT_BULLET_SPEED, TOWER_DEFAULT_ATTACK_CD);
+        struct Object* bullet = shoot_closest_enemy(MODEL_WHITE_PARTICLE, 2.f, TOWER_DEFAULT_DAMAGE * 1.2f, TOWER_DEFAULT_RANGE * 1.2f, TOWER_DEFAULT_BULLET_SPEED, TOWER_DEFAULT_ATTACK_CD / 1.2f);
         if (bullet)
-            bullet->oTdBulletSpeedDebuff = 45;
+            bullet->oTdBulletSpeedDebuff = 49;
     }
     else
     {
-        struct Object* bullet = shoot_closest_enemy(MODEL_WHITE_PARTICLE, 2.5f, TOWER_DEFAULT_DAMAGE, TOWER_DEFAULT_RANGE, TOWER_DEFAULT_BULLET_SPEED, TOWER_DEFAULT_ATTACK_CD);
+        struct Object* bullet = shoot_closest_enemy(MODEL_WHITE_PARTICLE, 2.5f, TOWER_DEFAULT_DAMAGE * 1.2f, TOWER_DEFAULT_RANGE * 1.2f, TOWER_DEFAULT_BULLET_SPEED, TOWER_DEFAULT_ATTACK_CD / 1.2f);
         if (bullet)
         {
-            bullet->oTdBulletSpeedDebuff = 45;
+            bullet->oTdBulletSpeedDebuff = 49;
             {
                 uintptr_t *behaviorAddr = segmented_to_virtual(bhvTdEnemy);
                 struct ObjectNode *listHead = &gObjectLists[get_object_list_from_behavior(behaviorAddr)];
@@ -1183,8 +1198,20 @@ void bhv_inferno_tower_loop()
     o->parentObj->oPosZ = o->oPosZ + coss(o->oTimer * 0x756) * 250.f;
 }
 
+void bhv_shard_tower_init()
+{
+    obj_scale(o, 0.7f);
+    o->oAnimations = (void*) manta_seg5_anims_05008EB4;
+    struct Animation **animations = o->oAnimations;
+    s32 animIndex = 0;
+    geo_obj_init_animation(&o->header.gfx, &animations[animIndex]);
+}
+
 void bhv_shard_tower_loop()
 {
+    struct Object* bullet = shoot_furthest_enemy(MODEL_WATER_SPLASH, 0.7f, TOWER_DEFAULT_DAMAGE * 2, TOWER_DEFAULT_BULLET_SPEED * 2, TOWER_DEFAULT_ATTACK_CD);
+    if (bullet)
+        bullet->oBehParams = BULLET_JUMP1;
 }
 
 void bhv_hurricane_tower_init()
