@@ -1257,20 +1257,20 @@ void bhv_steam_tower_init()
 
 void bhv_steam_tower_loop()
 {
-    deal_damage_around(400.f, 3 * 9);
+    deal_damage_around(400.f, 3 * 10);
     // obj_scale(o, 0.9f + sins(o->oTimer * 0x456) / 10.f);
     if (0 == o->oAction)
     {
-        o->oPosY += 5.f;
         if (o->oTimer == 60)
         {
             o->oAction = 1;
             return;
         }
+        o->oPosY += 5.f;
     }
     if (1 == o->oAction)
     {
-        if (o->oTimer > 3 + random_float() * 60.f)
+        if (o->oTimer > 1 + random_float() * 20.f)
         {
             o->oAction = 2;
             return;
@@ -1278,16 +1278,16 @@ void bhv_steam_tower_loop()
     }
     if (2 == o->oAction)
     {
-        o->oPosY -= 15.f;
         if (o->oTimer == 20)
         {
             o->oAction = 3;
             return;
         }
+        o->oPosY -= 15.f;
     }
     if (3 == o->oAction)
     {
-        if (o->oTimer > 1 + random_float() * 30.f)
+        if (o->oTimer > 1 + random_float() * 60.f)
         {
             o->oAction = 0;
             return;
