@@ -143,7 +143,7 @@ static const f32 kSpeeds[] = {
 };
 
 static const u16 kHealths[] = {
-    [ ENEMY_GOOMBA ] = 25,
+    [ ENEMY_GOOMBA ] = 20,
     [ ENEMY_KOOPA ]  = 10,
     [ ENEMY_BOBOMB ] = 30,
     [ ENEMY_BULLY ]  = 80,
@@ -575,7 +575,7 @@ static void handle_wave_spawning()
                     struct Object* enemy = spawn_object(o, kEnemyModels[enemyType], bhvTdEnemy);
                     enemy->oBehParams2ndByte = enemyType;
                     enemy->oForwardVel = kSpeeds[enemy->oBehParams2ndByte];
-                    enemy->oDamageOrCoinValue = enemy->oHealth = kHealths[enemy->oBehParams2ndByte] * (0.5f + 0.35f * (o->oTDWave * o->oTDWave));
+                    enemy->oDamageOrCoinValue = enemy->oHealth = kHealths[enemy->oBehParams2ndByte] * (0.1f + 1.2f * (o->oTDWave * o->oTDWave));
                     enemy->oPosX = -1143;
                     enemy->oPosY = -200;
                     enemy->oPosZ = -1600;
@@ -1052,13 +1052,13 @@ void bhv_fire_tower_loop()
     union TowerTypePacked* packed = (union TowerTypePacked*) &o->oBehParams2ndByte;
     if (0 == packed->level)
     {
-        struct Object* bullet = shoot_closest_enemy(MODEL_RED_FLAME, 5.f, TOWER_DEFAULT_DAMAGE / 0.8f, TOWER_DEFAULT_RANGE, TOWER_DEFAULT_BULLET_SPEED, TOWER_DEFAULT_ATTACK_CD);
+        struct Object* bullet = shoot_closest_enemy(MODEL_RED_FLAME, 5.f, TOWER_DEFAULT_DAMAGE / 0.8f * 4.f, TOWER_DEFAULT_RANGE, TOWER_DEFAULT_BULLET_SPEED, TOWER_DEFAULT_ATTACK_CD);
         if (bullet)
             bullet->oBehParams = BULLET_SPAWN_FLAME_LINGER;
     }
     else
     {
-        struct Object* bullet = shoot_closest_enemy(MODEL_RED_FLAME, 8.f, TOWER_DEFAULT_DAMAGE * 2, TOWER_DEFAULT_RANGE, TOWER_DEFAULT_BULLET_SPEED, TOWER_DEFAULT_ATTACK_CD);
+        struct Object* bullet = shoot_closest_enemy(MODEL_RED_FLAME, 8.f, TOWER_DEFAULT_DAMAGE * 0.8f * 10.f, TOWER_DEFAULT_RANGE, TOWER_DEFAULT_BULLET_SPEED, TOWER_DEFAULT_ATTACK_CD);
         if (bullet)
             bullet->oBehParams = BULLET_SPAWN_FLAME_LINGER2;
     }
@@ -1089,13 +1089,13 @@ void bhv_water_tower_loop()
     union TowerTypePacked* packed = (union TowerTypePacked*) &o->oBehParams2ndByte;
     if (0 == packed->level)
     {
-        struct Object* bullet = shoot_closest_enemy(MODEL_WHITE_PARTICLE, 2.f, TOWER_DEFAULT_DAMAGE * 1.2f, TOWER_DEFAULT_RANGE * 1.2f, TOWER_DEFAULT_BULLET_SPEED, TOWER_DEFAULT_ATTACK_CD / 1.2f);
+        struct Object* bullet = shoot_closest_enemy(MODEL_WHITE_PARTICLE, 2.f, TOWER_DEFAULT_DAMAGE / 1.f * 4.f, TOWER_DEFAULT_RANGE * 1.2f, TOWER_DEFAULT_BULLET_SPEED, TOWER_DEFAULT_ATTACK_CD / 1.2f);
         if (bullet)
             bullet->oTdBulletSpeedDebuff = 49;
     }
     else
     {
-        struct Object* bullet = shoot_closest_enemy(MODEL_WHITE_PARTICLE, 2.5f, TOWER_DEFAULT_DAMAGE * 1.2f, TOWER_DEFAULT_RANGE * 1.2f, TOWER_DEFAULT_BULLET_SPEED, TOWER_DEFAULT_ATTACK_CD / 1.2f);
+        struct Object* bullet = shoot_closest_enemy(MODEL_WHITE_PARTICLE, 2.5f, TOWER_DEFAULT_DAMAGE * 0.8f * 4.f, TOWER_DEFAULT_RANGE * 1.2f, TOWER_DEFAULT_BULLET_SPEED, TOWER_DEFAULT_ATTACK_CD / 2.4f);
         if (bullet)
         {
             bullet->oTdBulletSpeedDebuff = 49;
@@ -1109,9 +1109,9 @@ void bhv_water_tower_loop()
                         && obj->activeFlags != ACTIVE_FLAG_DEACTIVATED
                     ) {
                         f32 objDist = dist_between_objects(o, obj);
-                        if (objDist < 600.f)
+                        if (objDist < 400.f)
                         {
-                            obj->oTdEnemySpeedDebuff = obj->oForwardVel * 0.5f;
+                            obj->oTdEnemySpeedDebuff = obj->oForwardVel * 0.90f;
                         }
                     }
 
@@ -1153,7 +1153,7 @@ void bhv_crystal_tower_loop()
     if (0 == packed->level)
     {
         obj_scale(o, 2.f + sins(o->oTimer * 0x456) / 10.f);
-        shoot_furthest_enemy(MODEL_BOWLING_BALL, 0.7f, TOWER_DEFAULT_DAMAGE, TOWER_DEFAULT_BULLET_SPEED * 2, TOWER_DEFAULT_ATTACK_CD);
+        shoot_furthest_enemy(MODEL_BOWLING_BALL, 0.7f, TOWER_DEFAULT_DAMAGE * 2.5f, TOWER_DEFAULT_BULLET_SPEED * 2, TOWER_DEFAULT_ATTACK_CD);
     }
     else
     {
@@ -1189,7 +1189,7 @@ void bhv_crystal_tower_loop()
                 }
 
                 o->parentObj->oPosY += sins(o->oTimer * 0x8000 / 14) * 500.f;
-                deal_enemy_damage(o->parentObj, 5);
+                deal_enemy_damage(o->parentObj, 5 * 6);
             }
         }
     }
@@ -1221,11 +1221,11 @@ void bhv_air_tower_loop()
     union TowerTypePacked* packed = (union TowerTypePacked*) &o->oBehParams2ndByte;
     if (0 == packed->level)
     {
-        shoot_closest_enemy(MODEL_DIRT, 0.7f, TOWER_DEFAULT_DAMAGE, TOWER_DEFAULT_RANGE, TOWER_DEFAULT_BULLET_SPEED * 2.f, TOWER_DEFAULT_ATTACK_CD / 2);
+        shoot_closest_enemy(MODEL_DIRT, 0.7f, TOWER_DEFAULT_DAMAGE * 3, TOWER_DEFAULT_RANGE, TOWER_DEFAULT_BULLET_SPEED * 2.f, TOWER_DEFAULT_ATTACK_CD / 2);
     }
     else
     {
-        shoot_closest_enemy(MODEL_DIRT, 0.7f, TOWER_DEFAULT_DAMAGE, TOWER_DEFAULT_RANGE, TOWER_DEFAULT_BULLET_SPEED * 4.f, TOWER_DEFAULT_ATTACK_CD / 4);
+        shoot_closest_enemy(MODEL_DIRT, 0.7f, TOWER_DEFAULT_DAMAGE * 6, TOWER_DEFAULT_RANGE, TOWER_DEFAULT_BULLET_SPEED * 3.f, TOWER_DEFAULT_ATTACK_CD / 4);
     }
 }
 
@@ -1258,7 +1258,7 @@ void bhv_steam_tower_init()
 void bhv_steam_tower_loop()
 {
     obj_scale(o, 0.9f + sins(o->oTimer * 0x456) / 10.f);
-    deal_damage_around(400.f, 3);
+    deal_damage_around(400.f, 3 * 10);
 }
 
 void bhv_spire_tower_init()
@@ -1272,14 +1272,14 @@ void bhv_spire_tower_init()
 
 void bhv_spire_tower_loop()
 {
-    struct Object* bullet = shoot_closest_enemy(MODEL_YOSHI_EGG, 0.3f, TOWER_DEFAULT_DAMAGE / 25, TOWER_DEFAULT_RANGE * 2, TOWER_DEFAULT_BULLET_SPEED, TOWER_DEFAULT_ATTACK_CD / 2);
+    struct Object* bullet = shoot_closest_enemy(MODEL_YOSHI_EGG, 0.3f, TOWER_DEFAULT_DAMAGE / 25, TOWER_DEFAULT_RANGE * 2, TOWER_DEFAULT_BULLET_SPEED * 3, TOWER_DEFAULT_ATTACK_CD / 2);
     if (bullet)
         bullet->oBehParams = BULLET_INSTA_KILL;
 }
 
 void bhv_td_flame_loop()
 {
-    deal_damage_around(300.f, 6);
+    deal_damage_around(300.f, 6 * 16);
 }
 
 void bhv_inferno_tower_init()
@@ -1314,7 +1314,7 @@ void bhv_shard_tower_init()
 
 void bhv_shard_tower_loop()
 {
-    struct Object* bullet = shoot_furthest_enemy(MODEL_WATER_SPLASH, 0.7f, TOWER_DEFAULT_DAMAGE * 2, TOWER_DEFAULT_BULLET_SPEED * 2, TOWER_DEFAULT_ATTACK_CD);
+    struct Object* bullet = shoot_furthest_enemy(MODEL_WATER_SPLASH, 0.7f, TOWER_DEFAULT_DAMAGE * 2 * 13, TOWER_DEFAULT_BULLET_SPEED * 2, TOWER_DEFAULT_ATTACK_CD);
     if (bullet)
         bullet->oBehParams = BULLET_JUMP1;
 }
@@ -1394,7 +1394,7 @@ void bhv_td_spiny_loop()
         o->oPosZ -= d[2] * o->oForwardVel;
     }
 
-    deal_damage_around(200.f, 10);
+    deal_damage_around(200.f, 10 * 13);
 }
 
 void bhv_prism_tower_init()
@@ -1435,7 +1435,7 @@ void bhv_prism_tower_loop()
 
 void bhv_td_flame_linger_loop()
 {
-    f32 mult = BULLET_SPAWN_FLAME_LINGER2 == o->oBehParams ? 2.f : 1.f;
+    f32 mult = BULLET_SPAWN_FLAME_LINGER2 == o->oBehParams ? 3.f : 1.f;
     obj_scale(o, mult * (60 - o->oTimer) / 8.f);
     if (o->oTimer == 59)
     {
@@ -1455,7 +1455,7 @@ void bhv_td_flame_linger_loop()
         o->oPosZ = o->oTdBulletEnemy->oPosZ;
     }
 
-    deal_damage_around(range * mult, 2 * mult * mult);
+    deal_damage_around(range * mult, 4 * mult * mult);
 }
 
 Gfx *geo_hp(s32 callContext, struct GraphNode *node, Mat4 mtx)
