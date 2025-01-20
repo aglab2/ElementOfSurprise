@@ -745,14 +745,16 @@ void render_movie()
         create_dl_ortho_matrix();
 
         create_dl_translation_matrix(MENU_MTX_PUSH, 160, 120, 0);
+        gDPPipeSync(gDisplayListHead++);
+        gDPSetRenderMode(gDisplayListHead++, G_RM_OPA_SURF, G_RM_OPA_SURF2);
         gSPLoadGeometryMode(gDisplayListHead++, G_ZBUFFER | G_SHADE | G_CULL_BACK | G_LIGHTING | G_SHADING_SMOOTH);
         gDPSetCombineLERP(gDisplayListHead++, 0, 0, 0, TEXEL0, 0, 0, 0, 1, 0, 0, 0, TEXEL0, 0, 0, 0, 1);
         gSPSetOtherMode(gDisplayListHead++, G_SETOTHERMODE_H, 4, 20, G_AD_NOISE | G_CD_MAGICSQ | G_CK_NONE | G_TC_FILT | G_TF_BILERP | G_TT_NONE | G_TL_TILE | G_TD_CLAMP | G_TP_PERSP | G_CYC_1CYCLE | G_PM_1PRIMITIVE);
         gSPSetOtherMode(gDisplayListHead++, G_SETOTHERMODE_L, 0, 3, G_AC_NONE | G_ZS_PIXEL);
         gSPTexture(gDisplayListHead++, 65535, 65535, 0, 0, 1);
         gDPLoadSync(gDisplayListHead++);
-        gDPSetTextureImage(gDisplayListHead++, G_IM_FMT_RGBA, G_IM_SIZ_16b, 320, sMovieTexture);
-        gSPDisplayList(gDisplayListHead++, movie_movie_mesh);
+        gDPSetTextureImage(gDisplayListHead++, G_IM_FMT_RGBA, G_IM_SIZ_16b, 320, VIRTUAL_TO_PHYSICAL(sMovieTexture));
+        gSPDisplayList(gDisplayListHead++, movie_movie_mesh); 
 
         gSPPopMatrix(gDisplayListHead++, G_MTX_MODELVIEW);
     }
