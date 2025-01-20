@@ -1189,7 +1189,7 @@ void bhv_crystal_tower_loop()
                 }
 
                 o->parentObj->oPosY += sins(o->oTimer * 0x8000 / 14) * 500.f;
-                deal_enemy_damage(o->parentObj, 5 * 6);
+                deal_enemy_damage(o->parentObj, 5 * 5);
             }
         }
     }
