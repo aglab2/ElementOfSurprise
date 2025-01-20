@@ -1257,6 +1257,7 @@ void bhv_steam_tower_init()
 
 void bhv_steam_tower_loop()
 {
+    deal_damage_around(400.f, 3 * 9);
     // obj_scale(o, 0.9f + sins(o->oTimer * 0x456) / 10.f);
     if (0 == o->oAction)
     {
@@ -1292,9 +1293,6 @@ void bhv_steam_tower_loop()
             return;
         }
     }
-
-
-    deal_damage_around(400.f, 3 * 9);
 }
 
 void bhv_spire_tower_init()
