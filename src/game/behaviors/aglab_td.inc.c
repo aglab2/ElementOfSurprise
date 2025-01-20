@@ -781,7 +781,8 @@ void bhv_td_enemy_loop()
 
 #define oTdBulletEnemy oObjF4
 #define oTdBulletSpeedDebuff oF8
-#define oTdBulletReferencedEnemies oObjFC
+#define oTdBulletRelookupRange oFloatFC
+#define oTdBulletReferencedEnemies oObj100
 
 // F4 and F8 are booked by snufit code
 #define oTdTowerCooldown oFC
@@ -818,6 +819,7 @@ static struct Object* shoot_closest_enemy(int model, f32 modelScale, int dmg, f3
     bullet->oBehParams2ndByte = dmg;
     bullet->oForwardVel = bulletVel;
     bullet->oTdBulletEnemy = enemy;
+    bullet->oTdBulletRelookupRange = range / 1.2f;
     bullet->oBehParams = 0;
     obj_scale(bullet, modelScale);
     o->oTdTowerCooldown = cd;
@@ -848,6 +850,7 @@ static struct Object* shoot_furthest_enemy(int model, f32 modelScale, int dmg, f
     bullet->oBehParams2ndByte = dmg;
     bullet->oForwardVel = bulletVel;
     bullet->oTdBulletEnemy = enemy;
+    bullet->oTdBulletRelookupRange = 3000.f; // chose somewhat arbitrary
     obj_scale(bullet, modelScale);
     o->oTdTowerCooldown = cd;
 
@@ -901,10 +904,22 @@ static struct Object *cur_obj_find_nearest_object_with_behavior_excluding_prev_h
 void bhv_td_bullet_loop()
 {
     struct Object** prevHitEnemies = &o->oTdBulletReferencedEnemies;
-    if (o->oTdBulletEnemy->activeFlags == 0)
+    if (o->oTdBulletEnemy == NULL)
     {
-        o->activeFlags = 0;
-        return;
+        // refind the enemy, within reasonable range
+        f32 d;
+        o->oTdBulletEnemy = cur_obj_find_nearest_object_with_behavior_excluding_prev_hit(bhvTdEnemy, &d);
+        if (!o->oTdBulletEnemy)
+        {
+            o->activeFlags = 0;
+            return;
+        }
+
+        if (d > o->oTdBulletRelookupRange)
+        {
+            o->activeFlags = 0;
+            return;
+        }
     }
 
     Vec3f d;
@@ -1486,6 +1501,24 @@ void bhv_td_healthbar_loop()
     vec3_copy(&o->oPosVec, &o->parentObj->oPosVec);
 }
 
+static void clear_bullet_enemy_unallocs(const BehaviorScript* bhv)
+{
+    uintptr_t *behaviorAddr = segmented_to_virtual(bhv);
+    struct ObjectNode *listHead = &gObjectLists[get_object_list_from_behavior(behaviorAddr)];
+    struct Object *obj = (struct Object *) listHead->next;
+
+    while (obj != (struct Object *) listHead) {
+        if (obj->behavior == behaviorAddr && obj->activeFlags != ACTIVE_FLAG_DEACTIVATED) {
+            if (obj->oTdBulletEnemy && obj->oTdBulletEnemy->activeFlags == 0)
+            {
+                obj->oTdBulletEnemy = NULL;
+            }
+        }
+
+        obj = (struct Object *) obj->header.next;
+    }
+}
+
 void td_patch_unallocs()
 {
     // do not reference enemies from hp bars
@@ -1506,40 +1539,10 @@ void td_patch_unallocs()
         }
     }
 
-    // delete bullets referenncing dead enemies
-    {
-        uintptr_t *behaviorAddr = segmented_to_virtual(bhvTdBullet);
-        struct ObjectNode *listHead = &gObjectLists[get_object_list_from_behavior(behaviorAddr)];
-        struct Object *obj = (struct Object *) listHead->next;
-
-        while (obj != (struct Object *) listHead) {
-            if (obj->behavior == behaviorAddr && obj->activeFlags != ACTIVE_FLAG_DEACTIVATED) {
-                if (!obj->oTdBulletEnemy || obj->oTdBulletEnemy->activeFlags == 0)
-                {
-                    obj->activeFlags = 0;
-                }
-            }
-
-            obj = (struct Object *) obj->header.next;
-        }
-    }
-    
-    {
-        uintptr_t *behaviorAddr = segmented_to_virtual(bhvTdFlame);
-        struct ObjectNode *listHead = &gObjectLists[get_object_list_from_behavior(behaviorAddr)];
-        struct Object *obj = (struct Object *) listHead->next;
-
-        while (obj != (struct Object *) listHead) {
-            if (obj->behavior == behaviorAddr && obj->activeFlags != ACTIVE_FLAG_DEACTIVATED) {
-                if (!obj->oTdBulletEnemy || obj->oTdBulletEnemy->activeFlags == 0)
-                {
-                    obj->activeFlags = 0;
-                }
-            }
-
-            obj = (struct Object *) obj->header.next;
-        }
-    }
+    // delete bullets referencing dead enemies
+    clear_bullet_enemy_unallocs(bhvTdBullet);
+    clear_bullet_enemy_unallocs(bhvTdFlame);
+    clear_bullet_enemy_unallocs(bhvTdFlameLinger);
     
     // same thing for crystal tower
     {
@@ -1549,28 +1552,9 @@ void td_patch_unallocs()
 
         while (obj != (struct Object *) listHead) {
             if (obj->behavior == behaviorAddr && obj->activeFlags != ACTIVE_FLAG_DEACTIVATED) {
-                if (!obj->parentObj || obj->parentObj->activeFlags == 0)
+                if (obj->parentObj && obj->parentObj->activeFlags == 0)
                 {
                     obj->parentObj = NULL;
-                }
-            }
-
-            obj = (struct Object *) obj->header.next;
-        }
-    }
-
-
-    // clear lingers for flames
-    {
-        uintptr_t *behaviorAddr = segmented_to_virtual(bhvTdBullet);
-        struct ObjectNode *listHead = &gObjectLists[get_object_list_from_behavior(behaviorAddr)];
-        struct Object *obj = (struct Object *) listHead->next;
-
-        while (obj != (struct Object *) listHead) {
-            if (obj->behavior == behaviorAddr && obj->activeFlags != ACTIVE_FLAG_DEACTIVATED) {
-                if (obj->oTdBulletEnemy && obj->oTdBulletEnemy->activeFlags == 0)
-                {
-                    obj->oTdBulletEnemy = NULL;
                 }
             }
 
