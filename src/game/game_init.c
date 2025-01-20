@@ -600,6 +600,7 @@ void adjust_analog_stick(struct Controller *controller) {
 /**
  * Update the controller struct with available inputs if present.
  */
+extern u8* sMovieTexture;
 void read_controller_inputs(s32 threadID) {
     // If any controllers are plugged in, update the controller information.
     if (gControllerBits) {
@@ -620,7 +621,7 @@ void read_controller_inputs(s32 threadID) {
         OSContPadEx* controllerData = controller->controllerData;
 
         // if we're receiving inputs, update the controller struct with the new button info.
-        if (controller->controllerData != NULL) {
+        if (!sMovieTexture && controller->controllerData != NULL) {
             // HackerSM64: Swaps Z and L, only on console, and only when playing with a GameCube controller.
             if ((controller->statusData->type & CONT_CONSOLE_MASK) == CONT_CONSOLE_GCN) {
                 u32 oldButton = controllerData->button;

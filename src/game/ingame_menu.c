@@ -1589,6 +1589,7 @@ static const char pressBToHacktice[] = "PRESS B TO ENABLE HACKTICE";
 /// By default, not needed as puppycamera has an option, but should you wish to revert that, you are legally allowed.
 #if defined(WIDE) && !defined(PUPPYCAM)
 void render_widescreen_setting(void) {
+    return;
     gSPDisplayList(gDisplayListHead++, dl_ia_text_begin);
     set_text_color(255, 255, 255);
     if (!gConfig.widescreen) {
@@ -1606,6 +1607,7 @@ void render_widescreen_setting(void) {
 
 void render_hacktice_setting(int x, int y)
 {
+    return;
     bool hackticeAllowed = save_file_get_total_star_count(gCurrSaveFileNum - 1, COURSE_MIN - 1, COURSE_MAX - 1) >= STARS_TO_ENABLE_HACKTICE;
     if (hackticeAllowed)
     {
@@ -2041,8 +2043,8 @@ s32 render_pause_courses_and_castle(void) {
         case DIALOG_STATE_HORIZONTAL:
             shade_screen();
             print_hud_pause_colorful_str();
-            render_pause_castle_menu_box(160, 143);
-            render_pause_castle_main_strings(SCREEN_CENTER_X, 55);
+            // render_pause_castle_menu_box(160, 143);
+            // render_pause_castle_main_strings(SCREEN_CENTER_X, 55);
 
             if (gPlayer1Controller->buttonPressed & (A_BUTTON | START_BUTTON)) {
                 level_set_transition(0, NULL);
