@@ -1257,8 +1257,44 @@ void bhv_steam_tower_init()
 
 void bhv_steam_tower_loop()
 {
-    obj_scale(o, 0.9f + sins(o->oTimer * 0x456) / 10.f);
-    deal_damage_around(400.f, 3 * 10);
+    // obj_scale(o, 0.9f + sins(o->oTimer * 0x456) / 10.f);
+    if (0 == o->oAction)
+    {
+        o->oPosY += 5.f;
+        if (o->oTimer == 60)
+        {
+            o->oAction = 1;
+            return;
+        }
+    }
+    if (1 == o->oAction)
+    {
+        if (o->oTimer > 3 + random_float() * 60.f)
+        {
+            o->oAction = 2;
+            return;
+        }
+    }
+    if (2 == o->oAction)
+    {
+        o->oPosY -= 15.f;
+        if (o->oTimer == 20)
+        {
+            o->oAction = 3;
+            return;
+        }
+    }
+    if (3 == o->oAction)
+    {
+        if (o->oTimer > 1 + random_float() * 30.f)
+        {
+            o->oAction = 0;
+            return;
+        }
+    }
+
+
+    deal_damage_around(400.f, 3 * 9);
 }
 
 void bhv_spire_tower_init()
@@ -1314,7 +1350,7 @@ void bhv_shard_tower_init()
 
 void bhv_shard_tower_loop()
 {
-    struct Object* bullet = shoot_furthest_enemy(MODEL_WATER_SPLASH, 0.7f, TOWER_DEFAULT_DAMAGE * 2 * 13, TOWER_DEFAULT_BULLET_SPEED * 2, TOWER_DEFAULT_ATTACK_CD);
+    struct Object* bullet = shoot_furthest_enemy(MODEL_WATER_SPLASH, 0.7f, TOWER_DEFAULT_DAMAGE * 2 * 4, TOWER_DEFAULT_BULLET_SPEED * 2, TOWER_DEFAULT_ATTACK_CD);
     if (bullet)
         bullet->oBehParams = BULLET_JUMP1;
 }
@@ -1394,7 +1430,7 @@ void bhv_td_spiny_loop()
         o->oPosZ -= d[2] * o->oForwardVel;
     }
 
-    deal_damage_around(200.f, 10 * 13);
+    deal_damage_around(200.f, 10 * 1.2);
 }
 
 void bhv_prism_tower_init()
