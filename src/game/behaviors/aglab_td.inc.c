@@ -1225,7 +1225,7 @@ void bhv_air_tower_loop()
     }
     else
     {
-        shoot_closest_enemy(MODEL_DIRT, 0.7f, TOWER_DEFAULT_DAMAGE * 6, TOWER_DEFAULT_RANGE, TOWER_DEFAULT_BULLET_SPEED * 3.f, TOWER_DEFAULT_ATTACK_CD / 4);
+        shoot_closest_enemy(MODEL_DIRT, 0.7f, TOWER_DEFAULT_DAMAGE * 5, TOWER_DEFAULT_RANGE, TOWER_DEFAULT_BULLET_SPEED * 3.f, TOWER_DEFAULT_ATTACK_CD / 4);
     }
 }
 
