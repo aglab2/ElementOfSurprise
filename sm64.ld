@@ -778,6 +778,9 @@ COMPRESSED_CONTENT(img331)
 COMPRESSED_CONTENT(img332)
 COMPRESSED_CONTENT(img333)
 
+COMPRESSED_CONTENT(eletd)
+COMPRESSED_CONTENT(eletds)
+
    /* use segmented addressing for behaviors */
    BEGIN_SEG(behavior, 0x13000000)
    {

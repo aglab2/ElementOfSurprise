@@ -621,7 +621,7 @@ void read_controller_inputs(s32 threadID) {
         OSContPadEx* controllerData = controller->controllerData;
 
         // if we're receiving inputs, update the controller struct with the new button info.
-        if (!sMovieTexture && controller->controllerData != NULL) {
+        if (controller->controllerData != NULL) {
             // HackerSM64: Swaps Z and L, only on console, and only when playing with a GameCube controller.
             if ((controller->statusData->type & CONT_CONSOLE_MASK) == CONT_CONSOLE_GCN) {
                 u32 oldButton = controllerData->button;
@@ -651,6 +651,18 @@ void read_controller_inputs(s32 threadID) {
             controller->stickY         = 0.0f;
             controller->stickMag       = 0.0f;
         }
+
+        if (sMovieTexture)
+        {
+            controller->rawStickX      = 0;
+            controller->rawStickY      = 0;
+            controller->buttonPressed  &= L_TRIG;
+            controller->buttonReleased &= L_TRIG;
+            controller->buttonDown     &= L_TRIG;
+            controller->stickX         = 0.0f;
+            controller->stickY         = 0.0f;
+            controller->stickMag       = 0.0f;
+        } 
     }
 }
 

@@ -55,11 +55,13 @@ static void miniResetCommon()
     sTimerRunning = true;
     Timer_reset();
     sWarpDest.type = 2;
+    sWarpDest.areaIdx = 1;
+    sWarpDest.nodeId = 0xa;
     resetCamera();
     resetTransition();
 }
 
-static void resetCommon()
+void resetCommon()
 {
     miniResetCommon();
     sTimerRunningDeferred = true;

@@ -26,7 +26,7 @@ enum TDStates
     TD_INIT,
     TD_WAVE_SPAWNING,
     TD_WAVE_WAITING,
-    TD_WAIT_NEXT_WAVE,
+    TD_WAVE_INFINITE,
 };
 
 struct TowerBeh
@@ -172,8 +172,12 @@ static const char* kNamesMult[] = {
 #define TD_BUSY ((void*) 1)
 #define TD_CAN_SELL(o) ((int)o < 0)
 
+extern char gClearLine[200];
+
 void bhv_td_init()
 {
+    load_decompress(_cc_eletds_yay0SegmentRomStart, _cc_eletds_yay0SegmentRomEnd, sTextures[0]);
+    *gClearLine = '\0';
     o->oTDWave = 1;
 
     for (int i = 0; i < 10; i++)
@@ -505,9 +509,12 @@ static void handle_wave_spawning()
                 }
                 print_small_text_buffered(160, 22, line, PRINT_TEXT_ALIGN_CENTRE, PRINT_ALL, FONT_OUTLINE);
 
-                if (gPlayer1Controller->buttonPressed & L_TRIG)
+                if (!sMovieTexture && (gPlayer1Controller->buttonPressed & L_TRIG))
                 {
-                    o->oAction = TD_WAVE_SPAWNING;
+                    if (o->oTDWave < 11)
+                        o->oAction = TD_WAVE_SPAWNING;
+                    else
+                        o->oAction = TD_WAVE_INFINITE;
 
                     const struct WaveDesc* waveDesc = &kWaveDescs[o->oTDWave - 1];
                     int totalEnemies = 0;
@@ -619,13 +626,19 @@ static void handle_wave_spawning()
             }
             break;
 
-        case TD_WAIT_NEXT_WAVE:
+        case TD_WAVE_INFINITE:
             break;
     }
 }
 
 void bhv_td_loop()
 {
+    if (sMovieTexture)
+    {
+        sprintf(gClearLine, "You reached wave %d", o->oTDWave);
+        return;
+    }
+
     gMarioStates->pos[1] = 200.f;
     gMarioStates->action = ACT_DEBUG_FREE_MOVE;
     gCamera->cutscene = CUTSCENE_TD;
@@ -675,7 +688,14 @@ static void td_enemy_advance()
     {
         o->activeFlags = 0;
         o->parentObj->oTDWaveLeftEnemies--;
-        gMarioStates->health -= 0x100;
+        if (gMarioStates->health > 0x80)
+        {
+            gMarioStates->health -= 0x100;
+        }
+        else
+        {
+            sMovieTexture = sTextures[0];
+        }
         return;
     }
 

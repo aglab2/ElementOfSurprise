@@ -7,6 +7,9 @@ u8* sMovieTexture = NULL;
 
 #define PIC_DECLARE(name) extern u8 _cc_##name##_yay0SegmentRomStart[]; extern u8 _cc_##name##_yay0SegmentRomEnd[];
 
+PIC_DECLARE(eletd)
+PIC_DECLARE(eletds)
+
 PIC_DECLARE(img1)
 PIC_DECLARE(img2)
 PIC_DECLARE(img3)
@@ -714,11 +717,11 @@ void bhv_movie_loop()
         }
         else
         {
-            bzero(out, 320 * 240 * 2);
+            load_decompress(_cc_eletd_yay0SegmentRomStart, _cc_eletd_yay0SegmentRomEnd, out);
         }
         sMovieTexture = sTextures[presentFrame];
 
-        if (gTatums > 7000)
+        if (gTatums > 8500)
         {
             gMarioStates->usedObj = o;
             o->oBehParams2ndByte = 0xa;

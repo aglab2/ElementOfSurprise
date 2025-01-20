@@ -443,6 +443,10 @@ void play_transition_after_delay(s16 transType, s16 time, u8 red, u8 green, u8 b
     play_transition(transType, time, red, green, blue);
 }
 
+extern u8* sMovieTexture;
+char gClearLine[200];
+extern void resetCommon();
+
 extern void render_movie();
 void render_game(void) {
     PROFILER_GET_SNAPSHOT_TYPE(PROFILER_DELTA_COLLISION);
@@ -475,6 +479,19 @@ void render_game(void) {
 
         if (gMenuOptSelectIndex != 0) {
             gSaveOptSelectIndex = gMenuOptSelectIndex;
+        }
+
+        if (gCurrLevelNum == LEVEL_CASTLE_COURTYARD && sMovieTexture)
+        {
+            print_set_envcolour(255, 255, 255, 255);
+            print_small_text(160, 10, "Game Over, press L to reset", PRINT_TEXT_ALIGN_CENTER, PRINT_ALL, FONT_VANILLA);
+            print_small_text(160, 220, gClearLine, PRINT_TEXT_ALIGN_CENTER, PRINT_ALL, FONT_VANILLA);
+
+            if (gPlayer1Controller->buttonPressed & L_TRIG)
+            {
+                sMovieTexture = NULL;
+                resetCommon();
+            }
         }
 
         if (gViewportClip != NULL) {
