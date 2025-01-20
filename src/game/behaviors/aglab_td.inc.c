@@ -138,7 +138,7 @@ static const f32 kSpeeds[] = {
     [ ENEMY_KOOPA ]  = 40.f,
     [ ENEMY_BOBOMB ] = 25.f,
     [ ENEMY_BULLY ]  = 10.f,
-    [ ENEMY_BOWSER ] = 2.f,
+    [ ENEMY_BOWSER ] = 4.f,
     [ ENEMY_TOAD ]   = 30.f,
 };
 
@@ -147,7 +147,7 @@ static const u16 kHealths[] = {
     [ ENEMY_KOOPA ]  = 10,
     [ ENEMY_BOBOMB ] = 30,
     [ ENEMY_BULLY ]  = 80,
-    [ ENEMY_BOWSER ] = 400,
+    [ ENEMY_BOWSER ] = 1000,
     [ ENEMY_TOAD ]   = 40,
 };
 
@@ -455,13 +455,13 @@ static const struct WaveDesc kWaveDescs[] = {
     { (struct WaveEnemyGroup){ ENEMY_GOOMBA, 40, 0 }, },
     { (struct WaveEnemyGroup){ ENEMY_GOOMBA, 20, 2 }, (struct WaveEnemyGroup){ ENEMY_KOOPA, 10, 1 } },
     { (struct WaveEnemyGroup){ ENEMY_KOOPA, 50, 0 } },
-    { (struct WaveEnemyGroup){ ENEMY_KOOPA, 20, 1 }, (struct WaveEnemyGroup){ ENEMY_BULLY, 20, 1 } },
+    { (struct WaveEnemyGroup){ ENEMY_KOOPA, 20, 1 }, (struct WaveEnemyGroup){ ENEMY_BULLY, 10, 1 } },
 
     { (struct WaveEnemyGroup){ ENEMY_BOWSER, 1, 0 } },
 
-    { (struct WaveEnemyGroup){ ENEMY_BOBOMB, 30, 2 }, (struct WaveEnemyGroup){ ENEMY_KOOPA, 15, 1 } },
-    { (struct WaveEnemyGroup){ ENEMY_BULLY, 30, 1 } },
-    { (struct WaveEnemyGroup){ ENEMY_GOOMBA, 30, 1 } , (struct WaveEnemyGroup){ ENEMY_BOBOMB, 30, 1 } },
+    { (struct WaveEnemyGroup){ ENEMY_BOBOMB, 20, 2 }, (struct WaveEnemyGroup){ ENEMY_KOOPA, 10, 1 } },
+    { (struct WaveEnemyGroup){ ENEMY_BULLY, 15, 0 } },
+    { (struct WaveEnemyGroup){ ENEMY_GOOMBA, 20, 1 } , (struct WaveEnemyGroup){ ENEMY_BOBOMB, 20, 1 } },
 
     { (struct WaveEnemyGroup){ ENEMY_BOWSER, 1, 0 } },
     { (struct WaveEnemyGroup){ ENEMY_TOAD, 1, 0 } },
@@ -568,7 +568,7 @@ static void handle_wave_spawning()
                     struct Object* enemy = spawn_object(o, kEnemyModels[enemyType], bhvTdEnemy);
                     enemy->oBehParams2ndByte = enemyType;
                     enemy->oForwardVel = kSpeeds[enemy->oBehParams2ndByte];
-                    enemy->oDamageOrCoinValue = enemy->oHealth = kHealths[enemy->oBehParams2ndByte] * (0.5f + 0.4f * (o->oTDWave * o->oTDWave));
+                    enemy->oDamageOrCoinValue = enemy->oHealth = kHealths[enemy->oBehParams2ndByte] * (0.5f + 0.35f * (o->oTDWave * o->oTDWave));
                     enemy->oPosX = -1143;
                     enemy->oPosY = -200;
                     enemy->oPosZ = -1600;
@@ -694,11 +694,15 @@ static void td_enemy_advance()
         pointToCompare = &nextPoint->z;
         nextDirectionPositive = nextPoint->x > nextPoint2->x;
         vel = o->oForwardVel - o->oTdEnemySpeedDebuff;
+        o->oFaceAngleYaw = 0x0;
         if (vel < 0)
             vel = 0;
 
         if (curPoint->z > nextPoint->z)
+        {
             vel = -vel;
+            o->oFaceAngleYaw += 0x8000;
+        }
     }
     else
     {
@@ -707,11 +711,15 @@ static void td_enemy_advance()
         pointToCompare = &nextPoint->x;
         nextDirectionPositive = nextPoint->z > nextPoint2->z;
         vel = o->oForwardVel - o->oTdEnemySpeedDebuff;
+        o->oFaceAngleYaw = 0x4000;
         if (vel < 0)
             vel = 0;
 
         if (curPoint->x > nextPoint->x)
+        {
             vel = -vel;
+            o->oFaceAngleYaw += 0x8000;
+        }
     }
 
     *posToChange += vel;
@@ -1154,7 +1162,12 @@ void bhv_crystal_tower_loop()
         {
             if (o->parentObj)
             {
-                vec3_copy(&o->parentObj->oPosVec, &o->oPosVec);
+                if (o->oTimer < 5) {
+                    vec3_copy(&o->parentObj->oPosVec, &o->oPosVec);
+                } else {
+                    o->parentObj->oPosY = o->oPosY;
+                }
+
                 o->parentObj->oPosY += sins(o->oTimer * 0x8000 / 14) * 500.f;
                 deal_enemy_damage(o->parentObj, 5);
             }
@@ -1225,7 +1238,7 @@ void bhv_steam_tower_init()
 void bhv_steam_tower_loop()
 {
     obj_scale(o, 0.9f + sins(o->oTimer * 0x456) / 10.f);
-    deal_damage_around(400.f, 4);
+    deal_damage_around(400.f, 3);
 }
 
 void bhv_spire_tower_init()
@@ -1360,8 +1373,8 @@ void bhv_td_spiny_loop()
         o->oPosY -= d[1] * o->oForwardVel;
         o->oPosZ -= d[2] * o->oForwardVel;
     }
-    
-    deal_damage_around(100.f, 2);
+
+    deal_damage_around(200.f, 10);
 }
 
 void bhv_prism_tower_init()
@@ -1402,7 +1415,8 @@ void bhv_prism_tower_loop()
 
 void bhv_td_flame_linger_loop()
 {
-    obj_scale(o, (60 - o->oTimer) / 8.f);
+    f32 mult = BULLET_SPAWN_FLAME_LINGER2 == o->oBehParams ? 2.f : 1.f;
+    obj_scale(o, mult * (60 - o->oTimer) / 8.f);
     if (o->oTimer == 59)
     {
         o->activeFlags = 0;
@@ -1421,7 +1435,7 @@ void bhv_td_flame_linger_loop()
         o->oPosZ = o->oTdBulletEnemy->oPosZ;
     }
 
-    deal_damage_around(range, 2);
+    deal_damage_around(range * mult, 2 * mult * mult);
 }
 
 Gfx *geo_hp(s32 callContext, struct GraphNode *node, Mat4 mtx)

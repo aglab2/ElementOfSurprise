@@ -48,9 +48,23 @@ ALIGNED8 static const Texture water_splash_seg4_texture_040315C8[] = {
 #include "actors/water_splash/water_splash_7.rgba16.inc.c"
 };
 
+const Gfx water_splash_seg4_dl_render[] = {
+    gsSPVertex(water_splash_seg4_vertex_0402A588, 4, 0),
+    gsSP2Triangles( 0,  1,  2, 0x0,  0,  2,  3, 0x0),
+    gsSPEndDisplayList(),
+};
+
+const Gfx water_splash_seg4_dl_exit[] = {
+    gsDPPipeSync(),
+    gsSPTexture(0xFFFF, 0xFFFF, 0, G_TX_RENDERTILE, G_OFF),
+    gsDPSetCombineMode(G_CC_SHADE, G_CC_SHADE),
+    gsSPSetGeometryMode(G_ZBUFFER | G_LIGHTING),
+    gsSPEndDisplayList(),
+};
+
 // 0x040325C8 - 0x04032640
 const Gfx water_splash_seg4_dl_040325C8[] = {
-    gsSPClearGeometryMode(G_LIGHTING),
+    gsSPClearGeometryMode(G_ZBUFFER | G_LIGHTING),
     gsDPSetCombineMode(G_CC_DECALRGBA, G_CC_DECALRGBA),
     gsSPTexture(0xFFFF, 0xFFFF, 0, G_TX_RENDERTILE, G_ON),
     gsDPSetTile(G_IM_FMT_RGBA, G_IM_SIZ_16b, 0, 0, G_TX_LOADTILE, 0, G_TX_CLAMP, 6, G_TX_NOLOD, G_TX_CLAMP, 5, G_TX_NOLOD),
@@ -58,12 +72,6 @@ const Gfx water_splash_seg4_dl_040325C8[] = {
     gsDPLoadBlock(G_TX_LOADTILE, 0, 0, 32 * 64 - 1, CALC_DXT(32, G_IM_SIZ_16b_BYTES)),
     gsDPSetTile(G_IM_FMT_RGBA, G_IM_SIZ_16b, 8, 0, G_TX_RENDERTILE, 0, G_TX_CLAMP, 6, G_TX_NOLOD, G_TX_CLAMP, 5, G_TX_NOLOD),
     gsDPSetTileSize(0, 0, 0, (32 - 1) << G_TEXTURE_IMAGE_FRAC, (64 - 1) << G_TEXTURE_IMAGE_FRAC),
-    gsSPVertex(water_splash_seg4_vertex_0402A588, 4, 0),
-    gsSP2Triangles( 0,  1,  2, 0x0,  0,  2,  3, 0x0),
-    gsSPTexture(0xFFFF, 0xFFFF, 0, G_TX_RENDERTILE, G_OFF),
-    gsDPPipeSync(),
-    gsDPSetCombineMode(G_CC_SHADE, G_CC_SHADE),
-    gsSPSetGeometryMode(G_LIGHTING),
     gsSPEndDisplayList(),
 };
 

@@ -110,6 +110,7 @@ struct RenderModeContainer renderModeTable_1Cycle[2] = {
         [LAYER_YOSHIEGG] = G_RM_AA_XLU_SURF,
         [LAYER_DIRT] = G_RM_AA_XLU_SURF,
         [LAYER_PUPIL] = G_RM_AA_XLU_SURF,
+        [LAYER_SPLASH] = G_RM_AA_XLU_SURF,
         [LAYER_BLUE_FLAME] = G_RM_AA_XLU_SURF,
         [LAYER_TRANSPARENT_INTER] = G_RM_AA_XLU_SURF,
     } },
@@ -141,6 +142,7 @@ struct RenderModeContainer renderModeTable_1Cycle[2] = {
         [LAYER_YOSHIEGG] = G_RM_AA_ZB_XLU_SURF,
         [LAYER_DIRT] = G_RM_AA_ZB_XLU_SURF,
         [LAYER_PUPIL] = G_RM_AA_ZB_XLU_SURF,
+        [LAYER_SPLASH] = G_RM_AA_ZB_XLU_SURF,
         [LAYER_BLUE_FLAME] = G_RM_AA_ZB_XLU_SURF,
         [LAYER_TRANSPARENT_INTER] = G_RM_AA_ZB_XLU_INTER,
     } } };
@@ -176,6 +178,7 @@ struct RenderModeContainer renderModeTable_2Cycle[2] = {
         [LAYER_YOSHIEGG] = G_RM_AA_XLU_SURF2,
         [LAYER_DIRT] = G_RM_AA_XLU_SURF2,
         [LAYER_PUPIL] = G_RM_AA_XLU_SURF2,
+        [LAYER_SPLASH] = G_RM_AA_XLU_SURF2,
         [LAYER_BLUE_FLAME] = G_RM_AA_XLU_SURF2,
         [LAYER_TRANSPARENT_INTER] = G_RM_AA_XLU_SURF2,
     } },
@@ -208,6 +211,7 @@ struct RenderModeContainer renderModeTable_2Cycle[2] = {
         [LAYER_YOSHIEGG] = G_RM_AA_ZB_XLU_SURF2,
         [LAYER_DIRT] = G_RM_AA_ZB_XLU_SURF2,
         [LAYER_PUPIL] = G_RM_AA_ZB_XLU_SURF2,
+        [LAYER_SPLASH] = G_RM_AA_ZB_XLU_SURF2,
         [LAYER_BLUE_FLAME] = G_RM_AA_ZB_XLU_SURF2,
         [LAYER_TRANSPARENT_INTER] = G_RM_AA_ZB_XLU_INTER2,
     } } };
@@ -375,6 +379,19 @@ extern const Gfx yoshi_egg_seg5_dl_exit[];
 extern const Gfx bubble_seg4_dl_0401DDE0_enter[];
 extern const Gfx bubble_seg4_dl_0401DDE0_exit[];
 
+static const Gfx* sWaterSplashDls[] = {
+    water_splash_seg4_dl_04032640,
+    water_splash_seg4_dl_04032658,
+    water_splash_seg4_dl_04032670,
+    water_splash_seg4_dl_04032688,
+    water_splash_seg4_dl_040326A0,
+    water_splash_seg4_dl_040326B8,
+    water_splash_seg4_dl_040326D0,
+    water_splash_seg4_dl_040326E8,
+};
+
+extern const Gfx water_splash_seg4_dl_exit[];
+
 /**
  * Process a master list node. This has been modified, so now it runs twice, for each microcode.
  * It iterates through the first 5 layers of if the first index using F3DLX2.Rej, then it switches
@@ -529,6 +546,11 @@ void geo_process_master_list_sub(struct GraphNodeMasterList *node) {
             {
                 startDl = sYoshiEggsDls[frame];
                 endDl = yoshi_egg_seg5_dl_exit;
+            }
+            if (LAYER_SPLASH == currLayer)
+            {
+                startDl = sWaterSplashDls[frame];
+                endDl = water_splash_seg4_dl_exit;
             }
 
             if (startDl != curStartDl)

@@ -500,40 +500,10 @@ s32 act_debug_free_move(struct MarioState *m) {
     struct Surface *floor, *ceil;
     Vec3f pos;
 
-    if (gPlayer1Controller->buttonPressed & L_TRIG) {
-        m->health = 0x880;
-    }
-
-    f32 speed = (gPlayer1Controller->buttonDown & B_BUTTON) ? 4.0f : 1.0f;
-    if (gPlayer1Controller->buttonDown & Z_TRIG) speed = 0.01f;
-    if (m->area->camera->mode != CAMERA_MODE_8_DIRECTIONS) set_camera_mode(m->area->camera, CAMERA_MODE_8_DIRECTIONS, 1);
+    f32 speed = 1.f;
 
     set_mario_animation(m, MARIO_ANIM_A_POSE);
     vec3f_copy(pos, m->pos);
-
-    if (gPlayer1Controller->buttonDown & U_JPAD) {
-        pos[1] += 16.0f * speed;
-    }
-    if (gPlayer1Controller->buttonDown & D_JPAD) {
-        pos[1] -= 16.0f * speed;
-    }
-    if (gPlayer1Controller->buttonPressed & A_BUTTON) {
-        vec3_zero(m->vel);
-        m->forwardVel = 0.0f;
-
-        set_camera_mode(m->area->camera, m->area->camera->defMode, 1);
-        m->input &= ~INPUT_A_PRESSED;
-        if (m->pos[1] <= (m->waterLevel - 100)) {
-            return set_mario_action(m, ACT_WATER_IDLE, 0);
-        } else if (m->pos[1] <= m->floorHeight) {
-            return set_mario_action(m, ACT_IDLE, 0);
-        } else {
-            // slight upwards boost to get you some hover time
-            m->vel[1] = 20.0f;
-            gPlayer1Controller->buttonDown &= ~U_JPAD;
-            return set_mario_action(m, ACT_FREEFALL, 0);
-        }
-    }
 
     if (m->intendedMag > 0) {
         speed *= m->intendedMag * 2.0f;
