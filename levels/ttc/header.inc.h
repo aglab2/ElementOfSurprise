@@ -1,13 +1,7 @@
-// geo
-extern const GeoLayout ttc_geo_0003B8[];
-
-// leveldata
-extern const Gfx ttc_seg7_dl_0700AD38[];
-extern const Gfx ttc_seg7_dl_0700B1D8[];
-extern const Gfx ttc_seg7_dl_0700E878[];
-extern const Collision ttc_seg7_collision_level[];
-extern const MacroObject ttc_seg7_macro_objs[];
-extern const Texture ttc_yellow_triangle[];
-extern const Gfx ttc_dl_surface_treadmill_begin[];
-extern const Gfx ttc_dl_surface_treadmill_end[];
-extern const Gfx ttc_dl_surface_treadmill[];
+extern const GeoLayout ttc_area_1_geo[];
+extern const GeoLayout ttc_area_1[];
+extern const Collision ttc_area_1_collision[];
+extern const MacroObject ttc_area_1_macro_objs[];
+extern Vtx ttc_dl_Cube_mesh_layer_1_vtx_cull[8];
+extern Vtx ttc_dl_Cube_mesh_layer_1_vtx_0[24];
+extern Gfx ttc_dl_Cube_mesh_layer_1[];

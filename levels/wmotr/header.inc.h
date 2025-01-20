@@ -1,9 +1,7 @@
-// geo
-extern const GeoLayout wmotr_geo_0001F0[];
-
-// leveldata
-extern const Gfx wmotr_seg7_dl_0700C1F8[];
-extern const Gfx wmotr_seg7_dl_0700EFD8[];
-extern const Gfx wmotr_seg7_dl_07010608[];
-extern const Collision wmotr_seg7_collision[];
-extern const MacroObject wmotr_seg7_macro_objs[];
+extern const GeoLayout wmotr_area_1_geo[];
+extern const GeoLayout wmotr_area_1[];
+extern const Collision wmotr_area_1_collision[];
+extern const MacroObject wmotr_area_1_macro_objs[];
+extern Vtx wmotr_dl_Cube_mesh_layer_1_vtx_cull[8];
+extern Vtx wmotr_dl_Cube_mesh_layer_1_vtx_0[24];
+extern Gfx wmotr_dl_Cube_mesh_layer_1[];

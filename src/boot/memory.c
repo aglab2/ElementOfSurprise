@@ -539,7 +539,7 @@ void *load_to_fixed_pool_addr(u8 *destAddr, u8 *srcStart, u8 *srcEnd) {
 void load_decompress(const u8* srcStart, const u8* srcEnd, u8* dst)
 {
     u32 compSize = ALIGN16(srcEnd - srcStart);
-    u8 *compressed = 0x80400000; // main_pool_alloc_aligned_freeable(compSize, 0);
+    u8 *compressed = 0x80730000; // main_pool_alloc_aligned_freeable(compSize, 0);
     u32 *size = (u32 *) (compressed + 4);
     dma_read(compressed, srcStart, srcStart + DMA_ASYNC_HEADER_SIZE);
     struct DMAAsyncCtx asyncCtx;
