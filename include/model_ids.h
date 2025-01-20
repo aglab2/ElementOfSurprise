@@ -318,7 +318,6 @@
 #define MODEL_HOOT                        0x56        // hoot_geo
 
 // group 2
-#define MODEL_BULLY                       0x56        // bully_geo
 #define MODEL_BULLY_BOSS                  0x57        // bully_boss_geo
 
 // group 3
@@ -576,5 +575,6 @@
 #define MODEL_ENEMY_LAKITU MODEL_LEVEL_GEOMETRY_13
 #define MODEL_WATER_BOMB MODEL_LEVEL_GEOMETRY_14
 #define MODEL_THWOMP MODEL_LEVEL_GEOMETRY_15
+#define MODEL_BULLY MODEL_LEVEL_GEOMETRY_16
 
 #endif // MODEL_IDS_H

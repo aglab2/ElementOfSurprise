@@ -138,11 +138,11 @@ static const f32 kSpeeds[] = {
     [ ENEMY_KOOPA ]  = 40.f,
     [ ENEMY_BOBOMB ] = 25.f,
     [ ENEMY_BULLY ]  = 10.f,
-    [ ENEMY_BOWSER ] = 5.f,
+    [ ENEMY_BOWSER ] = 2.f,
     [ ENEMY_TOAD ]   = 30.f,
 };
 
-static const u8 kHealths[] = {
+static const u16 kHealths[] = {
     [ ENEMY_GOOMBA ] = 25,
     [ ENEMY_KOOPA ]  = 10,
     [ ENEMY_BOBOMB ] = 30,
@@ -154,9 +154,9 @@ static const u8 kHealths[] = {
 static const u8 kCoinRewards[] = {
     [ ENEMY_GOOMBA ] = 1,
     [ ENEMY_KOOPA ]  = 2,
-    [ ENEMY_BOBOMB ] = 3,
+    [ ENEMY_BOBOMB ] = 2,
     [ ENEMY_BULLY ]  = 5,
-    [ ENEMY_BOWSER ] = 10,
+    [ ENEMY_BOWSER ] = 50,
     [ ENEMY_TOAD ]   = 0,
 };
 
@@ -316,10 +316,22 @@ static void prompt_to_spawn_tower(struct Object** pslot, int upgrade, union Towe
 #undef slot
 }
 
+static int in_tutorial()
+{
+    if (1 == o->oTDWave)
+        return 1;
+    if (2 == o->oTDWave)
+        return 0 == o->oAction;
+
+    return 0;
+}
+
 static int prompt_to_despawn_tower(struct Object** pslot)
 {
-    if (o->oTDWave < 3)
+    if (in_tutorial())
         return 0;
+
+    print_set_envcolour(255, 255, 255, 255);
 
 #define slot (*pslot)
     union TowerTypePacked* packed = (union TowerTypePacked*) &slot->oBehParams2ndByte;
@@ -389,7 +401,7 @@ static void handle_tower_spawning()
     else
     {
         int canSpawnSimpleTower = 1;
-        if (o->oTDWave < 3)
+        if (in_tutorial())
         {
             canSpawnSimpleTower = 0;
             if (1 == o->oTDWave && 0 == o->oAction)
@@ -457,6 +469,7 @@ static const struct WaveDesc kWaveDescs[] = {
 
 static void handle_wave_spawning()
 {
+    print_set_envcolour(255, 255, 255, 255);
     char line[100];
     switch (o->oAction)
     {
@@ -535,6 +548,11 @@ static void handle_wave_spawning()
         case TD_WAVE_SPAWNING:
             sprintf(line, "Wave %d, Left %d/%d", o->oTDWave, o->oTDWaveLeftEnemies, o->oTDWaveTotalEnemyCount);
             print_small_text_buffered(160, 10, line, PRINT_TEXT_ALIGN_CENTRE, PRINT_ALL, FONT_OUTLINE);
+            if (1 == o->oTDWave)
+            {
+                print_set_envcolour(255, 200, 200, 255);
+                print_small_text_buffered(160, 22, "Use C Buttons to speed up", PRINT_TEXT_ALIGN_CENTRE, PRINT_ALL, FONT_OUTLINE);
+            }
 
             if (0 == (o->oTimer % 8))
             {
@@ -550,7 +568,7 @@ static void handle_wave_spawning()
                     struct Object* enemy = spawn_object(o, kEnemyModels[enemyType], bhvTdEnemy);
                     enemy->oBehParams2ndByte = enemyType;
                     enemy->oForwardVel = kSpeeds[enemy->oBehParams2ndByte];
-                    enemy->oDamageOrCoinValue = enemy->oHealth = kHealths[enemy->oBehParams2ndByte] * (0.3f + 0.4f * (o->oTDWave * o->oTDWave));
+                    enemy->oDamageOrCoinValue = enemy->oHealth = kHealths[enemy->oBehParams2ndByte] * (0.5f + 0.4f * (o->oTDWave * o->oTDWave));
                     enemy->oPosX = -1143;
                     enemy->oPosY = -200;
                     enemy->oPosZ = -1600;
@@ -588,6 +606,11 @@ static void handle_wave_spawning()
         case TD_WAVE_WAITING:
             sprintf(line, "Wave %d, Left %d/%d", o->oTDWave, o->oTDWaveLeftEnemies, o->oTDWaveTotalEnemyCount);
             print_small_text_buffered(160, 10, line, PRINT_TEXT_ALIGN_CENTRE, PRINT_ALL, FONT_OUTLINE);
+            if (1 == o->oTDWave)
+            {
+                print_set_envcolour(255, 200, 200, 255);
+                print_small_text_buffered(160, 22, "Use C Buttons to speed up", PRINT_TEXT_ALIGN_CENTRE, PRINT_ALL, FONT_OUTLINE);
+            }
 
             if (0 == o->oTDWaveLeftEnemies)
             {
@@ -714,7 +737,10 @@ static void td_enemy_advance()
 
 void bhv_td_enemy_init()
 {
-    spawn_object(o, MODEL_HP, bhvTdHealthBar);
+    struct Object* hp = spawn_object(o, MODEL_HP, bhvTdHealthBar);
+    o->oOpacity = 255;
+    if (ENEMY_BOWSER == o->oBehParams2ndByte)
+        obj_scale_xyz(hp, 2.f, 2.f, 6.f);
 }
 
 void bhv_td_enemy_loop()
@@ -744,7 +770,7 @@ void bhv_td_enemy_loop()
             break;
         case ENEMY_BOWSER:
             o->oAnimations = (void*) bowser_seg6_anims_06057690;
-            cur_obj_init_animation_with_accel_and_sound(0, 1.f);
+            cur_obj_init_animation_with_accel_and_sound(13, 1.f);
             break;
         case ENEMY_TOAD:
             o->oAnimations = (void*) toad_seg6_anims_0600FB58;
@@ -755,6 +781,7 @@ void bhv_td_enemy_loop()
 
 #define oTdBulletEnemy oObjF4
 #define oTdBulletSpeedDebuff oF8
+#define oTdBulletReferencedEnemies oObjFC
 
 // F4 and F8 are booked by snufit code
 #define oTdTowerCooldown oFC
@@ -841,8 +868,39 @@ static void deal_enemy_damage(struct Object* enemy, int dmg)
     }
 }
 
+static struct Object *cur_obj_find_nearest_object_with_behavior_excluding_prev_hit(const BehaviorScript *behavior, f32 *dist)
+{
+    struct Object** prevHitEnemies = &o->oTdBulletReferencedEnemies;
+    uintptr_t *behaviorAddr = segmented_to_virtual(behavior);
+    struct ObjectNode *listHead = &gObjectLists[get_object_list_from_behavior(behaviorAddr)];
+    struct Object *obj = (struct Object *) listHead->next;
+    struct Object *closestObj = NULL;
+    f32 minDist = 0x20000;
+
+    while (obj != (struct Object *) listHead) {
+        if (obj->behavior == behaviorAddr
+            && obj->activeFlags != ACTIVE_FLAG_DEACTIVATED
+            && obj != prevHitEnemies[0]
+            && obj != prevHitEnemies[1]
+        ) {
+            f32 objDist = dist_between_objects(o, obj);
+            if (objDist < minDist) {
+                closestObj = obj;
+                minDist = objDist;
+            }
+        }
+
+        obj = (struct Object *) obj->header.next;
+    }
+
+    *dist = minDist;
+    return closestObj;
+}
+
+
 void bhv_td_bullet_loop()
 {
+    struct Object** prevHitEnemies = &o->oTdBulletReferencedEnemies;
     if (o->oTdBulletEnemy->activeFlags == 0)
     {
         o->activeFlags = 0;
@@ -892,8 +950,9 @@ void bhv_td_bullet_loop()
 
             case BULLET_JUMP1:
             case BULLET_JUMP2:
+                prevHitEnemies[o->oBehParams - BULLET_JUMP1] = o->oTdBulletEnemy;
                 f32 d;
-                o->oTdBulletEnemy = cur_obj_find_nearest_object_with_behavior(bhvTdEnemy, &d);
+                o->oTdBulletEnemy = cur_obj_find_nearest_object_with_behavior_excluding_prev_hit(bhvTdEnemy, &d);
                 if (o->oTdBulletEnemy)
                 {
                     o->activeFlags = activeFlagsBackup;
@@ -1169,8 +1228,6 @@ void bhv_spire_tower_loop()
     if (bullet)
         bullet->oBehParams = BULLET_INSTA_KILL;
 }
-
-#define oTdBulletEnemy oObjF4
 
 void bhv_td_flame_loop()
 {
