@@ -1,7 +1,10 @@
+#define DEBUG_INFINITE_WAVE
+
 #include "game/puppyprint.h"
 
 #include "actors/group14.h"
 
+static int sToadsKilled = 0;
 static struct Object* kTDMap[10][10];
 
 #define oTDWave oF4
@@ -26,7 +29,8 @@ enum TDStates
     TD_INIT,
     TD_WAVE_SPAWNING,
     TD_WAVE_WAITING,
-    TD_WAVE_INFINITE,
+    TD_WAVE_INFINITE_SPAWNING,
+    TD_WAVE_INFINITE_WAITING,
 };
 
 struct TowerBeh
@@ -224,6 +228,8 @@ void bhv_td_init()
 
     for (int i = 0; i < 10; i++)
         kTDMap[i][9] = TD_BUSY;
+
+    sToadsKilled = 0;
 
     gHudDisplay.coins = gMarioStates->numCoins = 20;
 
@@ -511,24 +517,35 @@ static void handle_wave_spawning()
 
                 if (!sMovieTexture && (gPlayer1Controller->buttonPressed & L_TRIG))
                 {
+#ifndef DEBUG_INFINITE_WAVE
                     if (o->oTDWave < 11)
-                        o->oAction = TD_WAVE_SPAWNING;
-                    else
-                        o->oAction = TD_WAVE_INFINITE;
-
-                    const struct WaveDesc* waveDesc = &kWaveDescs[o->oTDWave - 1];
-                    int totalEnemies = 0;
-                    for (int i = 0; i < 4; i++)
                     {
-                        totalEnemies += waveDesc->enemies[i].count;
-                    }
+                        o->oAction = TD_WAVE_SPAWNING;
+                        const struct WaveDesc* waveDesc = &kWaveDescs[o->oTDWave - 1];
+                        int totalEnemies = 0;
+                        for (int i = 0; i < 4; i++)
+                        {
+                            totalEnemies += waveDesc->enemies[i].count;
+                        }
 
-                    union SpawnedStatePacked* spawnedState = (union SpawnedStatePacked*) &o->oTDWaveSpawningState;
-                    spawnedState->value = 0;
-                    spawnedState->totalLeftToSpawn = totalEnemies;
-                    o->oTDWaveLeftEnemies = totalEnemies;
-                    o->oTDWaveTotalEnemyCount = totalEnemies;
-                    o->oTDWaveSpawningAmountSpawned = 0;
+                        union SpawnedStatePacked* spawnedState = (union SpawnedStatePacked*) &o->oTDWaveSpawningState;
+                        spawnedState->value = 0;
+                        spawnedState->totalLeftToSpawn = totalEnemies;
+                        o->oTDWaveLeftEnemies = totalEnemies;
+                        o->oTDWaveTotalEnemyCount = totalEnemies;
+                        o->oTDWaveSpawningAmountSpawned = 0;
+                    }
+                    else
+#else
+                    o->oTDWave = 11;
+#endif
+                    {
+                        sToadsKilled = 0;
+                        o->oAction = TD_WAVE_INFINITE_SPAWNING;
+                        o->oTDWaveLeftEnemies = 20;
+                        o->oTDWaveTotalEnemyCount = 20;
+                        o->oTDWaveSpawningAmountSpawned = 0;
+                    }
                 }
             }
             else
@@ -626,7 +643,48 @@ static void handle_wave_spawning()
             }
             break;
 
-        case TD_WAVE_INFINITE:
+        case TD_WAVE_INFINITE_SPAWNING:
+            {
+                sprintf(line, "Final wave, killed %d", sToadsKilled);
+                print_small_text_buffered(160, 10, line, PRINT_TEXT_ALIGN_CENTRE, PRINT_ALL, FONT_OUTLINE);
+                if (0 == (o->oTimer % 8))
+                {
+                    {
+                        enum EnemyTypes enemyType = ENEMY_TOAD;
+
+                        struct Object* enemy = spawn_object(o, kEnemyModels[enemyType], bhvTdEnemy);
+                        enemy->oBehParams2ndByte = enemyType;
+                        enemy->oForwardVel = o->oTDWave * o->oTDWave / 6.f;
+                        enemy->oDamageOrCoinValue = enemy->oHealth = kHealths[enemy->oBehParams2ndByte] * (0.1f + 1.2f * (o->oTDWave * o->oTDWave));
+                        enemy->oPosX = -1143;
+                        enemy->oPosY = -200;
+                        enemy->oPosZ = -1600;
+
+                        o->oTDWaveSpawningAmountSpawned++;
+                    }
+
+                    if (o->oTDWaveSpawningAmountSpawned == 20)
+                    {
+                        o->oAction = TD_WAVE_INFINITE_WAITING;
+                    }
+                }
+            }
+            break;
+
+        case TD_WAVE_INFINITE_WAITING:
+            {
+                sprintf(line, "Final wave, killed %d", sToadsKilled);
+                print_small_text_buffered(160, 10, line, PRINT_TEXT_ALIGN_CENTRE, PRINT_ALL, FONT_OUTLINE);
+
+                if (o->oTDWaveLeftEnemies < o->oTDWave)
+                {
+                    o->oTDWave++;
+                    o->oTDWaveSpawningAmountSpawned = 0;
+                    o->oTDWaveLeftEnemies += 20;
+                    o->oTDWaveTotalEnemyCount += 20;
+                    o->oAction = TD_WAVE_INFINITE_SPAWNING;
+                }
+            }
             break;
     }
 }
@@ -635,7 +693,15 @@ void bhv_td_loop()
 {
     if (sMovieTexture)
     {
-        sprintf(gClearLine, "You reached wave %d", o->oTDWave);
+        if (o->oTDWave < 11)
+        {
+            sprintf(gClearLine, "You reached wave %d", o->oTDWave);            
+        }
+        else
+        {
+            sprintf(gClearLine, "You murdered %d toads", sToadsKilled);
+        }
+
         return;
     }
 
@@ -682,6 +748,22 @@ static const struct TdTrajPoint kTdEnemyPath[] =
 #define oTdEnemyProgress oF4
 #define oTdEnemySpeedDebuff oF8
 
+static void despawn_all_enemies()
+{
+    uintptr_t *behaviorAddr = segmented_to_virtual(bhvTdEnemy);
+    struct ObjectNode *listHead = &gObjectLists[get_object_list_from_behavior(behaviorAddr)];
+    struct Object *obj = (struct Object *) listHead->next;
+
+    while (obj != (struct Object *) listHead) {
+        if (obj->behavior == behaviorAddr && obj->activeFlags != ACTIVE_FLAG_DEACTIVATED
+        ) {
+            obj->activeFlags = 0;
+        }
+
+        obj = (struct Object *) obj->header.next;
+    }
+}
+
 static void td_enemy_advance()
 {
     if (o->oPosZ < -1610.f && o->activeFlags)
@@ -694,6 +776,7 @@ static void td_enemy_advance()
         }
         else
         {
+            despawn_all_enemies();
             sMovieTexture = sTextures[0];
         }
         return;
@@ -802,7 +885,7 @@ void bhv_td_enemy_loop()
             break;
         case ENEMY_TOAD:
             o->oAnimations = (void*) toad_seg6_anims_0600FB58;
-            cur_obj_init_animation_with_accel_and_sound(TOAD_ANIM_WEST_WALKING, 1.f);
+            cur_obj_init_animation_with_accel_and_sound(TOAD_ANIM_WEST_WAVING_BOTH_ARMS, 1.f);
             break;
     }
 }
@@ -896,6 +979,7 @@ static void deal_enemy_damage(struct Object* enemy, int dmg)
         enemy->activeFlags = 0;
         enemy->parentObj->oTDWaveLeftEnemies--;
         gMarioStates->numCoins += kCoinRewards[enemy->oBehParams2ndByte];
+        sToadsKilled++;
     }
 }
 
