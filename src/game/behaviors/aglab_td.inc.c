@@ -1,4 +1,4 @@
-// #define DEBUG_INFINITE_WAVE
+#define DEBUG_INFINITE_WAVE
 
 #include "game/puppyprint.h"
 
@@ -15,6 +15,8 @@ static struct Object* kTDMap[10][10];
 // array of u8
 #define oTDWaveSpawningAmountSpawned o104
 #define oTDWaveTotalEnemyCount o108
+
+extern void seq_player_play_sequence(u8 player, u8 seqId, u16 arg2);
 
 enum TowerTypes
 {
@@ -187,6 +189,7 @@ extern char gClearLine[200];
 
 void bhv_td_init()
 {
+    seq_player_play_sequence(0, 3, 0);
     load_decompress(_cc_eletds_yay0SegmentRomStart, _cc_eletds_yay0SegmentRomEnd, sTextures[0]);
     *gClearLine = '\0';
     o->oTDWave = 1;
@@ -574,6 +577,7 @@ static void handle_wave_spawning()
                     o->oTDWave = 11;
 #endif
                     {
+                        seq_player_play_sequence(0, 5, 0);
                         sToadsKilled = 0;
                         o->oAction = TD_WAVE_INFINITE_SPAWNING;
                         o->oTDWaveLeftEnemies = 20;
