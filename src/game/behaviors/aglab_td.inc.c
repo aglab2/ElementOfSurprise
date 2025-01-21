@@ -1,4 +1,4 @@
-#define DEBUG_INFINITE_WAVE
+// #define DEBUG_INFINITE_WAVE
 
 #include "game/puppyprint.h"
 
@@ -37,6 +37,7 @@ struct TowerBeh
 {
     int model;
     const BehaviorScript* bhv;
+    const char* colorizer;
     const char* name;
     const char* desc;
 };
@@ -53,39 +54,45 @@ static const struct Color kTowerColors[] = {
     [ TOWER_AIR ]     = { 0x58*2, 0x2f*2, 0xe*2, 255 }, 
 };
 
-const struct TowerBeh kInitTower = { MODEL_CANNON_BARREL, bhvTower, "Tower", "Shoots projectiles at enemies" };
+#define STR_COLOR_FIRE "<COL_FF474cFF>F"
+#define STR_COLOR_WATER "<COL_73C2FBFF>W"
+#define STR_COLOR_CRYSTAL "<COL_EFDE21FF>L"
+#define STR_COLOR_AIR "<COL_B05E1CFF>E"
+#define STR_COLOR_PLUS "<COL_FFFFFFFF>+"
+
+const struct TowerBeh kInitTower = { MODEL_CANNON_BARREL, bhvTower, "", "Tower", "Shoots projectiles at enemies" };
 
 static struct TowerBeh kBasicTowerBehs[] = {
-    { MODEL_FLYGUY       , bhvFireTower   , "Flame Tower"       , "Spawn fire trap on hit" },
-    { MODEL_MR_BLIZZARD  , bhvWaterTower  , "Freeze Tower"      , "Slows down targeted enemy" },
-    { MODEL_SNUFIT       , bhvCrystalTower, "Sharpshooter Tower", "Shoots furthest enemy" },
-    { MODEL_MONTY_MOLE   , bhvAirTower    , "Dirt Tower"        , "Very fast but weak attacks" },
+    { MODEL_FLYGUY       , bhvFireTower   , STR_COLOR_FIRE   , "Flame Tower"       , "Spawn fire trap on hit" },
+    { MODEL_MR_BLIZZARD  , bhvWaterTower  , STR_COLOR_WATER  , "Freeze Tower"      , "Slows down targeted enemy" },
+    { MODEL_SNUFIT       , bhvCrystalTower, STR_COLOR_CRYSTAL, "Sharpshooter Tower", "Shoots furthest enemy" },
+    { MODEL_MONTY_MOLE   , bhvAirTower    , STR_COLOR_AIR    , "Dirt Tower"        , "Very fast but weak attacks" },
 };
 
 static struct TowerBeh kComboTowerBehs[4][4] = {
     [TOWER_FIRE] = {
-        { MODEL_PIRANHA_PLANT, bhvFireTower   , "Inferno Tower", "Enemy catches on fire" },
-        { MODEL_THWOMP       , bhvSteamTower  , "URGH Tower"   , "High damage on short circle range" },
-        { MODEL_YOSHI        , bhvSpireTower  , "0.5A Tower"   , "Has 0.5% chance to instantly kill target" },
-        { MODEL_BLARGG       , bhvInfernoTower, "Spin Tower"   , "Spawn rotating flame around tower" },
+        { MODEL_PIRANHA_PLANT, bhvFireTower   , STR_COLOR_FIRE STR_COLOR_PLUS STR_COLOR_FIRE   , "Inferno Tower", "Enemy catches on fire" },
+        { MODEL_THWOMP       , bhvSteamTower  , STR_COLOR_FIRE STR_COLOR_PLUS STR_COLOR_WATER  , "URGH Tower"   , "High damage on short circle range" },
+        { MODEL_YOSHI        , bhvSpireTower  , STR_COLOR_FIRE STR_COLOR_PLUS STR_COLOR_CRYSTAL, "0.5A Tower"   , "Has 0.5% chance to instantly kill target" },
+        { MODEL_BLARGG       , bhvInfernoTower, STR_COLOR_FIRE STR_COLOR_PLUS STR_COLOR_AIR    , "Spin Tower"   , "Spawn rotating flame around tower" },
     },
     [TOWER_WATER] = {
-        { MODEL_THWOMP      , bhvSteamTower    , "URGH Tower"      , "High damage on around tower" },
-        { MODEL_PENGUIN     , bhvWaterTower    , "Permafrost Tower", "Slows downs enemies around tower" },
-        { MODEL_MANTA_RAY   , bhvShardTower    , "LINK Tower"      , "Hops on 3 far enemies after attack" },
-        { MODEL_ENEMY_LAKITU, bhvHurricaneTower, "Love Tower"      , "Throws projectile that follow enemies" },
+        { MODEL_THWOMP      , bhvSteamTower    , STR_COLOR_WATER STR_COLOR_PLUS STR_COLOR_FIRE   , "URGH Tower"      , "High damage on around tower" },
+        { MODEL_PENGUIN     , bhvWaterTower    , STR_COLOR_WATER STR_COLOR_PLUS STR_COLOR_WATER  , "Permafrost Tower", "Slows downs enemies around tower" },
+        { MODEL_MANTA_RAY   , bhvShardTower    , STR_COLOR_WATER STR_COLOR_PLUS STR_COLOR_CRYSTAL, "LINK Tower"      , "Hops on 3 far enemies after attack" },
+        { MODEL_ENEMY_LAKITU, bhvHurricaneTower, STR_COLOR_WATER STR_COLOR_PLUS STR_COLOR_AIR    , "Love Tower"      , "Throws projectile that follow enemies" },
     },
     [TOWER_CRYSTAL] = {
-        { MODEL_YOSHI       , bhvSpireTower  , "0.5A Tower"        , "Has 0.5% chance to instantly kill target" },
-        { MODEL_MANTA_RAY   , bhvShardTower  , "LINK Tower"        , "Hops on 3 far enemies after attack" },
-        { MODEL_HEAVE_HO    , bhvCrystalTower, "Flip Tower"        , "Full field attack, flips enemies" },
-        { MODEL_MR_I        , bhvPrismTower  , "iTower"            , "Shoots slow linear projectiles" },
+        { MODEL_YOSHI       , bhvSpireTower  , STR_COLOR_CRYSTAL STR_COLOR_PLUS STR_COLOR_FIRE   , "0.5A Tower"        , "Has 0.5% chance to instantly kill target" },
+        { MODEL_MANTA_RAY   , bhvShardTower  , STR_COLOR_CRYSTAL STR_COLOR_PLUS STR_COLOR_WATER  , "LINK Tower"        , "Hops on 3 far enemies after attack" },
+        { MODEL_HEAVE_HO    , bhvCrystalTower, STR_COLOR_CRYSTAL STR_COLOR_PLUS STR_COLOR_CRYSTAL, "Flip Tower"        , "Full field attack, flips enemies" },
+        { MODEL_MR_I        , bhvPrismTower  , STR_COLOR_CRYSTAL STR_COLOR_PLUS STR_COLOR_AIR    , "iTower"            , "Shoots slow linear projectiles" },
     },
     [TOWER_AIR] = {
-        { MODEL_BLARGG       , bhvInfernoTower  , "Spin Tower"   , "Spawn rotating flame around tower" },
-        { MODEL_ENEMY_LAKITU , bhvHurricaneTower, "Love Tower"   , "Throws projectile that follow enemies" },
-        { MODEL_MR_I         , bhvPrismTower    , "iTower"       , "Shoots slow linear projectiles" },
-        { MODEL_UKIKI        , bhvAirTower      , "Banana Tower" , "Even faster attacks" },
+        { MODEL_BLARGG       , bhvInfernoTower  , STR_COLOR_AIR STR_COLOR_PLUS STR_COLOR_FIRE   , "Spin Tower"   , "Spawn rotating flame around tower" },
+        { MODEL_ENEMY_LAKITU , bhvHurricaneTower, STR_COLOR_AIR STR_COLOR_PLUS STR_COLOR_WATER  , "Love Tower"   , "Throws projectile that follow enemies" },
+        { MODEL_MR_I         , bhvPrismTower    , STR_COLOR_AIR STR_COLOR_PLUS STR_COLOR_CRYSTAL, "iTower"       , "Shoots slow linear projectiles" },
+        { MODEL_UKIKI        , bhvAirTower      , STR_COLOR_AIR STR_COLOR_PLUS STR_COLOR_AIR    , "Banana Tower" , "Even faster attacks" },
     },
 };
 
@@ -294,8 +301,8 @@ static void prompt_to_spawn_tower(struct Object** pslot, int upgrade, union Towe
         color.a = 0xff;
     }
 
-    char line[100];
-    sprintf(line, "A to %s <COL_%02X%02X%02XFF>%s<COL_FFFFFFFF> for %d coins", upgrade ? "upgrade" : "place", color.r, color.g, color.b, towerBeh->name, cost);
+    char line[200];
+    sprintf(line, "A to %s (%s<COL_FFFFFFFF>)<COL_%02X%02X%02XFF>%s<COL_FFFFFFFF> for %d coins", upgrade ? "upgrade" : "place", towerBeh->colorizer, color.r, color.g, color.b, towerBeh->name, cost);
 
     print_set_envcolour(255, 255, 255, 255);
     print_small_text_buffered(160, 205, line, PRINT_TEXT_ALIGN_CENTRE, PRINT_ALL, FONT_OUTLINE);
