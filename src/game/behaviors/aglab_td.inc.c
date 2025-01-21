@@ -177,7 +177,7 @@ static const char* kNamesMult[] = {
     "Bobombs",
     "Bullies",
     "Bowser",
-    "The True Fiend",
+    "<RAINBOW>The True Fiend<RAINBOW>",
 };
 
 #define TD_BUSY ((void*) 1)
@@ -1340,11 +1340,11 @@ void bhv_air_tower_loop()
     union TowerTypePacked* packed = (union TowerTypePacked*) &o->oBehParams2ndByte;
     if (0 == packed->level)
     {
-        shoot_closest_enemy(MODEL_DIRT, 0.7f, TOWER_DEFAULT_DAMAGE * 3, TOWER_DEFAULT_RANGE, TOWER_DEFAULT_BULLET_SPEED * 2.f, TOWER_DEFAULT_ATTACK_CD / 2);
+        shoot_closest_enemy(MODEL_DIRT, 0.7f, TOWER_DEFAULT_DAMAGE * 2.5f, TOWER_DEFAULT_RANGE, TOWER_DEFAULT_BULLET_SPEED * 2.f, TOWER_DEFAULT_ATTACK_CD / 2);
     }
     else
     {
-        shoot_closest_enemy(MODEL_DIRT, 0.7f, TOWER_DEFAULT_DAMAGE * 5, TOWER_DEFAULT_RANGE, TOWER_DEFAULT_BULLET_SPEED * 3.f, TOWER_DEFAULT_ATTACK_CD / 4);
+        shoot_closest_enemy(MODEL_DIRT, 0.7f, TOWER_DEFAULT_DAMAGE * 4.5f, TOWER_DEFAULT_RANGE, TOWER_DEFAULT_BULLET_SPEED * 3.f, TOWER_DEFAULT_ATTACK_CD / 4);
     }
 }
 
@@ -1400,6 +1400,7 @@ void bhv_steam_tower_loop()
         if (o->oTimer == 20)
         {
             o->oAction = 3;
+            deal_damage_around(400.f, 3 * 20);
             return;
         }
         o->oPosY -= 15.f;
@@ -1547,7 +1548,7 @@ void bhv_td_spiny_loop()
         o->oPosZ -= d[2] * o->oForwardVel;
     }
 
-    deal_damage_around(200.f, 10 * 1.2);
+    deal_damage_around(250.f, 10 * 1.6);
 }
 
 void bhv_prism_tower_init()
@@ -1567,7 +1568,7 @@ void bhv_prism_tower_loop()
             o->parentObj = spawn_object(o, MODEL_PURPLE_MARBLE, bhvTdFlame);
             o->parentObj->oTdBulletEnemy = NULL;
             o->oFaceAngleYaw = o->parentObj->oFaceAngleYaw = obj_angle_to_object(o, enemy);
-            o->parentObj->oPosY -= 100.f;
+            o->parentObj->oPosY -= 170.f;
             obj_scale(o->parentObj, 5.f);
         }
     }
