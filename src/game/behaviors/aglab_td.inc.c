@@ -816,7 +816,8 @@ static void td_enemy_advance()
         else
         {
             despawn_all_enemies();
-            sMovieTexture = sTextures[0];
+            sMovieTexture = sTextures[0];    
+            seq_player_play_sequence(0, 4, 0);
         }
         return;
     }
