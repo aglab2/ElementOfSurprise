@@ -73,7 +73,7 @@ static struct TowerBeh kComboTowerBehs[4][4] = {
     [TOWER_FIRE] = {
         { MODEL_PIRANHA_PLANT, bhvFireTower   , STR_COLOR_FIRE STR_COLOR_PLUS STR_COLOR_FIRE   , "Inferno Tower", "Enemy catches on fire" },
         { MODEL_THWOMP       , bhvSteamTower  , STR_COLOR_FIRE STR_COLOR_PLUS STR_COLOR_WATER  , "URGH Tower"   , "High damage on short circle range" },
-        { MODEL_YOSHI        , bhvSpireTower  , STR_COLOR_FIRE STR_COLOR_PLUS STR_COLOR_CRYSTAL, "0.5A Tower"   , "Has 0.5% chance to instantly kill target" },
+        { MODEL_YOSHI        , bhvSpireTower  , STR_COLOR_FIRE STR_COLOR_PLUS STR_COLOR_CRYSTAL, "0.5A Tower"   , "Has 0.5% chance to instantly kill target, no damage" },
         { MODEL_BLARGG       , bhvInfernoTower, STR_COLOR_FIRE STR_COLOR_PLUS STR_COLOR_AIR    , "Spin Tower"   , "Spawn rotating flame around tower" },
     },
     [TOWER_WATER] = {
@@ -83,7 +83,7 @@ static struct TowerBeh kComboTowerBehs[4][4] = {
         { MODEL_ENEMY_LAKITU, bhvHurricaneTower, STR_COLOR_WATER STR_COLOR_PLUS STR_COLOR_AIR    , "Love Tower"      , "Throws projectile that follow enemies" },
     },
     [TOWER_CRYSTAL] = {
-        { MODEL_YOSHI       , bhvSpireTower  , STR_COLOR_CRYSTAL STR_COLOR_PLUS STR_COLOR_FIRE   , "0.5A Tower"        , "Has 0.5% chance to instantly kill target" },
+        { MODEL_YOSHI       , bhvSpireTower  , STR_COLOR_CRYSTAL STR_COLOR_PLUS STR_COLOR_FIRE   , "0.5A Tower"        , "Has 0.5% chance to instantly kill target, no damage" },
         { MODEL_MANTA_RAY   , bhvShardTower  , STR_COLOR_CRYSTAL STR_COLOR_PLUS STR_COLOR_WATER  , "LINK Tower"        , "Hops on 3 far enemies after attack" },
         { MODEL_HEAVE_HO    , bhvCrystalTower, STR_COLOR_CRYSTAL STR_COLOR_PLUS STR_COLOR_CRYSTAL, "Flip Tower"        , "Full field attack, flips enemies" },
         { MODEL_MR_I        , bhvPrismTower  , STR_COLOR_CRYSTAL STR_COLOR_PLUS STR_COLOR_AIR    , "iTower"            , "Shoots slow linear projectiles" },
@@ -263,20 +263,14 @@ static void handle_tower_style_selection()
     }
 }
 
-static void prompt_to_spawn_tower(struct Object** pslot, int upgrade, union TowerTypePacked towerType)
+struct TowerProps
 {
-#define slot (*pslot)
-    print_set_envcolour(255, 255, 255, 255);
+    struct Color color;
+    const struct TowerBeh* beh;
+};
 
-    int cost = towerType.totalCost;
-    if (gMarioStates->numCoins < cost)
-    {
-        char line[100];
-        sprintf(line, "Need %d coins %s", cost, upgrade ? "for next upgrade" : "to place tower");
-        print_small_text_buffered(160, 205, line, PRINT_TEXT_ALIGN_CENTRE, PRINT_ALL, FONT_OUTLINE);
-        return;
-    }
-
+static struct TowerProps get_tower_pros(char* name, union TowerTypePacked towerType)
+{
     const struct TowerBeh* towerBeh = NULL;
     struct Color color;
     if (towerType.level < 0)
@@ -286,23 +280,53 @@ static void prompt_to_spawn_tower(struct Object** pslot, int upgrade, union Towe
         color.g = 0xaf;
         color.b = 0xaf;
         color.a = 0xff;
+        sprintf(name, "<COL_%02X%02X%02XFF>%s<COL_FFFFFFFF>", color.r, color.g, color.b, towerBeh->name);
     }
     if (towerType.level == 0)
     {
         towerBeh = &kBasicTowerBehs[towerType.type0];
         color = kTowerColors[towerType.type0];
+        sprintf(name, "<COL_%02X%02X%02XFF>%s<COL_FFFFFFFF> (%s<COL_FFFFFFFF>)", color.r, color.g, color.b, towerBeh->name, towerBeh->colorizer);
     }
     if (towerType.level > 0)
     {
         towerBeh = &kComboTowerBehs[towerType.type0][towerType.type1];
+        struct Color towerCol1 = kTowerColors[towerType.type0];
+        struct Color towerCol2 = kTowerColors[towerType.type1];
         color.r = ((int) kTowerColors[towerType.type0].r + kTowerColors[towerType.type1].r) / 2;
         color.g = ((int) kTowerColors[towerType.type0].g + kTowerColors[towerType.type1].g) / 2;
         color.b = ((int) kTowerColors[towerType.type0].b + kTowerColors[towerType.type1].b) / 2;
         color.a = 0xff;
+
+        sprintf(name, "<FADE_%02X%02X%02XFF,%02X%02X%02XFF,20>%s<COL_FFFFFFFF> (%s<COL_FFFFFFFF>)"
+              , towerCol1.r, towerCol1.g, towerCol1.b
+              , towerCol2.r, towerCol2.g, towerCol2.b
+              , towerBeh->name, towerBeh->colorizer);
     }
 
+    return (struct TowerProps){ color, towerBeh };
+}
+
+static void prompt_to_spawn_tower(struct Object** pslot, int upgrade, union TowerTypePacked towerType)
+{
+#define slot (*pslot)
+    print_set_envcolour(255, 255, 255, 255);
+
+    int cost = towerType.totalCost;
+
     char line[200];
-    sprintf(line, "A to %s (%s<COL_FFFFFFFF>)<COL_%02X%02X%02XFF>%s<COL_FFFFFFFF> for %d coins", upgrade ? "upgrade" : "place", towerBeh->colorizer, color.r, color.g, color.b, towerBeh->name, cost);
+    if (gMarioStates->numCoins < cost)
+    {
+        sprintf(line, "Need %d coins %s", cost, upgrade ? "for next upgrade" : "to place tower");
+        print_small_text_buffered(160, 205, line, PRINT_TEXT_ALIGN_CENTRE, PRINT_ALL, FONT_OUTLINE);
+        return;
+    }
+
+    char towerName[120];
+    struct TowerProps props = get_tower_pros(towerName, towerType);
+    struct Color color = props.color;
+    const struct TowerBeh* towerBeh = props.beh;
+    sprintf(line, "A to %s %s for %d coins", upgrade ? "upgrade" : "place", towerName, cost);
 
     print_set_envcolour(255, 255, 255, 255);
     print_small_text_buffered(160, 205, line, PRINT_TEXT_ALIGN_CENTRE, PRINT_ALL, FONT_OUTLINE);
@@ -353,9 +377,12 @@ static int prompt_to_despawn_tower(struct Object** pslot)
 #define slot (*pslot)
     union TowerTypePacked* packed = (union TowerTypePacked*) &slot->oBehParams2ndByte;
     int cost = packed->totalCost * 8 / 10;
-    
-    char line[100];
-    sprintf(line, "B to destroy tower, returns %d coins", cost);
+
+    char towerName[120];
+    (void) get_tower_pros(towerName, *packed);
+
+    char line[200];
+    sprintf(line, "B to destroy %s, returns %d coins", towerName, cost);
     print_small_text_buffered(160, 185, line, PRINT_TEXT_ALIGN_CENTRE, PRINT_ALL, FONT_OUTLINE);
 
     if (gPlayer1Controller->buttonPressed & B_BUTTON)
@@ -487,7 +514,6 @@ static const struct WaveDesc kWaveDescs[] = {
 static void handle_wave_spawning()
 {
     print_set_envcolour(255, 255, 255, 255);
-    char line[100];
     switch (o->oAction)
     {
         case TD_INIT:
@@ -500,6 +526,7 @@ static void handle_wave_spawning()
 
             if (canSpawnNextWave)
             {
+                char line[100];
                 sprintf(line, "Press L to spawn wave %d", o->oTDWave);
                 print_small_text_buffered(160, 10, line, PRINT_TEXT_ALIGN_CENTRE, PRINT_ALL, FONT_OUTLINE);
 
@@ -577,6 +604,7 @@ static void handle_wave_spawning()
 
             break;
         case TD_WAVE_SPAWNING:
+            char line[100];
             sprintf(line, "Wave %d, Left %d/%d", o->oTDWave, o->oTDWaveLeftEnemies, o->oTDWaveTotalEnemyCount);
             print_small_text_buffered(160, 10, line, PRINT_TEXT_ALIGN_CENTRE, PRINT_ALL, FONT_OUTLINE);
             if (1 == o->oTDWave)
