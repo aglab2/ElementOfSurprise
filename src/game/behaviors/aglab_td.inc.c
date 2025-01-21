@@ -33,6 +33,7 @@ enum TDStates
     TD_WAVE_WAITING,
     TD_WAVE_INFINITE_SPAWNING,
     TD_WAVE_INFINITE_WAITING,
+    TD_WAVE_INFINITE_FADEOUT,
 };
 
 struct TowerBeh
@@ -187,8 +188,25 @@ static const char* kNamesMult[] = {
 
 extern char gClearLine[200];
 
+extern Gfx castle_courtyard_dl_td_mesh_layer_1[];
+
+static void fadeout_course(int time)
+{
+    u8* ptr = segmented_to_virtual(castle_courtyard_dl_td_mesh_layer_1);
+    f32 fade = 0xff * (1000.f - time * time) / 1000.f;
+    ptr[6*8 + 4] = fade;
+    ptr[6*8 + 5] = fade;
+    ptr[6*8 + 6] = fade;
+
+    fade /= 2;
+    ptr[7*8 + 4] = fade;
+    ptr[7*8 + 5] = fade;
+    ptr[7*8 + 6] = fade;
+}
+
 void bhv_td_init()
 {
+    fadeout_course(0);
     seq_player_play_sequence(0, 3, 0);
     load_decompress(_cc_eletds_yay0SegmentRomStart, _cc_eletds_yay0SegmentRomEnd, sTextures[0]);
     *gClearLine = '\0';
@@ -607,9 +625,9 @@ static void handle_wave_spawning()
                     o->oTDWave = 11;
 #endif
                     {
-                        seq_player_play_sequence(0, 5, 0);
                         sToadsKilled = 0;
-                        o->oAction = TD_WAVE_INFINITE_SPAWNING;
+                        seq_player_play_sequence(0, 0, 120);
+                        o->oAction = TD_WAVE_INFINITE_FADEOUT;
                         o->oTDWaveLeftEnemies = 20;
                         o->oTDWaveTotalEnemyCount = 20;
                         o->oTDWaveSpawningAmountSpawned = 0;
@@ -752,6 +770,19 @@ static void handle_wave_spawning()
                     o->oTDWaveLeftEnemies += 20;
                     o->oTDWaveTotalEnemyCount += 20;
                     o->oAction = TD_WAVE_INFINITE_SPAWNING;
+                }
+            }
+            break;
+
+         case TD_WAVE_INFINITE_FADEOUT:
+            {
+                if (o->oTimer < 30)
+                    fadeout_course(o->oTimer);
+
+                if (o->oTimer == 50)
+                {
+                    o->oAction = TD_WAVE_INFINITE_SPAWNING;
+                    seq_player_play_sequence(0, 5, 0);
                 }
             }
             break;
@@ -1441,7 +1472,7 @@ void bhv_steam_tower_loop()
         {
             o->oAction = 3;
             deal_damage_around(400.f, 3 * 110);
-            if (!sMovieFrame)
+            if (!sMovieTexture)
                 cur_obj_play_sound_2(SOUND_OBJ_THWOMP);
 
             return;
