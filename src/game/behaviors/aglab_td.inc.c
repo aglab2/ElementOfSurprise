@@ -975,7 +975,7 @@ void bhv_td_enemy_loop()
 #define BULLET_JUMP1 5
 #define BULLET_JUMP2 6
 
-static struct Object* shoot_closest_enemy(int model, f32 modelScale, int dmg, f32 range, f32 bulletVel, int cd)
+static struct Object* shoot_closest_enemy(int model, f32 modelScale, int dmg, f32 range, f32 bulletVel, int cd, s32 snd)
 {
     if (o->oTdTowerCooldown) 
     {
@@ -1005,11 +1005,13 @@ static struct Object* shoot_closest_enemy(int model, f32 modelScale, int dmg, f3
     obj_scale(bullet, modelScale);
     o->oTdTowerCooldown = cd;
 
+    play_sound(snd, bullet->header.gfx.cameraToObject);
+
     return bullet;
 }
 
 extern struct Object *cur_obj_find_furthest_object_with_behavior(const BehaviorScript *behavior, f32 *dist);
-static struct Object* shoot_furthest_enemy(int model, f32 modelScale, int dmg, f32 bulletVel, int cd)
+static struct Object* shoot_furthest_enemy(int model, f32 modelScale, int dmg, f32 bulletVel, int cd, s32 snd)
 {
     if (o->oTdTowerCooldown) 
     {
@@ -1034,6 +1036,8 @@ static struct Object* shoot_furthest_enemy(int model, f32 modelScale, int dmg, f
     bullet->oTdBulletRelookupRange = 3000.f; // chose somewhat arbitrary
     obj_scale(bullet, modelScale);
     o->oTdTowerCooldown = cd;
+
+    play_sound(snd, bullet->header.gfx.cameraToObject);
 
     return bullet;
 }
@@ -1178,7 +1182,7 @@ void bhv_tower_init()
 
 void bhv_tower_loop()
 {
-    shoot_closest_enemy(MODEL_WATER_BOMB, 0.7f, TOWER_DEFAULT_DAMAGE, TOWER_DEFAULT_RANGE, TOWER_DEFAULT_BULLET_SPEED, TOWER_DEFAULT_ATTACK_CD);
+    shoot_closest_enemy(MODEL_WATER_BOMB, 0.7f, TOWER_DEFAULT_DAMAGE, TOWER_DEFAULT_RANGE, TOWER_DEFAULT_BULLET_SPEED, TOWER_DEFAULT_ATTACK_CD, SOUND_OBJ_WATER_BOMB_CANNON);
 }
 
 void bhv_fire_tower_init()
@@ -1206,13 +1210,13 @@ void bhv_fire_tower_loop()
     union TowerTypePacked* packed = (union TowerTypePacked*) &o->oBehParams2ndByte;
     if (0 == packed->level)
     {
-        struct Object* bullet = shoot_closest_enemy(MODEL_RED_FLAME, 5.f, TOWER_DEFAULT_DAMAGE / 0.8f * 4.f, TOWER_DEFAULT_RANGE, TOWER_DEFAULT_BULLET_SPEED, TOWER_DEFAULT_ATTACK_CD);
+        struct Object* bullet = shoot_closest_enemy(MODEL_RED_FLAME, 5.f, TOWER_DEFAULT_DAMAGE / 0.8f * 4.f, TOWER_DEFAULT_RANGE, TOWER_DEFAULT_BULLET_SPEED, TOWER_DEFAULT_ATTACK_CD, SOUND_AIR_BOWSER_SPIT_FIRE);
         if (bullet)
             bullet->oBehParams = BULLET_SPAWN_FLAME_LINGER;
     }
     else
     {
-        struct Object* bullet = shoot_closest_enemy(MODEL_RED_FLAME, 8.f, TOWER_DEFAULT_DAMAGE * 0.8f * 10.f, TOWER_DEFAULT_RANGE, TOWER_DEFAULT_BULLET_SPEED, TOWER_DEFAULT_ATTACK_CD);
+        struct Object* bullet = shoot_closest_enemy(MODEL_RED_FLAME, 8.f, TOWER_DEFAULT_DAMAGE * 0.8f * 10.f, TOWER_DEFAULT_RANGE, TOWER_DEFAULT_BULLET_SPEED, TOWER_DEFAULT_ATTACK_CD, SOUND_AIR_BOWSER_SPIT_FIRE);
         if (bullet)
             bullet->oBehParams = BULLET_SPAWN_FLAME_LINGER2;
     }
@@ -1243,13 +1247,13 @@ void bhv_water_tower_loop()
     union TowerTypePacked* packed = (union TowerTypePacked*) &o->oBehParams2ndByte;
     if (0 == packed->level)
     {
-        struct Object* bullet = shoot_closest_enemy(MODEL_WHITE_PARTICLE, 2.f, TOWER_DEFAULT_DAMAGE / 1.f * 4.f, TOWER_DEFAULT_RANGE * 1.2f, TOWER_DEFAULT_BULLET_SPEED, TOWER_DEFAULT_ATTACK_CD / 1.2f);
+        struct Object* bullet = shoot_closest_enemy(MODEL_WHITE_PARTICLE, 2.f, TOWER_DEFAULT_DAMAGE / 1.f * 4.f, TOWER_DEFAULT_RANGE * 1.2f, TOWER_DEFAULT_BULLET_SPEED, TOWER_DEFAULT_ATTACK_CD / 1.2f, SOUND_ACTION_WATER_PLUNGE);
         if (bullet)
             bullet->oTdBulletSpeedDebuff = 49;
     }
     else
     {
-        struct Object* bullet = shoot_closest_enemy(MODEL_WHITE_PARTICLE, 2.5f, TOWER_DEFAULT_DAMAGE * 0.8f * 4.f, TOWER_DEFAULT_RANGE * 1.2f, TOWER_DEFAULT_BULLET_SPEED, TOWER_DEFAULT_ATTACK_CD / 2.4f);
+        struct Object* bullet = shoot_closest_enemy(MODEL_WHITE_PARTICLE, 2.5f, TOWER_DEFAULT_DAMAGE * 0.8f * 4.f, TOWER_DEFAULT_RANGE * 1.2f, TOWER_DEFAULT_BULLET_SPEED, TOWER_DEFAULT_ATTACK_CD / 2.4f, SOUND_ACTION_WATER_JUMP);
         if (bullet)
         {
             bullet->oTdBulletSpeedDebuff = 49;
@@ -1307,7 +1311,7 @@ void bhv_crystal_tower_loop()
     if (0 == packed->level)
     {
         obj_scale(o, 2.f + sins(o->oTimer * 0x456) / 10.f);
-        shoot_furthest_enemy(MODEL_BOWLING_BALL, 0.7f, TOWER_DEFAULT_DAMAGE * 2.5f, TOWER_DEFAULT_BULLET_SPEED * 2, TOWER_DEFAULT_ATTACK_CD);
+        shoot_furthest_enemy(MODEL_BOWLING_BALL, 0.7f, TOWER_DEFAULT_DAMAGE * 2.5f, TOWER_DEFAULT_BULLET_SPEED * 2, TOWER_DEFAULT_ATTACK_CD, SOUND_OBJ_SNUFIT_SHOOT);
     }
     else
     {
@@ -1324,6 +1328,7 @@ void bhv_crystal_tower_loop()
             }
             else
             {
+                cur_obj_play_sound_2(SOUND_OBJ_HEAVEHO_TOSSED);
                 o->oTimer = -1;
                 geo_obj_init_animation(&o->header.gfx, &animations[HEAVE_HO_ANIM_THROW]);
                 o->parentObj = enemy;
@@ -1375,11 +1380,11 @@ void bhv_air_tower_loop()
     union TowerTypePacked* packed = (union TowerTypePacked*) &o->oBehParams2ndByte;
     if (0 == packed->level)
     {
-        shoot_closest_enemy(MODEL_DIRT, 0.7f, TOWER_DEFAULT_DAMAGE * 2.5f, TOWER_DEFAULT_RANGE, TOWER_DEFAULT_BULLET_SPEED * 2.f, TOWER_DEFAULT_ATTACK_CD / 2);
+        shoot_closest_enemy(MODEL_DIRT, 0.7f, TOWER_DEFAULT_DAMAGE * 2.5f, TOWER_DEFAULT_RANGE, TOWER_DEFAULT_BULLET_SPEED * 2.f, TOWER_DEFAULT_ATTACK_CD / 2, SOUND_OBJ_MONTY_MOLE_ATTACK);
     }
     else
     {
-        shoot_closest_enemy(MODEL_DIRT, 0.7f, TOWER_DEFAULT_DAMAGE * 4.5f, TOWER_DEFAULT_RANGE, TOWER_DEFAULT_BULLET_SPEED * 3.f, TOWER_DEFAULT_ATTACK_CD / 4);
+        shoot_closest_enemy(MODEL_DIRT, 0.7f, TOWER_DEFAULT_DAMAGE * 4.5f, TOWER_DEFAULT_RANGE, TOWER_DEFAULT_BULLET_SPEED * 3.f, TOWER_DEFAULT_ATTACK_CD / 4, SOUND_OBJ_MONTY_MOLE_ATTACK);
     }
 }
 
@@ -1435,7 +1440,10 @@ void bhv_steam_tower_loop()
         if (o->oTimer == 20)
         {
             o->oAction = 3;
-            deal_damage_around(400.f, 3 * 20);
+            deal_damage_around(400.f, 3 * 110);
+            if (!sMovieFrame)
+                cur_obj_play_sound_2(SOUND_OBJ_THWOMP);
+
             return;
         }
         o->oPosY -= 15.f;
@@ -1461,7 +1469,7 @@ void bhv_spire_tower_init()
 
 void bhv_spire_tower_loop()
 {
-    struct Object* bullet = shoot_closest_enemy(MODEL_YOSHI_EGG, 0.3f, TOWER_DEFAULT_DAMAGE / 25, TOWER_DEFAULT_RANGE * 2, TOWER_DEFAULT_BULLET_SPEED * 3, TOWER_DEFAULT_ATTACK_CD / 2);
+    struct Object* bullet = shoot_closest_enemy(MODEL_YOSHI_EGG, 0.3f, TOWER_DEFAULT_DAMAGE / 25, TOWER_DEFAULT_RANGE * 2, TOWER_DEFAULT_BULLET_SPEED * 3, TOWER_DEFAULT_ATTACK_CD / 2, SOUND_AIR_AMP_BUZZ);
     if (bullet)
         bullet->oBehParams = BULLET_INSTA_KILL;
 }
@@ -1503,7 +1511,7 @@ void bhv_shard_tower_init()
 
 void bhv_shard_tower_loop()
 {
-    struct Object* bullet = shoot_furthest_enemy(MODEL_WATER_SPLASH, 0.7f, TOWER_DEFAULT_DAMAGE * 2 * 4, TOWER_DEFAULT_BULLET_SPEED * 2, TOWER_DEFAULT_ATTACK_CD);
+    struct Object* bullet = shoot_furthest_enemy(MODEL_WATER_SPLASH, 0.7f, TOWER_DEFAULT_DAMAGE * 2 * 4, TOWER_DEFAULT_BULLET_SPEED * 2, TOWER_DEFAULT_ATTACK_CD, SOUND_OBJ_SNUFIT_SHOOT);
     if (bullet)
         bullet->oBehParams = BULLET_JUMP1;
 }
@@ -1526,6 +1534,7 @@ void bhv_hurricane_tower_loop()
         struct Object* enemy = cur_obj_find_nearest_object_with_behavior(bhvTdEnemy, &d);
         if (d < TOWER_DEFAULT_RANGE * 3.f)
         {
+            cur_obj_play_sound_2(SOUND_OBJ_EVIL_LAKITU_THROW);
             o->parentObj = spawn_object(o, MODEL_SPINY_BALL, bhvTdSpiny);
             o->oFaceAngleYaw = o->parentObj->oFaceAngleYaw = obj_angle_to_object(o, enemy);
             o->parentObj->oForwardVel = 60.f;
@@ -1601,9 +1610,10 @@ void bhv_prism_tower_loop()
         if (d < TOWER_DEFAULT_RANGE * 1.5f)
         {
             o->parentObj = spawn_object(o, MODEL_PURPLE_MARBLE, bhvTdFlame);
+            cur_obj_play_sound_2(SOUND_OBJ_MRI_SHOOT);
             o->parentObj->oTdBulletEnemy = NULL;
             o->oFaceAngleYaw = o->parentObj->oFaceAngleYaw = obj_angle_to_object(o, enemy);
-            o->parentObj->oPosY -= 170.f;
+            o->parentObj->oPosY -= 150.f;
             obj_scale(o->parentObj, 5.f);
         }
     }
