@@ -1,4 +1,4 @@
-#define DEBUG_INFINITE_WAVE
+// #define DEBUG_INFINITE_WAVE
 
 #include "game/puppyprint.h"
 
@@ -310,6 +310,34 @@ static struct TowerProps get_tower_pros(char* name, union TowerTypePacked towerT
     return (struct TowerProps){ color, towerBeh };
 }
 
+static void puffAt(struct Object* obj, float size, int numParticles)
+{
+    f32 sizeBase = size;
+    f32 sizeRange = size / 20.f;
+    f32 forwardVelBase = 40.f;
+    f32 forwardVelRange = 5.f;
+    f32 velYBase = 30.f;
+    f32 velYRange = 20.f;
+    for (int i = 0; i < numParticles; i++) {
+        f32 scale = random_float() * (sizeRange * 0.1f) + sizeBase * 0.1f;
+        struct Object* particle = spawn_object(obj, MODEL_MIST, bhvWhitePuffExplosion);
+
+        particle->oBehParams2ndByte = 2;
+        particle->oMoveAngleYaw = random_u16();
+        particle->oGravity = 2.52f;
+        particle->oDragStrength = 1.0f;
+        particle->oForwardVel = random_float() * forwardVelRange + forwardVelBase;
+        particle->oPosX = obj->oPosX;
+        particle->oPosY = obj->oPosY;
+        particle->oPosZ = obj->oPosZ;
+        particle->oVelX = 0.f;
+        particle->oVelY = random_float() * velYRange + velYBase;
+        particle->oVelZ = 0.f;
+
+        obj_scale(particle, scale);
+    }
+}
+
 static void prompt_to_spawn_tower(struct Object** pslot, int upgrade, union TowerTypePacked towerType)
 {
 #define slot (*pslot)
@@ -353,6 +381,8 @@ static void prompt_to_spawn_tower(struct Object** pslot, int upgrade, union Towe
             gHudDisplay.coins = 0;
 
         slot = spawn_object(o, towerBeh->model, towerBeh->bhv);
+        puffAt(slot, 100.f, 10);
+        play_sound(SOUND_GENERAL_POUND_ROCK, slot->header.gfx.cameraToObject);
         union TowerTypePacked* packed = (union TowerTypePacked*) &slot->oBehParams2ndByte;
         *packed = towerType;
         packed->totalCost += prevCost;
