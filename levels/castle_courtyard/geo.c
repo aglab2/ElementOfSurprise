@@ -19,3 +19,5 @@ const GeoLayout td_shadow_geo[] = {
 #include "levels/castle_courtyard/header.h"
 
 #include "levels/castle_courtyard/geo.inc.c"
+
+#include "levels/castle_courtyard/circle/geo.inc.c"

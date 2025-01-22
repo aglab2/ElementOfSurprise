@@ -107,6 +107,7 @@ struct RenderModeContainer renderModeTable_1Cycle[2] = {
         [LAYER_MIST] = G_RM_AA_XLU_SURF,
         [LAYER_RED_FLAME] = G_RM_AA_XLU_SURF,
         [LAYER_HP] = G_RM_AA_OPA_SURF,
+        [LAYER_RANGE] = G_RM_AA_OPA_SURF,
         [LAYER_YOSHIEGG] = G_RM_AA_XLU_SURF,
         [LAYER_DIRT] = G_RM_AA_XLU_SURF,
         [LAYER_PUPIL] = G_RM_AA_XLU_SURF,
@@ -129,21 +130,22 @@ struct RenderModeContainer renderModeTable_1Cycle[2] = {
 #endif
         [LAYER_SMOKE_ALPHA] = G_RM_AA_ZB_TEX_EDGE,
         [LAYER_COIN] = G_RM_AA_ZB_TEX_EDGE,
-        [LAYER_WHITE_PARTICLES] = G_RM_AA_ZB_XLU_SURF,
-        [LAYER_WATERBOMB] = G_RM_AA_ZB_XLU_SURF,
+        [LAYER_WHITE_PARTICLES] = G_RM_AA_XLU_SURF,
+        [LAYER_WATERBOMB] = G_RM_AA_XLU_SURF,
         [LAYER_CIRCLE_SHADOW] = G_RM_AA_ZB_XLU_DECAL,
         [LAYER_CIRCLE_SHADOW_TRANSPARENT] = G_RM_ZB_CLD_SURF,
         [LAYER_TRANSPARENT_DECAL] = G_RM_AA_ZB_XLU_DECAL,
         [LAYER_TRANSPARENT] = G_RM_AA_ZB_XLU_SURF,
         [LAYER_SMOKE_TRANSPARENT] = G_RM_AA_ZB_XLU_SURF,
         [LAYER_MIST] = G_RM_AA_ZB_XLU_SURF,
-        [LAYER_RED_FLAME] = G_RM_AA_ZB_XLU_SURF,
-        [LAYER_HP] = G_RM_AA_ZB_OPA_SURF,
-        [LAYER_YOSHIEGG] = G_RM_AA_ZB_XLU_SURF,
-        [LAYER_DIRT] = G_RM_AA_ZB_XLU_SURF,
-        [LAYER_PUPIL] = G_RM_AA_ZB_XLU_SURF,
-        [LAYER_SPLASH] = G_RM_AA_ZB_XLU_SURF,
-        [LAYER_BLUE_FLAME] = G_RM_AA_ZB_XLU_SURF,
+        [LAYER_RED_FLAME] = G_RM_AA_XLU_SURF,
+        [LAYER_HP] = G_RM_AA_OPA_SURF,
+        [LAYER_RANGE] = G_RM_AA_OPA_SURF,
+        [LAYER_YOSHIEGG] = G_RM_AA_XLU_SURF,
+        [LAYER_DIRT] = G_RM_AA_XLU_SURF,
+        [LAYER_PUPIL] = G_RM_AA_XLU_SURF,
+        [LAYER_SPLASH] = G_RM_AA_XLU_SURF,
+        [LAYER_BLUE_FLAME] = G_RM_AA_XLU_SURF,
         [LAYER_TRANSPARENT_INTER] = G_RM_AA_ZB_XLU_INTER,
     } } };
 
@@ -175,6 +177,7 @@ struct RenderModeContainer renderModeTable_2Cycle[2] = {
         [LAYER_MIST] = G_RM_AA_XLU_SURF2,
         [LAYER_RED_FLAME] = G_RM_AA_XLU_SURF2,
         [LAYER_HP] = G_RM_AA_OPA_SURF2,
+        [LAYER_RANGE] = G_RM_AA_OPA_SURF2,
         [LAYER_YOSHIEGG] = G_RM_AA_XLU_SURF2,
         [LAYER_DIRT] = G_RM_AA_XLU_SURF2,
         [LAYER_PUPIL] = G_RM_AA_XLU_SURF2,
@@ -198,21 +201,22 @@ struct RenderModeContainer renderModeTable_2Cycle[2] = {
 #endif
         [LAYER_SMOKE_ALPHA] = G_RM_AA_ZB_TEX_EDGE2,
         [LAYER_COIN] = G_RM_AA_ZB_TEX_EDGE2,
-        [LAYER_WHITE_PARTICLES] = G_RM_AA_ZB_XLU_SURF2,
-        [LAYER_WATERBOMB] = G_RM_AA_ZB_XLU_SURF2,
+        [LAYER_WHITE_PARTICLES] = G_RM_AA_XLU_SURF2,
+        [LAYER_WATERBOMB] = G_RM_AA_XLU_SURF2,
         [LAYER_CIRCLE_SHADOW] = G_RM_AA_ZB_XLU_DECAL2,
         [LAYER_CIRCLE_SHADOW_TRANSPARENT] = G_RM_ZB_CLD_SURF2,
         [LAYER_TRANSPARENT_DECAL] = G_RM_AA_ZB_XLU_DECAL2,
         [LAYER_TRANSPARENT] = G_RM_AA_ZB_XLU_SURF2,
         [LAYER_SMOKE_TRANSPARENT] = G_RM_AA_ZB_XLU_SURF2,
         [LAYER_MIST] = G_RM_AA_ZB_XLU_SURF2,
-        [LAYER_RED_FLAME] = G_RM_AA_ZB_XLU_SURF2,
-        [LAYER_HP] = G_RM_AA_ZB_OPA_SURF2,
-        [LAYER_YOSHIEGG] = G_RM_AA_ZB_XLU_SURF2,
-        [LAYER_DIRT] = G_RM_AA_ZB_XLU_SURF2,
-        [LAYER_PUPIL] = G_RM_AA_ZB_XLU_SURF2,
-        [LAYER_SPLASH] = G_RM_AA_ZB_XLU_SURF2,
-        [LAYER_BLUE_FLAME] = G_RM_AA_ZB_XLU_SURF2,
+        [LAYER_RED_FLAME] = G_RM_AA_XLU_SURF2,
+        [LAYER_HP] = G_RM_AA_OPA_SURF2,
+        [LAYER_RANGE] = G_RM_AA_OPA_SURF2,
+        [LAYER_YOSHIEGG] = G_RM_AA_XLU_SURF2,
+        [LAYER_DIRT] = G_RM_AA_XLU_SURF2,
+        [LAYER_PUPIL] = G_RM_AA_XLU_SURF2,
+        [LAYER_SPLASH] = G_RM_AA_XLU_SURF2,
+        [LAYER_BLUE_FLAME] = G_RM_AA_XLU_SURF2,
         [LAYER_TRANSPARENT_INTER] = G_RM_AA_ZB_XLU_INTER2,
     } } };
 
@@ -502,6 +506,14 @@ void geo_process_master_list_sub(struct GraphNodeMasterList *node) {
             {
                 startDl = hp_enemy_enter;
                 endDl = hp_enemy_exit;
+            }
+            if (LAYER_RANGE == currLayer)
+            {
+                Gfx* g = alloc_display_list(2 * sizeof(Gfx));
+                startDl = g;
+                gDPSetPrimColor(g++, 0, 0, 0, 0, 0, 255);
+                gSPEndDisplayList(g++);
+                endDl = NULL;
             }
             if (LAYER_WHITE_PARTICLES == currLayer)
             {

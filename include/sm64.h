@@ -89,6 +89,7 @@ enum RenderLayers {
     LAYER_SMOKE_TRANSPARENT,
     LAYER_TRANSPARENT_INTER,
     LAYER_HP,
+    LAYER_RANGE,
     LAYER_COUNT
 };
 
