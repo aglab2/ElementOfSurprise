@@ -111,6 +111,7 @@ struct RenderModeContainer renderModeTable_1Cycle[2] = {
         [LAYER_YOSHIEGG] = G_RM_AA_XLU_SURF,
         [LAYER_DIRT] = G_RM_AA_XLU_SURF,
         [LAYER_PUPIL] = G_RM_AA_XLU_SURF,
+        [LAYER_SNUF_BALL] = G_RM_AA_XLU_SURF,
         [LAYER_SPLASH] = G_RM_AA_XLU_SURF,
         [LAYER_BLUE_FLAME] = G_RM_AA_XLU_SURF,
         [LAYER_TRANSPARENT_INTER] = G_RM_AA_XLU_SURF,
@@ -144,6 +145,7 @@ struct RenderModeContainer renderModeTable_1Cycle[2] = {
         [LAYER_YOSHIEGG] = G_RM_AA_XLU_SURF,
         [LAYER_DIRT] = G_RM_AA_XLU_SURF,
         [LAYER_PUPIL] = G_RM_AA_XLU_SURF,
+        [LAYER_SNUF_BALL] = G_RM_AA_XLU_SURF,
         [LAYER_SPLASH] = G_RM_AA_XLU_SURF,
         [LAYER_BLUE_FLAME] = G_RM_AA_XLU_SURF,
         [LAYER_TRANSPARENT_INTER] = G_RM_AA_ZB_XLU_INTER,
@@ -181,6 +183,7 @@ struct RenderModeContainer renderModeTable_2Cycle[2] = {
         [LAYER_YOSHIEGG] = G_RM_AA_XLU_SURF2,
         [LAYER_DIRT] = G_RM_AA_XLU_SURF2,
         [LAYER_PUPIL] = G_RM_AA_XLU_SURF2,
+        [LAYER_SNUF_BALL] = G_RM_AA_XLU_SURF2,
         [LAYER_SPLASH] = G_RM_AA_XLU_SURF2,
         [LAYER_BLUE_FLAME] = G_RM_AA_XLU_SURF2,
         [LAYER_TRANSPARENT_INTER] = G_RM_AA_XLU_SURF2,
@@ -215,6 +218,7 @@ struct RenderModeContainer renderModeTable_2Cycle[2] = {
         [LAYER_YOSHIEGG] = G_RM_AA_XLU_SURF2,
         [LAYER_DIRT] = G_RM_AA_XLU_SURF2,
         [LAYER_PUPIL] = G_RM_AA_XLU_SURF2,
+        [LAYER_SNUF_BALL] = G_RM_AA_XLU_SURF2,
         [LAYER_SPLASH] = G_RM_AA_XLU_SURF2,
         [LAYER_BLUE_FLAME] = G_RM_AA_XLU_SURF2,
         [LAYER_TRANSPARENT_INTER] = G_RM_AA_ZB_XLU_INTER2,
@@ -396,6 +400,9 @@ static const Gfx* sWaterSplashDls[] = {
 
 extern const Gfx water_splash_seg4_dl_exit[];
 
+extern const Gfx bobomb_seg8_dl_08022D08_exit[];
+extern const Gfx bobomb_seg8_dl_08022D08_enter[];
+
 /**
  * Process a master list node. This has been modified, so now it runs twice, for each microcode.
  * It iterates through the first 5 layers of if the first index using F3DLX2.Rej, then it switches
@@ -506,6 +513,11 @@ void geo_process_master_list_sub(struct GraphNodeMasterList *node) {
             {
                 startDl = hp_enemy_enter;
                 endDl = hp_enemy_exit;
+            }
+            if (LAYER_SNUF_BALL == currLayer)
+            {
+                startDl = bobomb_seg8_dl_08022D08_enter;
+                endDl = bobomb_seg8_dl_08022D08_exit;
             }
             if (LAYER_RANGE == currLayer)
             {
