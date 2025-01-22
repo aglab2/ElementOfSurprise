@@ -15,6 +15,7 @@ static struct Object* kTDMap[10][10];
 // array of u8
 #define oTDWaveSpawningAmountSpawned o104
 #define oTDWaveTotalEnemyCount o108
+#define oTDWaveRangeObj oObj10C
 
 extern void seq_player_play_sequence(u8 player, u8 seqId, u16 arg2);
 
@@ -204,6 +205,14 @@ static void fadeout_course(int time)
     ptr[7*8 + 6] = fade;
 }
 
+static void obj_unhide(struct Object* obj) {
+    obj->header.gfx.node.flags &= ~GRAPH_RENDER_INVISIBLE;
+}
+
+static void obj_hide(struct Object* obj) {
+    obj->header.gfx.node.flags |= GRAPH_RENDER_INVISIBLE;
+}
+
 void bhv_td_init()
 {
     fadeout_course(0);
@@ -262,6 +271,9 @@ void bhv_td_init()
     gHudDisplay.coins = gMarioStates->numCoins = 20;
 
     o->oTDSelectedTower = -1;
+    
+    o->oTDWaveRangeObj = spawn_object(o, MODEL_RANGE, bhvStaticObject);
+    obj_hide(o->oTDWaveRangeObj);
 }
 
 static void handle_tower_style_selection()
@@ -376,6 +388,9 @@ static void prompt_to_spawn_tower(struct Object** pslot, int upgrade, union Towe
     struct Color color = props.color;
     const struct TowerBeh* towerBeh = props.beh;
     sprintf(line, "A to %s %s for %d coins", upgrade ? "upgrade" : "place", towerName, cost);
+    obj_unhide(o->oTDWaveRangeObj);
+    vec3_copy(&o->oTDWaveRangeObj->oPosVec, &o->oPosVec);
+    o->oTDWaveRangeObj->oFaceAngleYaw += 0x126;
 
     print_set_envcolour(255, 255, 255, 255);
     print_small_text_buffered(160, 205, line, PRINT_TEXT_ALIGN_CENTRE, PRINT_ALL, FONT_OUTLINE);
@@ -786,6 +801,7 @@ static void handle_wave_spawning()
 
 void bhv_td_loop()
 {
+    obj_hide(o->oTDWaveRangeObj);
     if (sMovieTexture)
     {
         if (o->oTDWave < 11)
