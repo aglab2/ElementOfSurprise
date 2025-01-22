@@ -726,6 +726,9 @@ static void handle_wave_spawning()
             if (0 == o->oTDWaveLeftEnemies)
             {
                 o->oAction = TD_INIT;
+                if (o->oTDWave <= 2)
+                    gMarioStates->numCoins = 20;
+
                 o->oTDWave++;
             }
             break;
