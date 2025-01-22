@@ -175,11 +175,11 @@ static const u8 kCoinRewards[] = {
 };
 
 static const char* kNamesMult[] = {
-    "Goombas",
-    "Koopas",
-    "Bobombs",
-    "Bullies",
-    "Bowser",
+    "Goombas <SIZE_070>(so classic)<SIZE_100>",
+    "Koopas <SIZE_070>(the quick ones)<SIZE_100>",
+    "Bobombs <SIZE_070>(stronger classic)<SIZE_100>",
+    "Bullies <SIZE_070>(slow but powerful)<SIZE_100>",
+    "Bowser <SIZE_070>(the man himself)<SIZE_100>",
     "<RAINBOW>The True Fiend<RAINBOW>",
 };
 
@@ -520,13 +520,13 @@ static void set_green_color_if(int on)
 static void render_tower_labels()
 {
     set_green_color_if(o->oTDSelectedTower == TOWER_FIRE);
-    print_small_text_buffered(260, 10, "Fire", PRINT_TEXT_ALIGN_CENTRE, PRINT_ALL, FONT_OUTLINE);
+    print_small_text_buffered(270, 10, "Fire", PRINT_TEXT_ALIGN_CENTRE, PRINT_ALL, FONT_OUTLINE);
     set_green_color_if(o->oTDSelectedTower == TOWER_WATER);
-    print_small_text_buffered(260, 50, "Water", PRINT_TEXT_ALIGN_CENTRE, PRINT_ALL, FONT_OUTLINE);
+    print_small_text_buffered(270, 40, "Water", PRINT_TEXT_ALIGN_CENTRE, PRINT_ALL, FONT_OUTLINE);
     set_green_color_if(o->oTDSelectedTower == TOWER_CRYSTAL);
-    print_small_text_buffered(240, 30, "Light", PRINT_TEXT_ALIGN_RIGHT, PRINT_ALL, FONT_OUTLINE);
+    print_small_text_buffered(260, 25, "Light", PRINT_TEXT_ALIGN_RIGHT, PRINT_ALL, FONT_OUTLINE);
     set_green_color_if(o->oTDSelectedTower == TOWER_AIR);
-    print_small_text_buffered(280, 30, "Earth", PRINT_TEXT_ALIGN_LEFT, PRINT_ALL, FONT_OUTLINE);
+    print_small_text_buffered(280, 25, "Earth", PRINT_TEXT_ALIGN_LEFT, PRINT_ALL, FONT_OUTLINE);
 
     print_set_envcolour(255, 255, 255, 255);
 }
@@ -582,23 +582,15 @@ static void handle_wave_spawning()
                 print_small_text_buffered(160, 10, line, PRINT_TEXT_ALIGN_CENTRE, PRINT_ALL, FONT_OUTLINE);
 
                 const struct WaveDesc* waveDesc = &kWaveDescs[o->oTDWave - 1];
-                int lineOff = 0;
                 for (int i = 0; i < 4; i++)
                 {
                     const struct WaveEnemyGroup* waveGroup = &waveDesc->enemies[i];
                     if (waveGroup->count == 0)
                         break;
 
-                    if (0 == lineOff)
-                    {
-                        lineOff += sprintf(line + lineOff, "%d %s", waveGroup->count, kNamesMult[waveGroup->enemy]);
-                    }
-                    else
-                    {
-                        lineOff += sprintf(line + lineOff, " & %d %s", waveGroup->count, kNamesMult[waveGroup->enemy]);
-                    }
+                    sprintf(line, "%d %s", waveGroup->count, kNamesMult[waveGroup->enemy]);
+                    print_small_text_buffered(160, 22 + 10 * i, line, PRINT_TEXT_ALIGN_CENTRE, PRINT_ALL, FONT_OUTLINE);
                 }
-                print_small_text_buffered(160, 22, line, PRINT_TEXT_ALIGN_CENTRE, PRINT_ALL, FONT_OUTLINE);
 
                 if (!sMovieTexture && (gPlayer1Controller->buttonPressed & L_TRIG))
                 {
