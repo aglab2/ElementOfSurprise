@@ -83,12 +83,12 @@ static struct TowerBeh kComboTowerBehs[4][4] = {
     [TOWER_WATER] = {
         { MODEL_THWOMP      , bhvSteamTower    , STR_COLOR_WATER STR_COLOR_PLUS STR_COLOR_FIRE   , "URGH Tower"      , "High damage on around tower" },
         { MODEL_PENGUIN     , bhvWaterTower    , STR_COLOR_WATER STR_COLOR_PLUS STR_COLOR_WATER  , "Permafrost Tower", "Slows downs enemies around tower" },
-        { MODEL_MANTA_RAY   , bhvShardTower    , STR_COLOR_WATER STR_COLOR_PLUS STR_COLOR_CRYSTAL, "LINK Tower"      , "Hops on 3 far enemies after attack" },
+        { MODEL_MANTA_RAY   , bhvShardTower    , STR_COLOR_WATER STR_COLOR_PLUS STR_COLOR_CRYSTAL, "LINK Tower"      , "Attacks 3 furthest enemies" },
         { MODEL_ENEMY_LAKITU, bhvHurricaneTower, STR_COLOR_WATER STR_COLOR_PLUS STR_COLOR_AIR    , "Love Tower"      , "Throws projectile that follow enemies" },
     },
     [TOWER_CRYSTAL] = {
         { MODEL_YOSHI       , bhvSpireTower  , STR_COLOR_CRYSTAL STR_COLOR_PLUS STR_COLOR_FIRE   , "0.5A Tower"        , "Has 0.5% chance to instantly kill target, no damage" },
-        { MODEL_MANTA_RAY   , bhvShardTower  , STR_COLOR_CRYSTAL STR_COLOR_PLUS STR_COLOR_WATER  , "LINK Tower"        , "Hops on 3 far enemies after attack" },
+        { MODEL_MANTA_RAY   , bhvShardTower  , STR_COLOR_CRYSTAL STR_COLOR_PLUS STR_COLOR_WATER  , "LINK Tower"        , "Attacks 3 furthest enemies" },
         { MODEL_HEAVE_HO    , bhvCrystalTower, STR_COLOR_CRYSTAL STR_COLOR_PLUS STR_COLOR_CRYSTAL, "Flip Tower"        , "Full field attack, flips enemies" },
         { MODEL_MR_I        , bhvPrismTower  , STR_COLOR_CRYSTAL STR_COLOR_PLUS STR_COLOR_AIR    , "iTower"            , "Shoots slow linear projectiles" },
     },
@@ -104,6 +104,54 @@ static struct TowerBeh kComboTowerBehs[4][4] = {
 #define TOWER_DEFAULT_DAMAGE 25
 #define TOWER_DEFAULT_BULLET_SPEED 50.f
 #define TOWER_DEFAULT_ATTACK_CD 10
+
+struct TowerStat
+{
+    u16 damage;
+    u16 range;
+    u8 bulletPerSecond;
+    u8 bulletSpeed;
+    u8 flame;
+    u8 freeze;
+    u8 yoshi;
+    u8 throws;
+};
+
+static const struct TowerStat kInitStats = { TOWER_DEFAULT_DAMAGE, TOWER_DEFAULT_RANGE, 30 / TOWER_DEFAULT_ATTACK_CD, TOWER_DEFAULT_BULLET_SPEED, 0, 0, 0, 0 };
+
+static const struct TowerStat kBasicTowerStats[] = {
+    { TOWER_DEFAULT_DAMAGE / 0.8f * 4.f     , TOWER_DEFAULT_RANGE       , 30 / TOWER_DEFAULT_ATTACK_CD       , TOWER_DEFAULT_BULLET_SPEED       , 1, 0, 0, 0 },
+    { TOWER_DEFAULT_DAMAGE / 1.f * 4.f      , TOWER_DEFAULT_RANGE * 1.2f, 30 / TOWER_DEFAULT_ATTACK_CD * 1.2f, TOWER_DEFAULT_BULLET_SPEED       , 0, 1, 0, 0 },
+    { TOWER_DEFAULT_DAMAGE * 2.5f           , TOWER_DEFAULT_RANGE * 4.f , 30 / TOWER_DEFAULT_ATTACK_CD       , TOWER_DEFAULT_BULLET_SPEED * 2.f , 0, 0, 0, 0 },
+    { TOWER_DEFAULT_DAMAGE * 2.5f           , TOWER_DEFAULT_RANGE       , 30 / TOWER_DEFAULT_ATTACK_CD * 2   , TOWER_DEFAULT_BULLET_SPEED * 2.f , 0, 0, 0, 0 },
+};
+
+static const struct TowerStat kComboTowerStats[4][4] = {
+    [TOWER_FIRE] = {
+        { TOWER_DEFAULT_DAMAGE * 0.8f * 10.f, TOWER_DEFAULT_RANGE       , 30 / TOWER_DEFAULT_ATTACK_CD       , TOWER_DEFAULT_BULLET_SPEED        , 2, 0, 0, 0 },
+        { 500.f                             , 400.f                     , 30                                 , TOWER_DEFAULT_BULLET_SPEED * 10.f , 0, 0, 0, 0 },
+        { 10000.f                           , TOWER_DEFAULT_RANGE * 2.f , 30 / TOWER_DEFAULT_ATTACK_CD * 2   , TOWER_DEFAULT_BULLET_SPEED * 3    , 0, 0, 1, 0 },
+        { 700.f                             , 250.f                     , 30                                 , TOWER_DEFAULT_BULLET_SPEED * 10.f , 3, 0, 0, 0 },
+    },
+    [TOWER_WATER] = {
+        { 500.f                             , 400.f                     , 30                                 , TOWER_DEFAULT_BULLET_SPEED * 10.f , 0, 0, 0, 0 },
+        { TOWER_DEFAULT_DAMAGE * 0.8f * 4.f , TOWER_DEFAULT_RANGE * 1.2f, 30 / TOWER_DEFAULT_ATTACK_CD * 2.4f, TOWER_DEFAULT_BULLET_SPEED        , 0, 2, 0, 0 },
+        { TOWER_DEFAULT_DAMAGE * 2*4*1.75f  , TOWER_DEFAULT_RANGE * 4.f , 30 / TOWER_DEFAULT_ATTACK_CD       , TOWER_DEFAULT_BULLET_SPEED * 2    , 0, 0, 0, 0 },
+        { 400.f                             , TOWER_DEFAULT_RANGE * 4.f , 30                                 , 5.f                               , 0, 0, 0, 1 },
+    },
+    [TOWER_CRYSTAL] = {
+        { 10000.f                           , TOWER_DEFAULT_RANGE * 2.f , 30 / TOWER_DEFAULT_ATTACK_CD * 2   , TOWER_DEFAULT_BULLET_SPEED * 3    , 0, 0, 1, 0 },
+        { TOWER_DEFAULT_DAMAGE * 2*4*1.75f  , TOWER_DEFAULT_RANGE * 4.f , 30 / TOWER_DEFAULT_ATTACK_CD       , TOWER_DEFAULT_BULLET_SPEED * 2    , 0, 0, 0, 0 },
+        { 25 * 10                           , TOWER_DEFAULT_RANGE * 4.f , 1                                  , TOWER_DEFAULT_BULLET_SPEED * 10.f , 0, 0, 0, 0 },
+        { 25 * 15 * 4                       , TOWER_DEFAULT_RANGE * 4.f , 1                                  , 30.f                              , 0, 0, 0, 2 },
+    },
+    [TOWER_AIR] = {
+        { 700.f                             , 250.f                     , 30                                 , TOWER_DEFAULT_BULLET_SPEED * 10.f , 3, 0, 0, 0 },
+        { 400.f                             , TOWER_DEFAULT_RANGE * 4.f , 30                                 , 5.f                               , 0, 0, 0, 1 },
+        { 25 * 15 * 4                       , TOWER_DEFAULT_RANGE * 4.f , 1                                  , 30.f                              , 0, 0, 0, 2 },
+        { TOWER_DEFAULT_DAMAGE * 4.5f       , TOWER_DEFAULT_RANGE       , 30 / TOWER_DEFAULT_ATTACK_CD * 4   , TOWER_DEFAULT_BULLET_SPEED * 3.f  , 0, 0, 0, 0 },
+    },
+};
 
 union TowerTypePacked
 {
@@ -315,13 +363,13 @@ static struct TowerProps get_tower_pros(char* name, union TowerTypePacked towerT
         color.a = 0xff;
         sprintf(name, "<COL_%02X%02X%02XFF>%s<COL_FFFFFFFF>", color.r, color.g, color.b, towerBeh->name);
     }
-    if (towerType.level == 0)
+    else if (towerType.level == 0)
     {
         towerBeh = &kBasicTowerBehs[towerType.type0];
         color = kTowerColors[towerType.type0];
         sprintf(name, "<COL_%02X%02X%02XFF>%s<COL_FFFFFFFF> (%s<COL_FFFFFFFF>)", color.r, color.g, color.b, towerBeh->name, towerBeh->colorizer);
     }
-    if (towerType.level > 0)
+    else
     {
         towerBeh = &kComboTowerBehs[towerType.type0][towerType.type1];
         struct Color towerCol1 = kTowerColors[towerType.type0];
@@ -338,6 +386,16 @@ static struct TowerProps get_tower_pros(char* name, union TowerTypePacked towerT
     }
 
     return (struct TowerProps){ color, towerBeh };
+}
+
+static const struct TowerStat* get_tower_stat(union TowerTypePacked towerType)
+{
+    if (towerType.level < 0)
+        return &kInitStats;
+    else if (towerType.level == 0)
+        return &kBasicTowerStats[towerType.type0];
+    else
+        return &kComboTowerStats[towerType.type0][towerType.type1];
 }
 
 static void puffAt(struct Object* obj, float size, int numParticles)
@@ -366,6 +424,32 @@ static void puffAt(struct Object* obj, float size, int numParticles)
 
         obj_scale(particle, scale);
     }
+}
+
+static void set_green_or_red_color_if(int on)
+{
+    if (!on)
+        print_set_envcolour(235, 0x47, 0x4c, 255);
+    else
+        print_set_envcolour(136, 231, 136, 255);
+}
+
+static void print_valued_stat_diff(char* line, int* off, const char* name, int prev, int curr)
+{
+    int on = prev < curr;
+    set_green_or_red_color_if(on);
+    sprintf(line, "%s %s%d%%", name, on ? "+" : "", (curr - prev) * 100 / prev);
+    print_small_text_buffered(240, *off, line, PRINT_TEXT_ALIGN_LEFT, PRINT_ALL, FONT_OUTLINE);
+    (*off) += 10;
+}
+
+static void print_discrete_stat_diff(char* line, int* off, const char* name, int prev, int curr)
+{
+    int on = prev < curr;
+    set_green_or_red_color_if(on);
+    sprintf(line, "%c%s", on ? '+' : '-', name);
+    print_small_text_buffered(240, *off, line, PRINT_TEXT_ALIGN_LEFT, PRINT_ALL, FONT_OUTLINE);
+    (*off) += 10;
 }
 
 static void prompt_to_spawn_tower(struct Object** pslot, int upgrade, union TowerTypePacked towerType)
@@ -397,6 +481,35 @@ static void prompt_to_spawn_tower(struct Object** pslot, int upgrade, union Towe
     print_set_envcolour(color.r, color.g, color.b, 255);
     print_small_text_buffered(160, 215, towerBeh->desc, PRINT_TEXT_ALIGN_CENTRE, PRINT_ALL, FONT_OUTLINE);
     print_set_envcolour(255, 255, 255, 255);
+
+    if (upgrade)
+    {
+        const struct TowerStat* prevStat = get_tower_stat(*(union TowerTypePacked*) &slot->oBehParams2ndByte);
+        const struct TowerStat* currStat = get_tower_stat(towerType);
+
+        obj_scale(o->oTDWaveRangeObj, currStat->range / TOWER_DEFAULT_RANGE);
+
+        int off = 50;
+        if (prevStat->range != currStat->range)
+            print_valued_stat_diff(line, &off, "Range", prevStat->range, currStat->range);
+        if (prevStat->damage != currStat->damage)
+            print_valued_stat_diff(line, &off, "Damage", prevStat->damage, currStat->damage);
+        if (prevStat->bulletPerSecond != currStat->bulletPerSecond)
+            print_valued_stat_diff(line, &off, "Rate", prevStat->bulletPerSecond, currStat->bulletPerSecond);
+        if (prevStat->bulletSpeed != currStat->bulletSpeed)
+            print_valued_stat_diff(line, &off, "Speed", prevStat->bulletSpeed, currStat->bulletSpeed);
+
+        if (prevStat->flame != currStat->flame)
+            print_discrete_stat_diff(line, &off, "Flame", prevStat->flame, currStat->flame);
+        if (prevStat->freeze != currStat->freeze)
+            print_discrete_stat_diff(line, &off, "Freeze", prevStat->freeze, currStat->freeze);
+        if (prevStat->yoshi != currStat->yoshi)
+            print_discrete_stat_diff(line, &off, "0.5%% chance", prevStat->yoshi, currStat->yoshi);
+        if (prevStat->throws != currStat->throws)
+            print_discrete_stat_diff(line, &off, "Projectile", prevStat->throws, currStat->throws);
+
+        print_set_envcolour(255, 255, 255, 255);
+    }
 
     if (gPlayer1Controller->buttonPressed & A_BUTTON)
     {
