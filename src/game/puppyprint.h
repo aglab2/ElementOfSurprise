@@ -119,9 +119,9 @@ enum PuppyFont {
     FONT_NUM
 };
 
+#if 0
 extern u8 sPPDebugPage;
 extern u8 gPuppyFont;
-extern ColorRGBA gCurrEnvCol;
 extern s32 ramsizeSegment[33];
 extern const s8 nameTable;
 extern s32 mempool;
@@ -132,6 +132,9 @@ extern u8 gPuppyWarp;
 extern u8 gPuppyWarpArea;
 extern u8 gLastWarpID;
 extern struct CallCounter gPuppyCallCounter;
+#endif
+
+extern ColorRGBA gCurrEnvCol;
 
 extern void puppyprint_render_profiler(void);
 extern s32 print_set_envcolour(u8 r, u8 g, u8 b, u8 a);

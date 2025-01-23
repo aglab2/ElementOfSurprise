@@ -1430,16 +1430,16 @@ void render_blank_box_rounded(s32 x1, s32 y1, s32 x2, s32 y2, u8 r, u8 g, u8 b, 
     gDPPipeSync(gDisplayListHead++);
 }
 
-s8 shakeToggle = 0;
-s8 waveToggle = 0;
-s8 rainbowToggle = 0;
-f32 textSize = 1.0f; // The value that's used as a baseline multiplier before applying text size modifiers. Make sure to set it back when you're done.
-f32 textSizeTotal = 1.0f; // The value that's read to set the text size. Do not mess with this.
-f32 textSizeTemp = 1.0f; // The value that's set when modifying text size mid draw. Also do not mess with this.
-u16 textTempScale = 1024; // A fixed point means of referring to scale.
-u8 textOffsets[2]; // Represents the dimensions of the text (12 x 8), and written to when size is modified.
-u8 topLineHeight; // Represents the peak line height of the current line. Prevents vertical overlapping.
-u8 gMonoSpace = FALSE; // Ignore kerning.
+static s8 shakeToggle = 0;
+static s8 waveToggle = 0;
+static s8 rainbowToggle = 0;
+static f32 textSize = 1.0f; // The value that's used as a baseline multiplier before applying text size modifiers. Make sure to set it back when you're done.
+static f32 textSizeTotal = 1.0f; // The value that's read to set the text size. Do not mess with this.
+static f32 textSizeTemp = 1.0f; // The value that's set when modifying text size mid draw. Also do not mess with this.
+static u16 textTempScale = 1024; // A fixed point means of referring to scale.
+static u8 textOffsets[2]; // Represents the dimensions of the text (12 x 8), and written to when size is modified.
+static u8 topLineHeight; // Represents the peak line height of the current line. Prevents vertical overlapping.
+static u8 gMonoSpace = FALSE; // Ignore kerning.
 
 s32 get_text_width(const char *str, s32 font) {
     s32 i       = 0;
