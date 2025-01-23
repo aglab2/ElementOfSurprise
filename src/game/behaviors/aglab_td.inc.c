@@ -224,11 +224,11 @@ static const u8 kCoinRewards[] = {
 };
 
 static const char* kNamesMult[] = {
-    "Goombas <SIZE_070>(so classic)<SIZE_100>",
-    "Koopas <SIZE_070>(the quick ones)<SIZE_100>",
-    "Bobombs <SIZE_070>(stronger classic)<SIZE_100>",
-    "Bullies <SIZE_070>(slow but powerful)<SIZE_100>",
-    "Bowser <SIZE_070>(the man himself)<SIZE_100>",
+    "Goombas <SIZE_070>(so classic)",
+    "Koopas <SIZE_070>(the quick ones)",
+    "Bobombs <SIZE_070>(stronger classic)",
+    "Bullies <SIZE_070>(slow but powerful)",
+    "Bowser <SIZE_070>(the man himself)",
     "<RAINBOW>The True Fiend<RAINBOW>",
 };
 
@@ -434,22 +434,147 @@ static void set_green_or_red_color_if(int on)
         print_set_envcolour(136, 231, 136, 255);
 }
 
-static void print_valued_stat_diff(char* line, int* off, const char* name, int prev, int curr)
+struct ComposedStat
 {
-    int on = prev < curr;
-    set_green_or_red_color_if(on);
-    sprintf(line, "%s %s%d%%", name, on ? "+" : "", (curr - prev) * 100 / prev);
-    print_small_text_buffered(240, *off, line, PRINT_TEXT_ALIGN_LEFT, PRINT_ALL, FONT_OUTLINE);
-    (*off) += 10;
+    f32 raw;
+    const char* name;
+    char preLine[4];
+    char postLine[8];
+};
+
+// TowerTypePacked comparison
+static uint32_t sCacheTowerVerifier[2] = { 0, 0 }; // 0->0 is invalid transition so cache will be fine
+static int sComposedTowerDiffsCount = 0;
+static struct ComposedStat sComposedTowerDiffs[10];
+
+static int greater_composed_stat_raw(f32 r1, f32 r2)
+{
+    // Consider anything that increases stats be greater than anything that decreases stats
+    int r1pos = r1 >= 1.f;
+    int r2pos = r2 >= 1.f;
+    if (r1pos != r2pos)
+        return r1pos - r2pos;
+
+    // ... and prioritize the one that increases the most or decreases the most
+    if (r1pos)
+        return r1 > r2;
+    else
+        return r1 < r2;
 }
 
-static void print_discrete_stat_diff(char* line, int* off, const char* name, int prev, int curr)
+static void bubble_sort_composed_tower_diffs()
+{
+    int cnt = sComposedTowerDiffsCount;
+    while (cnt > 1)
+    {
+        int newCnt = 0;
+        for (int i = 1; i < cnt; i++)
+        {
+            if (greater_composed_stat_raw(sComposedTowerDiffs[i - 1].raw, sComposedTowerDiffs[i].raw))
+                continue;
+
+            struct ComposedStat temp = sComposedTowerDiffs[i - 1];
+            sComposedTowerDiffs[i - 1] = sComposedTowerDiffs[i];
+            sComposedTowerDiffs[i] = temp;
+            newCnt = i;
+        }
+
+        cnt = newCnt;
+    }
+}
+
+static void compose_stat_diff_valued(struct ComposedStat* stat, const char* name, f32 prev, f32 curr)
+{
+    f32 diff = curr / prev;
+    stat->raw = diff;
+    stat->name = name;
+    stat->preLine[0] = '\0';
+
+    // For postline we should be a bit smarter. Round the diff carefully to be easily readable
+    if (diff > 100.f)
+    {
+        stat->postLine[0] = 'x';
+        for (int i = 0; i < 7; i++)
+            stat->postLine[i + 1] = '9';
+
+        stat->postLine[7] = '\0';
+    }
+    else if (diff > 5.f)
+    {
+        sprintf(stat->postLine, "x%.0f", diff);
+    }
+    else
+    {
+        sprintf(stat->postLine, "x%.1f", diff);
+        // Patches artifact that looks like x0.0 to be x0.1
+        if (stat->postLine[1] == '0' && stat->postLine[2] == '.' && stat->postLine[3] == '0')
+            stat->postLine[3] = '1';
+
+        // Patches artifact that looks like x2.0 to be x2
+        if (stat->postLine[3] == '0')
+            stat->postLine[2] = '\0';
+    }
+}
+
+static void compose_stat_diff_discrete(struct ComposedStat* stat, const char* name, int prev, int curr)
 {
     int on = prev < curr;
-    set_green_or_red_color_if(on);
-    sprintf(line, "%c%s", on ? '+' : '-', name);
-    print_small_text_buffered(240, *off, line, PRINT_TEXT_ALIGN_LEFT, PRINT_ALL, FONT_OUTLINE);
-    (*off) += 10;
+    // Make sure that bubblesort will put the debuffs at the end
+    stat->raw = on ? 1.001f : 0.999f;
+    stat->name = name;
+    stat->preLine[0] = on ? '+' : '-';
+    stat->preLine[1] = '\0';
+    stat->postLine[0] = '\0';
+}
+
+static void print_stats_diffs(char* line, union TowerTypePacked prevTowerType, union TowerTypePacked towerType)
+{
+    const struct TowerStat* prevStat = get_tower_stat(prevTowerType);
+    const struct TowerStat* currStat = get_tower_stat(towerType);
+
+    if (sCacheTowerVerifier[0] != prevTowerType.value || sCacheTowerVerifier[1] != towerType.value)
+    {
+        sCacheTowerVerifier[0] = prevTowerType.value;
+        sCacheTowerVerifier[1] = towerType.value;
+
+        sComposedTowerDiffsCount = 0;
+        if (prevStat->range != currStat->range)
+            compose_stat_diff_valued(&sComposedTowerDiffs[sComposedTowerDiffsCount++], "Range", prevStat->range, currStat->range);
+        if (prevStat->damage != currStat->damage)
+            compose_stat_diff_valued(&sComposedTowerDiffs[sComposedTowerDiffsCount++], "Damage", prevStat->damage, currStat->damage);
+        if (prevStat->bulletPerSecond != currStat->bulletPerSecond)
+            compose_stat_diff_valued(&sComposedTowerDiffs[sComposedTowerDiffsCount++], "Rate", prevStat->bulletPerSecond, currStat->bulletPerSecond);
+        if (prevStat->bulletSpeed != currStat->bulletSpeed)
+            compose_stat_diff_valued(&sComposedTowerDiffs[sComposedTowerDiffsCount++], "Speed", prevStat->bulletSpeed, currStat->bulletSpeed);
+
+        if (prevStat->flame != currStat->flame)
+            compose_stat_diff_discrete(&sComposedTowerDiffs[sComposedTowerDiffsCount++], "Flame", prevStat->flame, currStat->flame);
+        if (prevStat->freeze != currStat->freeze)
+            compose_stat_diff_discrete(&sComposedTowerDiffs[sComposedTowerDiffsCount++], "Freeze", prevStat->freeze, currStat->freeze);
+        if (prevStat->yoshi != currStat->yoshi)
+        {
+            struct ComposedStat* stat = &sComposedTowerDiffs[sComposedTowerDiffsCount++];
+            compose_stat_diff_discrete(stat, "RNG", currStat->yoshi, prevStat->yoshi);
+            stat->preLine[0] = '+';
+        }
+        if (prevStat->throws != currStat->throws)
+            compose_stat_diff_discrete(&sComposedTowerDiffs[sComposedTowerDiffsCount++], "Projectile", prevStat->throws, currStat->throws);
+
+        bubble_sort_composed_tower_diffs();
+    }
+
+    obj_scale(o->oTDWaveRangeObj, currStat->range / TOWER_DEFAULT_RANGE);
+
+    int y = 200 - 10 * sComposedTowerDiffsCount;
+    for (int i = 0; i < sComposedTowerDiffsCount; i++)
+    {
+        const struct ComposedStat* stat = &sComposedTowerDiffs[i];
+        set_green_or_red_color_if(stat->raw > 1.f);
+        sprintf(line, "<SIZE_075>%s%s %s", stat->preLine, stat->name, stat->postLine);
+        print_small_text_buffered(265, y + i * 10, line, PRINT_TEXT_ALIGN_LEFT, PRINT_ALL, FONT_OUTLINE);
+    }
+
+    print_set_envcolour(255, 255, 255, 255);
 }
 
 static void prompt_to_spawn_tower(struct Object** pslot, int upgrade, union TowerTypePacked towerType)
@@ -484,31 +609,7 @@ static void prompt_to_spawn_tower(struct Object** pslot, int upgrade, union Towe
 
     if (upgrade)
     {
-        const struct TowerStat* prevStat = get_tower_stat(*(union TowerTypePacked*) &slot->oBehParams2ndByte);
-        const struct TowerStat* currStat = get_tower_stat(towerType);
-
-        obj_scale(o->oTDWaveRangeObj, currStat->range / TOWER_DEFAULT_RANGE);
-
-        int off = 50;
-        if (prevStat->range != currStat->range)
-            print_valued_stat_diff(line, &off, "Range", prevStat->range, currStat->range);
-        if (prevStat->damage != currStat->damage)
-            print_valued_stat_diff(line, &off, "Damage", prevStat->damage, currStat->damage);
-        if (prevStat->bulletPerSecond != currStat->bulletPerSecond)
-            print_valued_stat_diff(line, &off, "Rate", prevStat->bulletPerSecond, currStat->bulletPerSecond);
-        if (prevStat->bulletSpeed != currStat->bulletSpeed)
-            print_valued_stat_diff(line, &off, "Speed", prevStat->bulletSpeed, currStat->bulletSpeed);
-
-        if (prevStat->flame != currStat->flame)
-            print_discrete_stat_diff(line, &off, "Flame", prevStat->flame, currStat->flame);
-        if (prevStat->freeze != currStat->freeze)
-            print_discrete_stat_diff(line, &off, "Freeze", prevStat->freeze, currStat->freeze);
-        if (prevStat->yoshi != currStat->yoshi)
-            print_discrete_stat_diff(line, &off, "0.5%% chance", prevStat->yoshi, currStat->yoshi);
-        if (prevStat->throws != currStat->throws)
-            print_discrete_stat_diff(line, &off, "Projectile", prevStat->throws, currStat->throws);
-
-        print_set_envcolour(255, 255, 255, 255);
+        print_stats_diffs(line, *(union TowerTypePacked*) &slot->oBehParams2ndByte, towerType);
     }
 
     if (gPlayer1Controller->buttonPressed & A_BUTTON)
