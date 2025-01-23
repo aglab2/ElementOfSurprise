@@ -128,13 +128,13 @@ static const struct TowerStat kBasicTowerStats[] = {
 
 static const struct TowerStat kComboTowerStats[4][4] = {
     [TOWER_FIRE] = {
-        { TOWER_DEFAULT_DAMAGE * 0.8f * 10.f, TOWER_DEFAULT_RANGE       , 30 / TOWER_DEFAULT_ATTACK_CD       , TOWER_DEFAULT_BULLET_SPEED        , 2, 0, 0, 0 },
-        { 500.f                             , 400.f                     , 30                                 , TOWER_DEFAULT_BULLET_SPEED * 10.f , 0, 0, 0, 0 },
+        { TOWER_DEFAULT_DAMAGE * 0.8f * 20.f, TOWER_DEFAULT_RANGE       , 30 / TOWER_DEFAULT_ATTACK_CD       , TOWER_DEFAULT_BULLET_SPEED        , 2, 0, 0, 0 },
+        { 500.f                             , 400.f                     , 2                                 , TOWER_DEFAULT_BULLET_SPEED * 10.f , 0, 0, 0, 0 },
         { 10000.f                           , TOWER_DEFAULT_RANGE * 2.f , 30 / TOWER_DEFAULT_ATTACK_CD * 2   , TOWER_DEFAULT_BULLET_SPEED * 3    , 0, 0, 1, 0 },
         { 700.f                             , 250.f                     , 30                                 , TOWER_DEFAULT_BULLET_SPEED * 10.f , 3, 0, 0, 0 },
     },
     [TOWER_WATER] = {
-        { 500.f                             , 400.f                     , 30                                 , TOWER_DEFAULT_BULLET_SPEED * 10.f , 0, 0, 0, 0 },
+        { 500.f                             , 400.f                     , 2                                  , TOWER_DEFAULT_BULLET_SPEED * 10.f , 0, 0, 0, 0 },
         { TOWER_DEFAULT_DAMAGE * 0.8f * 4.f , TOWER_DEFAULT_RANGE * 1.2f, 30 / TOWER_DEFAULT_ATTACK_CD * 2.4f, TOWER_DEFAULT_BULLET_SPEED        , 0, 2, 0, 0 },
         { TOWER_DEFAULT_DAMAGE * 2*4*1.75f  , TOWER_DEFAULT_RANGE * 4.f , 30 / TOWER_DEFAULT_ATTACK_CD       , TOWER_DEFAULT_BULLET_SPEED * 2    , 0, 0, 0, 0 },
         { 400.f                             , TOWER_DEFAULT_RANGE * 4.f , 30                                 , 5.f                               , 0, 0, 0, 1 },
@@ -491,7 +491,7 @@ static void compose_stat_diff_valued(struct ComposedStat* stat, const char* name
     stat->preLine[0] = '\0';
 
     // For postline we should be a bit smarter. Round the diff carefully to be easily readable
-    if (diff > 100.f)
+    if (diff > 75.f)
     {
         stat->postLine[0] = 'x';
         for (int i = 0; i < 7; i++)
@@ -565,13 +565,13 @@ static void print_stats_diffs(char* line, union TowerTypePacked prevTowerType, u
 
     obj_scale(o->oTDWaveRangeObj, currStat->range / TOWER_DEFAULT_RANGE);
 
-    int y = 200 - 10 * sComposedTowerDiffsCount;
+    int y = 185 - 8 * sComposedTowerDiffsCount;
     for (int i = 0; i < sComposedTowerDiffsCount; i++)
     {
         const struct ComposedStat* stat = &sComposedTowerDiffs[i];
         set_green_or_red_color_if(stat->raw > 1.f);
         sprintf(line, "<SIZE_075>%s%s %s", stat->preLine, stat->name, stat->postLine);
-        print_small_text_buffered(265, y + i * 10, line, PRINT_TEXT_ALIGN_LEFT, PRINT_ALL, FONT_OUTLINE);
+        print_small_text_buffered(265, y + i * 8, line, PRINT_TEXT_ALIGN_LEFT, PRINT_ALL, FONT_OUTLINE);
     }
 
     print_set_envcolour(255, 255, 255, 255);
