@@ -1671,6 +1671,7 @@ static void deal_damage_around(f32 range, int dmg)
 void bhv_steam_tower_init()
 {
     o->oOpacity = 255;
+    obj_scale(o, 0.8f);
 }
 
 void bhv_steam_tower_loop()
