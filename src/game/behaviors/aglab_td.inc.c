@@ -115,41 +115,42 @@ struct TowerStat
     u8 freeze;
     u8 yoshi;
     u8 throws;
+    u8 multi;
 };
 
-static const struct TowerStat kInitStats = { TOWER_DEFAULT_DAMAGE, TOWER_DEFAULT_RANGE, 30 / TOWER_DEFAULT_ATTACK_CD, TOWER_DEFAULT_BULLET_SPEED, 0, 0, 0, 0 };
+static const struct TowerStat kInitStats = { TOWER_DEFAULT_DAMAGE, TOWER_DEFAULT_RANGE, 30 / TOWER_DEFAULT_ATTACK_CD, TOWER_DEFAULT_BULLET_SPEED, 0, 0, 0, 0, 0 };
 
 static const struct TowerStat kBasicTowerStats[] = {
-    { TOWER_DEFAULT_DAMAGE / 0.8f * 4.f     , TOWER_DEFAULT_RANGE       , 30 / TOWER_DEFAULT_ATTACK_CD       , TOWER_DEFAULT_BULLET_SPEED       , 1, 0, 0, 0 },
-    { TOWER_DEFAULT_DAMAGE / 1.f * 4.f      , TOWER_DEFAULT_RANGE * 1.2f, 30 / TOWER_DEFAULT_ATTACK_CD * 1.2f, TOWER_DEFAULT_BULLET_SPEED       , 0, 1, 0, 0 },
-    { TOWER_DEFAULT_DAMAGE * 2.5f           , TOWER_DEFAULT_RANGE * 4.f , 30 / TOWER_DEFAULT_ATTACK_CD       , TOWER_DEFAULT_BULLET_SPEED * 2.f , 0, 0, 0, 0 },
-    { TOWER_DEFAULT_DAMAGE * 2.5f           , TOWER_DEFAULT_RANGE       , 30 / TOWER_DEFAULT_ATTACK_CD * 2   , TOWER_DEFAULT_BULLET_SPEED * 2.f , 0, 0, 0, 0 },
+    { TOWER_DEFAULT_DAMAGE / 0.8f * 4.f     , TOWER_DEFAULT_RANGE       , 30 / TOWER_DEFAULT_ATTACK_CD       , TOWER_DEFAULT_BULLET_SPEED       , 1, 0, 0, 0, 0 },
+    { TOWER_DEFAULT_DAMAGE / 1.f * 4.f      , TOWER_DEFAULT_RANGE * 1.2f, 30 / TOWER_DEFAULT_ATTACK_CD * 1.2f, TOWER_DEFAULT_BULLET_SPEED       , 0, 1, 0, 0, 0 },
+    { TOWER_DEFAULT_DAMAGE * 2.5f           , TOWER_DEFAULT_RANGE * 4.f , 30 / TOWER_DEFAULT_ATTACK_CD       , TOWER_DEFAULT_BULLET_SPEED * 2.f , 0, 0, 0, 0, 0 },
+    { TOWER_DEFAULT_DAMAGE * 2.5f           , TOWER_DEFAULT_RANGE       , 30 / TOWER_DEFAULT_ATTACK_CD * 2   , TOWER_DEFAULT_BULLET_SPEED * 2.f , 0, 0, 0, 0, 0 },
 };
 
 static const struct TowerStat kComboTowerStats[4][4] = {
     [TOWER_FIRE] = {
-        { TOWER_DEFAULT_DAMAGE * 0.8f * 20.f, TOWER_DEFAULT_RANGE       , 30 / TOWER_DEFAULT_ATTACK_CD       , TOWER_DEFAULT_BULLET_SPEED        , 2, 0, 0, 0 },
-        { 500.f                             , 400.f                     , 2                                 , TOWER_DEFAULT_BULLET_SPEED * 10.f , 0, 0, 0, 0 },
-        { 10000.f                           , TOWER_DEFAULT_RANGE * 2.f , 30 / TOWER_DEFAULT_ATTACK_CD * 2   , TOWER_DEFAULT_BULLET_SPEED * 3    , 0, 0, 1, 0 },
-        { 700.f                             , 250.f                     , 30                                 , TOWER_DEFAULT_BULLET_SPEED * 10.f , 3, 0, 0, 0 },
+        { TOWER_DEFAULT_DAMAGE * 0.8f * 20.f, TOWER_DEFAULT_RANGE       , 30 / TOWER_DEFAULT_ATTACK_CD       , TOWER_DEFAULT_BULLET_SPEED        , 2, 0, 0, 0, 0 },
+        { 500.f                             , 400.f                     , 2                                  , TOWER_DEFAULT_BULLET_SPEED * 10.f , 0, 0, 0, 0, 0 },
+        { 10000.f                           , TOWER_DEFAULT_RANGE * 2.f , 30 / TOWER_DEFAULT_ATTACK_CD * 2   , TOWER_DEFAULT_BULLET_SPEED * 3    , 0, 0, 1, 0, 0 },
+        { 700.f                             , 250.f                     , 30                                 , TOWER_DEFAULT_BULLET_SPEED * 10.f , 3, 0, 0, 0, 0 },
     },
     [TOWER_WATER] = {
-        { 500.f                             , 400.f                     , 2                                  , TOWER_DEFAULT_BULLET_SPEED * 10.f , 0, 0, 0, 0 },
-        { TOWER_DEFAULT_DAMAGE * 0.8f * 4.f , TOWER_DEFAULT_RANGE * 1.2f, 30 / TOWER_DEFAULT_ATTACK_CD * 2.4f, TOWER_DEFAULT_BULLET_SPEED        , 0, 2, 0, 0 },
-        { TOWER_DEFAULT_DAMAGE * 2*4*1.75f  , TOWER_DEFAULT_RANGE * 4.f , 30 / TOWER_DEFAULT_ATTACK_CD       , TOWER_DEFAULT_BULLET_SPEED * 2    , 0, 0, 0, 0 },
-        { 400.f                             , TOWER_DEFAULT_RANGE * 4.f , 30                                 , 5.f                               , 0, 0, 0, 1 },
+        { 500.f                             , 400.f                     , 2                                  , TOWER_DEFAULT_BULLET_SPEED * 10.f , 0, 0, 0, 0, 0 },
+        { TOWER_DEFAULT_DAMAGE * 0.8f * 4.f , TOWER_DEFAULT_RANGE * 1.2f, 30 / TOWER_DEFAULT_ATTACK_CD * 2.4f, TOWER_DEFAULT_BULLET_SPEED        , 0, 2, 0, 0, 0 },
+        { TOWER_DEFAULT_DAMAGE * 2*4*1.75f  , TOWER_DEFAULT_RANGE * 4.f , 30 / TOWER_DEFAULT_ATTACK_CD       , TOWER_DEFAULT_BULLET_SPEED * 2    , 0, 0, 0, 0, 1 },
+        { 400.f                             , TOWER_DEFAULT_RANGE * 4.f , 30                                 , 5.f                               , 0, 0, 0, 1, 0 },
     },
     [TOWER_CRYSTAL] = {
-        { 10000.f                           , TOWER_DEFAULT_RANGE * 2.f , 30 / TOWER_DEFAULT_ATTACK_CD * 2   , TOWER_DEFAULT_BULLET_SPEED * 3    , 0, 0, 1, 0 },
-        { TOWER_DEFAULT_DAMAGE * 2*4*1.75f  , TOWER_DEFAULT_RANGE * 4.f , 30 / TOWER_DEFAULT_ATTACK_CD       , TOWER_DEFAULT_BULLET_SPEED * 2    , 0, 0, 0, 0 },
-        { 25 * 10                           , TOWER_DEFAULT_RANGE * 4.f , 1                                  , TOWER_DEFAULT_BULLET_SPEED * 10.f , 0, 0, 0, 0 },
-        { 25 * 15 * 4                       , TOWER_DEFAULT_RANGE * 4.f , 1                                  , 30.f                              , 0, 0, 0, 2 },
+        { 10000.f                           , TOWER_DEFAULT_RANGE * 2.f , 30 / TOWER_DEFAULT_ATTACK_CD * 2   , TOWER_DEFAULT_BULLET_SPEED * 3    , 0, 0, 1, 0, 0 },
+        { TOWER_DEFAULT_DAMAGE * 2*4*1.75f  , TOWER_DEFAULT_RANGE * 4.f , 30 / TOWER_DEFAULT_ATTACK_CD       , TOWER_DEFAULT_BULLET_SPEED * 2    , 0, 0, 0, 0, 1 },
+        { 25 * 10                           , TOWER_DEFAULT_RANGE * 4.f , 1                                  , TOWER_DEFAULT_BULLET_SPEED * 10.f , 0, 0, 0, 0, 0 },
+        { 25 * 15 * 4                       , TOWER_DEFAULT_RANGE * 4.f , 1                                  , 30.f                              , 0, 0, 0, 2, 0 },
     },
     [TOWER_AIR] = {
-        { 700.f                             , 250.f                     , 30                                 , TOWER_DEFAULT_BULLET_SPEED * 10.f , 3, 0, 0, 0 },
-        { 400.f                             , TOWER_DEFAULT_RANGE * 4.f , 30                                 , 5.f                               , 0, 0, 0, 1 },
-        { 25 * 15 * 4                       , TOWER_DEFAULT_RANGE * 4.f , 1                                  , 30.f                              , 0, 0, 0, 2 },
-        { TOWER_DEFAULT_DAMAGE * 4.5f       , TOWER_DEFAULT_RANGE       , 30 / TOWER_DEFAULT_ATTACK_CD * 4   , TOWER_DEFAULT_BULLET_SPEED * 3.f  , 0, 0, 0, 0 },
+        { 700.f                             , 250.f                     , 30                                 , TOWER_DEFAULT_BULLET_SPEED * 10.f , 3, 0, 0, 0, 0 },
+        { 400.f                             , TOWER_DEFAULT_RANGE * 4.f , 30                                 , 5.f                               , 0, 0, 0, 1, 0 },
+        { 25 * 15 * 4                       , TOWER_DEFAULT_RANGE * 4.f , 1                                  , 30.f                              , 0, 0, 0, 2, 0 },
+        { TOWER_DEFAULT_DAMAGE * 4.5f       , TOWER_DEFAULT_RANGE       , 30 / TOWER_DEFAULT_ATTACK_CD * 4   , TOWER_DEFAULT_BULLET_SPEED * 3.f  , 0, 0, 0, 0, 0 },
     },
 };
 
@@ -532,7 +533,7 @@ static void print_stats_diffs(char* line, union TowerTypePacked prevTowerType, u
     const struct TowerStat* prevStat = get_tower_stat(prevTowerType);
     const struct TowerStat* currStat = get_tower_stat(towerType);
 
-    if (sCacheTowerVerifier[0] != prevTowerType.value || sCacheTowerVerifier[1] != towerType.value)
+    if (__builtin_expect(sCacheTowerVerifier[0] != prevTowerType.value || sCacheTowerVerifier[1] != towerType.value, 0))
     {
         sCacheTowerVerifier[0] = prevTowerType.value;
         sCacheTowerVerifier[1] = towerType.value;
@@ -559,6 +560,8 @@ static void print_stats_diffs(char* line, union TowerTypePacked prevTowerType, u
         }
         if (prevStat->throws != currStat->throws)
             compose_stat_diff_discrete(&sComposedTowerDiffs[sComposedTowerDiffsCount++], "Projectile", prevStat->throws, currStat->throws);
+        if (prevStat->multi != currStat->multi)
+            compose_stat_diff_discrete(&sComposedTowerDiffs[sComposedTowerDiffsCount++], "Multi", prevStat->multi, currStat->multi);
 
         bubble_sort_composed_tower_diffs();
     }
