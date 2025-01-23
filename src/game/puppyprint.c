@@ -25,6 +25,7 @@ a modern game engine's developer's console.
 
 #include <ultra64.h>
 
+#include "game/emutest.h"
 #include "config.h"
 #include "seq_ids.h"
 #include "game_init.h"
@@ -1815,6 +1816,10 @@ s32 text_iterate_command(const char *str, s32 i, s32 runCMD) {
         textSizeTemp += (newStr[7] - '0')/10.0f;
         textSizeTemp += (newStr[8] - '0')/100.0f;
         textSizeTemp = CLAMP(textSizeTemp, 0.01f, 10.0f);
+        gDPPipeSync(gDisplayListHead++);
+        if (gIsConsole)
+            gDPSetTextureFilter(gDisplayListHead++, G_TF_AVERAGE);
+
         set_text_size_params();
     } else if (len == 14 && strncmp((newStr), "<COL_xxxxxxxx>", 5) == 0) { // Simple text colour effect. goes up to FF for each, so FF0000FF is red.
         // Each value is taken from the string. The first is shifted left 4 bits, because it's a larger significant value, then it adds the next digit onto it.
@@ -1829,6 +1834,7 @@ s32 text_iterate_command(const char *str, s32 i, s32 runCMD) {
         }
 
         rainbowToggle = 0;
+        gDPPipeSync(gDisplayListHead++);
         gDPSetEnvColor(gDisplayListHead++, (Color) rgba[0], (Color) rgba[1], (Color) rgba[2], (Color) rgba[3]); // Don't use print_set_envcolour here
     } else if (len == 27 && strncmp((newStr), "<FADE_xxxxxxxx,xxxxxxxx,xx>", 6) == 0) { // Same as above, except it fades between two colours. The third set of numbers is the speed it fades.
         if (!runCMD)
@@ -1850,11 +1856,13 @@ s32 text_iterate_command(const char *str, s32 i, s32 runCMD) {
         }
 
         rainbowToggle = 0;
+        gDPPipeSync(gDisplayListHead++);
         gDPSetEnvColor(gDisplayListHead++, (Color) rgba[0], (Color) rgba[1], (Color) rgba[2], (Color) rgba[3]); // Don't use print_set_envcolour here
     } else if (len == 9 && strncmp((newStr), "<RAINBOW>", 9) == 0) { // Toggles the happy colours :o) Do it again to disable it.
         if (!runCMD)
             return len;
 
+        gDPPipeSync(gDisplayListHead++);
         rainbowToggle ^= 1;
         if (rainbowToggle) {
             s32 r = (coss(gGlobalTimer * 600) + 1) * 127;

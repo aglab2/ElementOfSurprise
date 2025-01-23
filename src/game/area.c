@@ -484,7 +484,7 @@ void render_game(void) {
         if (gCurrLevelNum == LEVEL_CASTLE_COURTYARD && sMovieTexture)
         {
             print_set_envcolour(255, 255, 255, 255);
-            print_small_text(160, 10, "Thx for playing! Press L to reset", PRINT_TEXT_ALIGN_CENTER, PRINT_ALL, FONT_VANILLA);
+            print_small_text(160, 10, gClearLine[4] == 'r' ? "Game over. Press L to reset" : "Thx for playing! Press L to reset", PRINT_TEXT_ALIGN_CENTER, PRINT_ALL, FONT_VANILLA);
             print_small_text(160, 220, gClearLine, PRINT_TEXT_ALIGN_CENTER, PRINT_ALL, FONT_VANILLA);
 
             if (gPlayer1Controller->buttonPressed & L_TRIG)
