@@ -1849,7 +1849,7 @@ void bhv_shard_tower_loop()
 
 void bhv_hurricane_tower_init()
 {
-    obj_scale(o, 1.2f);
+    obj_scale(o, 1.7f);
     o->oAnimations = (void*) lakitu_enemy_seg5_anims_050144D4;
     struct Animation **animations = o->oAnimations;
     s32 animIndex = ENEMY_LAKITU_ANIM_SPAWN;
@@ -1869,6 +1869,7 @@ void bhv_hurricane_tower_loop()
             o->parentObj = spawn_object(o, MODEL_SPINY_BALL, bhvTdSpiny);
             o->oFaceAngleYaw = o->parentObj->oFaceAngleYaw = obj_angle_to_object(o, enemy);
             o->parentObj->oForwardVel = 60.f;
+            o->oTdTowerAnimTimer = 20;
         }
     }
     else
@@ -1880,6 +1881,8 @@ void bhv_hurricane_tower_loop()
             o->parentObj = NULL;
         }
     }
+
+    tower_animate(ENEMY_LAKITU_ANIM_THROW_SPINY, ENEMY_LAKITU_ANIM_SPAWN);
 }
 
 void bhv_td_spiny_loop()
