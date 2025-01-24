@@ -1688,7 +1688,7 @@ void bhv_air_tower_init()
     {
         obj_scale(o, 1.5f);
         o->oAnimations = (void*) ukiki_seg5_anims_05015784;
-        s32 animIndex = UKIKI_ANIM_RUN;
+        s32 animIndex = UKIKI_ANIM_ITCH;
         struct Animation **animations = o->oAnimations;
         geo_obj_init_animation(&o->header.gfx, &animations[animIndex]);
     }
@@ -1703,7 +1703,13 @@ void bhv_air_tower_loop()
     }
     else
     {
-        shoot_closest_enemy(MODEL_DIRT, 0.7f, TOWER_DEFAULT_DAMAGE * 4.5f, TOWER_DEFAULT_RANGE, TOWER_DEFAULT_BULLET_SPEED * 3.f, TOWER_DEFAULT_ATTACK_CD / 4, SOUND_OBJ_MONTY_MOLE_ATTACK);
+        struct Object* bullet = shoot_closest_enemy(MODEL_DIRT, 0.7f, TOWER_DEFAULT_DAMAGE * 4.5f, TOWER_DEFAULT_RANGE, TOWER_DEFAULT_BULLET_SPEED * 3.f, TOWER_DEFAULT_ATTACK_CD / 4, SOUND_OBJ_MONTY_MOLE_ATTACK);
+        if (bullet)
+        {
+            o->oTdTowerAnimTimer = 30;
+        }
+
+        tower_animate(UKIKI_ANIM_RUN, UKIKI_ANIM_ITCH);
     }
 }
 
