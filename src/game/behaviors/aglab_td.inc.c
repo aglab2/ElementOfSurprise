@@ -1401,9 +1401,10 @@ void bhv_td_bullet_loop()
 
             case BULLET_INSTA_KILL:
             {
-                if (random_u16() < (0x10000 * 0.05f))
+                if (random_u16() < (0x10000 * 1.f))
                 {
                     deal_enemy_damage(o->oTdBulletEnemy, 100000);
+                    create_sound_spawner(SOUND_MENU_YOSHI_GAIN_LIVES);
                 }
             }
             break;
