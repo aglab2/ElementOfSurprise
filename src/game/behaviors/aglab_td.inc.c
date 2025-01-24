@@ -1230,6 +1230,8 @@ void bhv_td_enemy_loop()
 
 // F4 and F8 are booked by snufit code
 #define oTdTowerCooldown oFC
+#define oTdTowerExtraScaling oFloat100
+#define oTdTowerAnimTimer o100
 
 #define BULLET_SPAWN_FLAME_LINGER 1
 #define BULLET_SPAWN_FLAME_LINGER2 2
@@ -1463,7 +1465,7 @@ void bhv_fire_tower_init()
     else
     {
         o->oAnimations = (void*) piranha_plant_seg6_anims_0601C31C;
-        s32 animIndex = PIRANHA_PLANT_ANIM_BITE;
+        s32 animIndex = PIRANHA_PLANT_ANIM_SLEEPING;
         struct Animation **animations = o->oAnimations;
         geo_obj_init_animation(&o->header.gfx, &animations[animIndex]);
     }
@@ -1476,13 +1478,43 @@ void bhv_fire_tower_loop()
     {
         struct Object* bullet = shoot_closest_enemy(MODEL_RED_FLAME, 5.f, TOWER_DEFAULT_DAMAGE / 0.8f * 4.f, TOWER_DEFAULT_RANGE, TOWER_DEFAULT_BULLET_SPEED, TOWER_DEFAULT_ATTACK_CD, SOUND_AIR_BOWSER_SPIT_FIRE);
         if (bullet)
+        {
+            o->oTdTowerExtraScaling = 0.7f;
             bullet->oBehParams = BULLET_SPAWN_FLAME_LINGER;
+        }
+
+        if (o->oTdTowerExtraScaling > 0)
+        {
+            obj_scale(o, 2.f + o->oTdTowerExtraScaling);
+            o->oTdTowerExtraScaling -= 0.06f;
+        }
+        else
+        {
+            obj_scale(o, 2.f);
+        }
     }
     else
     {
         struct Object* bullet = shoot_closest_enemy(MODEL_RED_FLAME, 8.f, TOWER_DEFAULT_DAMAGE * 0.8f * 10.f, TOWER_DEFAULT_RANGE, TOWER_DEFAULT_BULLET_SPEED, TOWER_DEFAULT_ATTACK_CD, SOUND_AIR_BOWSER_SPIT_FIRE);
         if (bullet)
+        {
+            o->oTdTowerAnimTimer = 10;
             bullet->oBehParams = BULLET_SPAWN_FLAME_LINGER2;
+        }
+
+        s32 animIndex;
+        if (o->oTdTowerAnimTimer)
+        {
+            animIndex = PIRANHA_PLANT_ANIM_STOP_BITING;
+            o->oTdTowerAnimTimer--;
+        }
+        else
+        {
+            animIndex = PIRANHA_PLANT_ANIM_SLEEPING;
+        }
+
+        struct Animation **animations = o->oAnimations;
+        geo_obj_init_animation(&o->header.gfx, &animations[animIndex]);
     }
 }
 
