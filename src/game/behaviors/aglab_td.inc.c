@@ -614,6 +614,10 @@ static void prompt_to_spawn_tower(struct Object** pslot, int upgrade, union Towe
     {
         print_stats_diffs(line, *(union TowerTypePacked*) &slot->oBehParams2ndByte, towerType);
     }
+    else
+    {
+        obj_scale(o->oTDWaveRangeObj, 1.f);
+    }
 
     if (gPlayer1Controller->buttonPressed & A_BUTTON)
     {
