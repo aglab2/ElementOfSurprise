@@ -1471,6 +1471,23 @@ void bhv_fire_tower_init()
     }
 }
 
+static void tower_animate(int anim1, int anim2)
+{
+    s32 animIndex;
+    if (o->oTdTowerAnimTimer)
+    {
+        animIndex = anim1;
+        o->oTdTowerAnimTimer--;
+    }
+    else
+    {
+        animIndex = anim2;
+    }
+
+    struct Animation **animations = o->oAnimations;
+    geo_obj_init_animation(&o->header.gfx, &animations[animIndex]);
+}
+
 void bhv_fire_tower_loop()
 {
     union TowerTypePacked* packed = (union TowerTypePacked*) &o->oBehParams2ndByte;
@@ -1502,19 +1519,7 @@ void bhv_fire_tower_loop()
             bullet->oBehParams = BULLET_SPAWN_FLAME_LINGER2;
         }
 
-        s32 animIndex;
-        if (o->oTdTowerAnimTimer)
-        {
-            animIndex = PIRANHA_PLANT_ANIM_STOP_BITING;
-            o->oTdTowerAnimTimer--;
-        }
-        else
-        {
-            animIndex = PIRANHA_PLANT_ANIM_SLEEPING;
-        }
-
-        struct Animation **animations = o->oAnimations;
-        geo_obj_init_animation(&o->header.gfx, &animations[animIndex]);
+        tower_animate(PIRANHA_PLANT_ANIM_STOP_BITING, PIRANHA_PLANT_ANIM_SLEEPING);
     }
 }
 
@@ -1530,7 +1535,7 @@ void bhv_water_tower_init()
     }
     else
     {
-        obj_scale(o, 1.7f);
+        obj_scale(o, 1.9f);
         o->oAnimations = (void*) penguin_seg5_anims_05008B74;
         s32 animIndex = PENGUIN_ANIM_IDLE;
         struct Animation **animations = o->oAnimations;
@@ -1545,13 +1550,19 @@ void bhv_water_tower_loop()
     {
         struct Object* bullet = shoot_closest_enemy(MODEL_WHITE_PARTICLE, 2.f, TOWER_DEFAULT_DAMAGE / 1.f * 4.f, TOWER_DEFAULT_RANGE * 1.2f, TOWER_DEFAULT_BULLET_SPEED, TOWER_DEFAULT_ATTACK_CD / 1.2f, SOUND_ACTION_WATER_PLUNGE);
         if (bullet)
+        {
+            o->oTdTowerAnimTimer = 5;
             bullet->oTdBulletSpeedDebuff = 49;
+        }
+
+        tower_animate(MR_BLIZZARD_ANIM_THROW_SNOWBALL, MR_BLIZZARD_ANIM_SPAWN_SNOWBALL);
     }
     else
     {
         struct Object* bullet = shoot_closest_enemy(MODEL_WHITE_PARTICLE, 2.5f, TOWER_DEFAULT_DAMAGE * 0.8f * 4.f, TOWER_DEFAULT_RANGE * 1.2f, TOWER_DEFAULT_BULLET_SPEED, TOWER_DEFAULT_ATTACK_CD / 2.4f, SOUND_ACTION_WATER_JUMP);
         if (bullet)
         {
+            o->oTdTowerAnimTimer = 5;
             bullet->oTdBulletSpeedDebuff = 49;
             {
                 uintptr_t *behaviorAddr = segmented_to_virtual(bhvTdEnemy);
@@ -1573,6 +1584,8 @@ void bhv_water_tower_loop()
                 }
             }
         }
+
+        tower_animate(PENGUIN_ANIM_DIVE_SLIDE, PENGUIN_ANIM_IDLE);
     }
 }
 
