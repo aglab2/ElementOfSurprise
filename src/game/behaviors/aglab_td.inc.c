@@ -1488,6 +1488,19 @@ static void tower_animate(int anim1, int anim2)
     geo_obj_init_animation(&o->header.gfx, &animations[animIndex]);
 }
 
+static void tower_exscale(f32 base, f32 decel)
+{
+    if (o->oTdTowerExtraScaling > 0)
+    {
+        obj_scale(o, base + o->oTdTowerExtraScaling);
+        o->oTdTowerExtraScaling -= decel;
+    }
+    else
+    {
+        obj_scale(o, base);
+    }
+}
+
 void bhv_fire_tower_loop()
 {
     union TowerTypePacked* packed = (union TowerTypePacked*) &o->oBehParams2ndByte;
@@ -1496,19 +1509,11 @@ void bhv_fire_tower_loop()
         struct Object* bullet = shoot_closest_enemy(MODEL_RED_FLAME, 5.f, TOWER_DEFAULT_DAMAGE / 0.8f * 4.f, TOWER_DEFAULT_RANGE, TOWER_DEFAULT_BULLET_SPEED, TOWER_DEFAULT_ATTACK_CD, SOUND_AIR_BOWSER_SPIT_FIRE);
         if (bullet)
         {
-            o->oTdTowerExtraScaling = 0.7f;
+            o->oTdTowerExtraScaling = 0.6f;
             bullet->oBehParams = BULLET_SPAWN_FLAME_LINGER;
         }
 
-        if (o->oTdTowerExtraScaling > 0)
-        {
-            obj_scale(o, 2.f + o->oTdTowerExtraScaling);
-            o->oTdTowerExtraScaling -= 0.06f;
-        }
-        else
-        {
-            obj_scale(o, 2.f);
-        }
+        tower_exscale(2.f, 0.06f);
     }
     else
     {
@@ -1619,8 +1624,13 @@ void bhv_crystal_tower_loop()
     union TowerTypePacked* packed = (union TowerTypePacked*) &o->oBehParams2ndByte;
     if (0 == packed->level)
     {
-        obj_scale(o, 2.f + sins(o->oTimer * 0x456) / 10.f);
-        shoot_furthest_enemy(MODEL_BOWLING_BALL, 0.7f, TOWER_DEFAULT_DAMAGE * 2.5f, TOWER_DEFAULT_BULLET_SPEED * 2, TOWER_DEFAULT_ATTACK_CD, SOUND_OBJ_SNUFIT_SHOOT);
+        struct Object* bullet = shoot_furthest_enemy(MODEL_BOWLING_BALL, 0.7f, TOWER_DEFAULT_DAMAGE * 2.5f, TOWER_DEFAULT_BULLET_SPEED * 2, TOWER_DEFAULT_ATTACK_CD, SOUND_OBJ_SNUFIT_SHOOT);
+        if (bullet)
+        {
+            o->oTdTowerExtraScaling = 0.6f;
+        }
+
+        tower_exscale(2.f + sins(o->oTimer * 0x456) / 10.f, 0.06f);
     }
     else
     {
