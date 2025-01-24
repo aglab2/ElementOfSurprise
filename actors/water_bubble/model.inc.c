@@ -236,8 +236,3 @@ const Gfx water_bubble_seg5_dl_05011000_exit[] = {
     gsDPSetEnvColor(255, 255, 255, 255),
     gsSPEndDisplayList(),
 };
-
-const Gfx water_bubble_seg5_dl_05011000_dl[] = {
-    gsSPDisplayList(water_bubble_seg5_dl_05010D30),
-    gsSPEndDisplayList(),
-};

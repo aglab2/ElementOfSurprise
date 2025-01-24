@@ -121,7 +121,7 @@ const Gfx yoshi_egg_seg5_dl_050098C8[] = {
 const Gfx yoshi_egg_seg5_dl_draw[] = {
     gsSPVertex(yoshi_egg_seg5_vertex_05005778, 4, 0),
     gsSP2Triangles( 0,  1,  2, 0x0,  0,  2,  3, 0x0),
-    gsSPBranchList(yoshi_egg_seg5_dl_050097B8),
+    gsSPEndDisplayList(),
 };
 
 const Gfx yoshi_egg_seg5_dl_exit[] = {
