@@ -1797,7 +1797,12 @@ void bhv_spire_tower_loop()
 {
     struct Object* bullet = shoot_closest_enemy(MODEL_YOSHI_EGG, 0.3f, TOWER_DEFAULT_DAMAGE / 25, TOWER_DEFAULT_RANGE * 2, TOWER_DEFAULT_BULLET_SPEED * 3, TOWER_DEFAULT_ATTACK_CD / 2, SOUND_AIR_AMP_BUZZ);
     if (bullet)
+    {
+        o->oTdTowerAnimTimer = 20;
         bullet->oBehParams = BULLET_INSTA_KILL;
+    }
+
+    tower_animate(YOSHI_ANIM_WALK, YOSHI_ANIM_IDLE);
 }
 
 void bhv_td_flame_loop()
